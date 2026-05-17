@@ -2427,7 +2427,52 @@ function openExportModal()  { document.getElementById('export-modal-backdrop').c
 function closeExportModal() { document.getElementById('export-modal-backdrop').classList.remove('visible'); }
 
 function hddExportDownload() { hddCloseAll(); exportData(); }
-function hddExportCloud()   { hddCloseAll(); alert('Upload to cloud — coming soon.'); }
+function hddExportCloud() {
+  hddCloseAll();
+  // Check if journal.html has Drive connected via shared localStorage
+  const token    = localStorage.getItem('paramo.drive.token');
+  const folderId = localStorage.getItem('paramo.drive.folderId');
+  if (!token || !folderId) {
+    // Not connected — open journal to connect
+    window.open('journal.html', '_blank');
+    return;
+  }
+  // Build the same payload as exportData()
+  const kiln = kilns.find(k => k.id === activeKilnId) || {};
+  const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
+  const now  = new Date();
+  const startedAt   = datapoints.length ? datapoints[0].ts : now.getTime();
+  const duration_min = datapoints.length > 1 ? Math.round((datapoints[datapoints.length-1].ts - datapoints[0].ts) / 60000) : 0;
+  const tcs = datapoints.map(d => d.tc).filter(v => !isNaN(v));
+  const maxTemp_c = tcs.length ? Math.round(Math.max(...tcs) * 10) / 10 : 0;
+  const payload = {
+    meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note },
+    datapoints
+  };
+  const dateStr = now.toISOString().slice(0,10);
+  const durStr  = duration_min < 60 ? Math.round(duration_min)+'m' : Math.floor(duration_min/60)+'h'+(duration_min%60?(duration_min%60)+'m':'');
+  const filename = 'Paramo_' + dateStr + '_' + Math.round(maxTemp_c) + 'C_' + durStr + '.json';
+  // Upload via Drive API using stored token
+  const boundary = 'paramo_boundary';
+  const meta = JSON.stringify({ name: filename, parents: [folderId] });
+  const body = JSON.stringify(payload, null, 2);
+  const multipart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body: multipart
+  }).then(res => {
+    if (res.ok) {
+      log('Uploaded to Google Drive: ' + filename, 'ok');
+    } else if (res.status === 401) {
+      localStorage.removeItem('paramo.drive.token');
+      log('Drive session expired — reconnect in Journal', 'warn');
+      window.open('journal.html', '_blank');
+    } else {
+      log('Drive upload failed — try again', 'err');
+    }
+  }).catch(() => log('Drive upload error — check connection', 'err'));
+}
 
 function openNoteModal() {
   const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
