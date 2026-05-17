@@ -337,28 +337,97 @@ body.dark .tab-btn.active {
 
 .step-num {
   font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
   color: var(--accent);
-  padding-top: 2px;
+  padding-top: 1px;
   flex-shrink: 0;
-  width: 24px;
+  width: 36px;
+  line-height: 1.2;
 }
 
 .step-body { flex: 1; }
 .step-title {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--text);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   letter-spacing: 0.04em;
 }
 .step-desc {
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
-/* ── CONTACT FIELDS placeholder ── */
+/* Sub-steps */
+.substep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.substep {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.substep-num {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  padding-top: 1px;
+  flex-shrink: 0;
+  width: 28px;
+  line-height: 1.2;
+}
+.substep-body { flex: 1; }
+.substep-title {
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  margin-bottom: 3px;
+  letter-spacing: 0.03em;
+}
+.substep-desc {
+  font-size: 0.79rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Guide section header */
+.guide-section-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 24px 0 12px;
+}
+
+/* Links inside guide */
+.guide-link {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.guide-link:hover { border-color: var(--accent); }
+
+/* Tip block */
+.guide-tip {
+  font-size: 0.75rem;
+  color: var(--dimmer);
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  margin-top: 8px;
+}
+
+/* ── CONTACT FIELDS ── */
 .contact-field {
   margin-bottom: 12px;
 }
@@ -383,13 +452,35 @@ body.dark .tab-btn.active {
   transition: border-color 0.15s;
   -webkit-appearance: none;
 }
+.contact-input::placeholder { color: var(--dimmer); }
 .contact-input:focus { border-color: var(--accent); }
-.contact-input[data-placeholder] { color: var(--dimmer); pointer-events: none; }
-textarea.contact-input { resize: none; height: 90px; }
+textarea.contact-input { resize: none; height: 120px; }
+
+.contact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.contact-addr {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.contact-addr-icon { color: var(--dimmer); font-size: 0.8rem; }
+.contact-addr a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.contact-addr a:hover { color: var(--accent); }
 
 .contact-btn {
-  width: 100%;
-  padding: 11px;
+  padding: 10px 22px;
   background: linear-gradient(135deg, var(--c-orange), var(--c-magenta), var(--c-azure));
   background-size: 200% 100%;
   background-position: 0% 0%;
@@ -397,13 +488,14 @@ textarea.contact-input { resize: none; height: 90px; }
   border-radius: 10px;
   color: #fff;
   font-family: var(--mono);
-  font-size: 0.76rem;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  cursor: not-allowed;
-  margin-top: 4px;
-  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.15s, background-position 0.4s;
+  white-space: nowrap;
 }
+.contact-btn:hover { opacity: 0.88; background-position: 100% 0%; }
 
 /* ── THEME + LANG CONTROLS ── */
 .top-controls {
@@ -562,96 +654,203 @@ textarea.contact-input { resize: none; height: 90px; }
           Reach out — this space is reserved for the right words.
         </p>
 
-        <div class="placeholder-grid single">
-          <div class="ph-block">
-            <div class="ph-label" id="str-contact-direct-label">Direct</div>
-            <div class="ph-value" id="str-contact-direct-value" style="color:var(--dimmer);font-style:italic;">
-              hello@example.com — placeholder
-            </div>
-          </div>
+        <div class="contact-field">
+          <label class="contact-label" id="str-contact-subject">Subject</label>
+          <input class="contact-input" id="input-subject" type="text" placeholder="What's this about?"/>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label" id="str-contact-message">Message</label>
+          <textarea class="contact-input" id="input-message" placeholder="Your message…"></textarea>
         </div>
 
         <div class="grad-rule"></div>
 
-        <div class="contact-field">
-          <label class="contact-label" id="str-contact-name">Name</label>
-          <input class="contact-input" id="input-name" data-placeholder value="Your name — coming soon" readonly/>
+        <div class="contact-footer">
+          <span class="contact-addr" id="str-contact-addr">
+            <span class="contact-addr-icon">✉</span>
+            <a href="mailto:paramoyermo@disroot.org" id="contact-mailto-link">paramoyermo@disroot.org</a>
+          </span>
+          <button class="contact-btn" id="btn-contact-send" onclick="sendContact()">
+            <span id="str-contact-send">Open in mail client</span>
+          </button>
         </div>
-        <div class="contact-field">
-          <label class="contact-label" id="str-contact-email">Email</label>
-          <input class="contact-input" id="input-email" data-placeholder value="your@email.com — coming soon" readonly/>
-        </div>
-        <div class="contact-field">
-          <label class="contact-label" id="str-contact-message">Message</label>
-          <textarea class="contact-input" id="textarea-message" data-placeholder readonly>Your message — coming soon</textarea>
-        </div>
-        <button class="contact-btn" id="str-contact-send" disabled>Send message — coming soon</button>
       </div>
 
       <!-- ── GUIDE ── -->
       <div class="tab-pane" id="pane-guide">
         <div class="pane-title" id="str-guide-title">Guide</div>
-        <div class="pane-sub" id="str-guide-sub">Setup & usage</div>
-        <p class="pane-lead" id="str-guide-lead">
-          Páramo connects to your kiln's ESP32 over MQTT.
-          Below you'll find setup instructions, connection details, and usage notes.
-          Full documentation coming soon.
+        <div class="pane-sub" id="str-guide-sub">Setup and usage</div>
+        <p class="pane-lead">
+          <span id="str-guide-lead">Páramo connects to your kiln monitor via an MQTT server. Here you'll find setup instructions, connection details, and usage notes. Full documentation for makers and technical users is on the</span>
+          <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor" target="_blank" id="str-guide-lead-gh">GitHub page</a>.
+          <span id="str-guide-lead-contact">If you have any doubts, feel free to use the</span>
+          <a class="guide-link" href="?tab=contact" id="str-guide-lead-contact-link">contact page</a>.
         </p>
 
+        <div class="guide-section-title" id="str-guide-section">How to get started</div>
+
         <div class="step-list">
+
+          <!-- 01 -->
           <div class="step">
             <div class="step-num">01</div>
             <div class="step-body">
-              <div class="step-title" id="str-step1-title">Configure your ESP32</div>
-              <div class="step-desc"  id="str-step1-desc">Flash the Páramo firmware and set your WiFi credentials. The ESP32 will publish temperature data to the MQTT broker at regular intervals. — placeholder</div>
+              <div class="step-title" id="str-g-s1-title">Connect your thermocouple</div>
+              <div class="step-desc">
+                <span id="str-g-s1-desc">Páramo uses a Type S thermocouple for accurate high-temperature readings. See the</span>
+                <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Thermocouple" target="_blank" id="str-g-s1-link">Thermocouples Guide</a>
+                <span id="str-g-s1-desc2">for recommended models and wiring instructions.</span>
+              </div>
             </div>
           </div>
+
+          <!-- 02 -->
           <div class="step">
             <div class="step-num">02</div>
             <div class="step-body">
-              <div class="step-title" id="str-step2-title">Set up a HiveMQ broker</div>
-              <div class="step-desc"  id="str-step2-desc">Create a free account at HiveMQ Cloud. Copy your cluster host, username, and password into the Connection panel in the sidebar. — placeholder</div>
+              <div class="step-title" id="str-g-s2-title">Prepare your server and notifications</div>
+              <div class="substep-list">
+
+                <div class="substep">
+                  <div class="substep-num">2.1</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s2-1-title">HiveMQ account</div>
+                    <div class="substep-desc">
+                      <span id="str-g-s2-1-a">We chose this free MQTT server because it provides more than enough capacity without extra costs for the end user. Alternative self-hosted servers are possible for more technical users — see the</span>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Server" target="_blank" id="str-g-s2-1-link">Servers Guide</a>.<br><br>
+                      <span id="str-g-s2-1-b">Go to</span>
+                      <a class="guide-link" href="https://www.hivemq.com/" target="_blank">hivemq.com</a>,
+                      <span id="str-g-s2-1-c">create a free account, and set a username and password. You will also be given a cluster token. Save all three for the next step.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">2.2</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s2-2-title">Set up notifications</div>
+                    <div class="substep-desc">
+                      <span id="str-g-s2-2-a">We chose</span>
+                      <a class="guide-link" href="https://ntfy.sh" target="_blank">NTFY</a>
+                      <span id="str-g-s2-2-b">as the notification provider for its simplicity and free pricing.</span><br><br>
+                      <span id="str-g-s2-2-c">Download the app on any device, then create a new topic. Give it a name that is not easily guessable — just for you.</span>
+                      <div class="guide-tip" id="str-g-s2-2-tip1">Example topic name: StudioKiln-HXsbi93DHF</div>
+                      <span id="str-g-s2-2-d">In the topic settings you will find the Topic URL. Save it for the next step.</span>
+                      <div class="guide-tip" id="str-g-s2-2-tip2">Example URL: ntfy.sh/StudioKiln-HXsbi93DHF</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
+
+          <!-- 03 -->
           <div class="step">
             <div class="step-num">03</div>
             <div class="step-body">
-              <div class="step-title" id="str-step3-title">Connect &amp; monitor</div>
-              <div class="step-desc"  id="str-step3-desc">Hit Connect. The status pills in the header will turn green when both the MQTT server and kiln are reachable. Your firing data starts streaming. — placeholder</div>
+              <div class="step-title" id="str-g-s3-title">Turn on your Páramo Kiln Monitor</div>
+              <div class="step-desc">
+                <span id="str-g-s3-desc-a">On first boot, the device creates a</span>
+                <strong id="str-g-s3-portal">Kiln Setup</strong>
+                <span id="str-g-s3-desc-b">Wi-Fi portal. Connect to it from any phone or laptop to configure your credentials.</span>
+              </div>
+              <div class="substep-list">
+                <div class="substep">
+                  <div class="substep-num">3.1</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s3-1">Choose your preferred Wi-Fi network and enter the password. We recommend the most stable network near where the device will live — close to the kiln.</div>
+                  </div>
+                </div>
+                <div class="substep">
+                  <div class="substep-num">3.2</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s3-2">Enter the HiveMQ credentials you set up in step 2.1.</div>
+                  </div>
+                </div>
+                <div class="substep">
+                  <div class="substep-num">3.3</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s3-3">Paste the NTFY topic URL you created in step 2.2.</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- 04 -->
           <div class="step">
             <div class="step-num">04</div>
             <div class="step-body">
-              <div class="step-title" id="str-step4-title">Set thresholds &amp; firing mode</div>
-              <div class="step-desc"  id="str-step4-desc">Use the Alarm Threshold card to receive an alert when a target temperature is reached. Select a firing mode to overlay a reference ramp curve on the chart. — placeholder</div>
+              <div class="step-title" id="str-g-s4-title">You're done ◉</div>
+              <div class="step-desc" id="str-g-s4-desc">Your Páramo Kiln Monitor now has everything it needs to communicate with you over the internet. You will receive temperature alerts and fault notifications directly on your device.</div>
             </div>
           </div>
+
+          <!-- 05 -->
           <div class="step">
             <div class="step-num">05</div>
             <div class="step-body">
-              <div class="step-title" id="str-step5-title">Export your session</div>
-              <div class="step-desc"  id="str-step5-desc">When the firing is complete, export the chart as JSON for archiving or analysis. Start a new firing session from the Session card. — placeholder</div>
+              <div class="step-title" id="str-g-s5-title">Web app setup and usage</div>
+              <div class="substep-list">
+
+                <div class="substep">
+                  <div class="substep-num">5.1</div>
+                  <div class="substep-body">
+                    <div class="substep-desc">
+                      <span id="str-g-s5-1-a">Open</span>
+                      <a class="guide-link" href="https://paramostudio.github.io/KilnMonitor/" target="_blank">paramostudio.github.io/KilnMonitor</a>.
+                      <span id="str-g-s5-1-b">On mobile, we suggest adding it to your home screen and using it as a web app.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">5.2</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s5-2">This app relies on local cache. If you clear it, some configurations will be lost. Export them first using the toolbar — they can be re-imported on any device.</div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">5.3</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s5-3-title">Add a kiln</div>
+                    <div class="substep-desc" id="str-g-s5-3-desc">On first open there is a blank "Studio Kiln" entry. Open the Connection panel under it and enter your HiveMQ credentials to link the device with the web app. You can rename or delete kilns using the buttons to the right, and add as many as you want — each one needs its own Páramo monitor.</div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">5.4</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s5-4-title">Other tools</div>
+                    <div class="substep-desc">
+                      <strong>Kiln Power</strong> — <span id="str-g-s5-4-power">bridges an MQTT relay to cut kiln power remotely in case of emergency. See the</span>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power" target="_blank" id="str-g-s5-4-power-link">Kiln Power Guide</a>.
+                      <span id="str-g-s5-4-power2">A solution for gas kilns is being studied.</span><br><br>
+                      <strong>Firing Mode</strong> — <span id="str-g-s5-4-mode">shows a reference ramp curve alongside your actual firing for easy comparison, and tags the session for later search in the Journal.</span><br><br>
+                      <strong>Add Notes</strong> — <span id="str-g-s5-4-notes">write observations during or after a firing before exporting. Saved with the session in the Journal.</span><br><br>
+                      <strong>Export / Import / Reset</strong> — <span id="str-g-s5-4-export">copy your configuration to other devices or reset all stored data.</span><br><br>
+                      <strong>Journal</strong> — <span id="str-g-s5-4-journal">a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you'd rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
-        </div>
+
+        </div><!-- /.step-list -->
 
         <div class="grad-rule"></div>
 
-        <div class="placeholder-grid triple">
-          <div class="ph-block">
-            <div class="ph-label" id="str-mqtt-temp-label">MQTT topic — temp</div>
-            <div class="ph-value" id="str-mqtt-temp-val" style="font-size:0.76rem;color:var(--dimmer);">kiln/tc — placeholder</div>
-          </div>
-          <div class="ph-block">
-            <div class="ph-label" id="str-mqtt-hist-label">MQTT topic — history</div>
-            <div class="ph-value" id="str-mqtt-hist-val" style="font-size:0.76rem;color:var(--dimmer);">kiln/history — placeholder</div>
-          </div>
-          <div class="ph-block">
-            <div class="ph-label" id="str-interval-label">Update interval</div>
-            <div class="ph-value" id="str-interval-val" style="font-size:0.76rem;color:var(--dimmer);">~5 s — placeholder</div>
-          </div>
-        </div>
+        <p class="step-desc" style="text-align:center;">
+          <span id="str-g-footer">Having trouble?</span>
+          <a class="guide-link" href="?tab=contact" id="str-g-footer-contact">Contact us</a>
+          <span id="str-g-footer-or">or check the</span>
+          <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Troubleshooting" target="_blank" id="str-g-footer-ts">Troubleshooting guide</a>.
+        </p>
+
       </div>
 
       <!-- ── LICENCE ── -->
@@ -732,39 +931,69 @@ const FALLBACK = {
   contact_title: 'Contact',
   contact_sub:   'Get in touch',
   contact_lead:  'Have a question about Páramo, want to collaborate, or found a bug? Reach out — this space is reserved for the right words.',
-  contact_direct_label: 'Direct',
-  contact_direct_value: 'hello@example.com — placeholder',
-  contact_name:    'Name',
-  contact_name_ph: 'Your name — coming soon',
-  contact_email:   'Email',
-  contact_email_ph:'you@email.com — coming soon',
-  contact_message: 'Message',
-  contact_message_ph: 'Your message — coming soon',
-  contact_send:    'Send message — coming soon',
+  contact_subject:    'Subject',
+  contact_subject_ph: "What's this about?",
+  contact_message:    'Message',
+  contact_message_ph: 'Your message…',
+  contact_send:  'Open in mail client',
+  contact_addr:  'paramoyermo@disroot.org',
   // guide
   guide_title: 'Guide',
   guide_sub:   'Setup and usage',
-  guide_lead:  "Páramo connects to your kiln's ESP32 via MQTT. Here you'll find setup instructions, connection details, and usage notes. Full documentation coming soon.",
-  guide_step1_title: 'Set up your ESP32',
-  guide_step1_desc:  'Flash the Páramo firmware and configure your WiFi credentials. The ESP32 will publish temperature data to the MQTT broker at regular intervals. — placeholder',
-  guide_step2_title: 'Set up a HiveMQ broker',
-  guide_step2_desc:  'Create a free account at HiveMQ Cloud. Copy the host, username and password into the Connection panel in the sidebar. — placeholder',
-  guide_step3_title: 'Connect and monitor',
-  guide_step3_desc:  'Press Connect. The status pills in the header will turn green when both the MQTT server and the kiln are reachable. Firing data will start flowing. — placeholder',
-  guide_step4_title: 'Set alarms and firing mode',
-  guide_step4_desc:  'Use the Alarm card to get an alert when a target temperature is reached. Select a firing mode to overlay a reference curve on the chart. — placeholder',
-  guide_step5_title: 'Export your session',
-  guide_step5_desc:  'When the firing is done, export the chart as JSON for archiving or analysis. Start a new session from the Session card. — placeholder',
-  guide_mqtt_temp:     'MQTT topic — temperature',
-  guide_mqtt_temp_val: 'kiln/tc — placeholder',
-  guide_mqtt_hist:     'MQTT topic — history',
-  guide_mqtt_hist_val: 'kiln/history — placeholder',
-  guide_interval:      'Update interval',
-  guide_interval_val:  '~5 s — placeholder',
+  guide_lead:  'Páramo connects to your kiln monitor via an MQTT server. Here you\'ll find setup instructions, connection details, and usage notes. Full documentation for makers and technical users is on the',
+  guide_lead_gh: 'GitHub page',
+  guide_lead_contact: 'If you have any doubts, feel free to use the',
+  guide_lead_contact_link: 'contact page',
+  guide_section: 'How to get started',
+  g_s1_title: 'Connect your thermocouple',
+  g_s1_desc:  'Páramo uses a Type S thermocouple for accurate high-temperature readings. See the',
+  g_s1_link:  'Thermocouples Guide',
+  g_s1_desc2: 'for recommended models and wiring instructions.',
+  g_s2_title: 'Prepare your server and notifications',
+  g_s2_1_title: 'HiveMQ account',
+  g_s2_1_a: 'We chose this free MQTT server because it provides more than enough capacity without extra costs for the end user. Alternative self-hosted servers are possible for more technical users — see the',
+  g_s2_1_link: 'Servers Guide',
+  g_s2_1_b: 'Go to',
+  g_s2_1_c: 'create a free account, and set a username and password. You will also be given a cluster token. Save all three for the next step.',
+  g_s2_2_title: 'Set up notifications',
+  g_s2_2_a: 'We chose',
+  g_s2_2_b: 'as the notification provider for its simplicity and free pricing.',
+  g_s2_2_c: 'Download the app on any device, then create a new topic. Give it a name that is not easily guessable — just for you.',
+  g_s2_2_tip1: 'Example topic name: StudioKiln-HXsbi93DHF',
+  g_s2_2_d: 'In the topic settings you will find the Topic URL. Save it for the next step.',
+  g_s2_2_tip2: 'Example URL: ntfy.sh/StudioKiln-HXsbi93DHF',
+  g_s3_title: 'Turn on your Páramo Kiln Monitor',
+  g_s3_desc_a: 'On first boot, the device creates a',
+  g_s3_portal: 'Kiln Setup',
+  g_s3_desc_b: 'Wi-Fi portal. Connect to it from any phone or laptop to configure your credentials.',
+  g_s3_1: 'Choose your preferred Wi-Fi network and enter the password. We recommend the most stable network near where the device will live — close to the kiln.',
+  g_s3_2: 'Enter the HiveMQ credentials you set up in step 2.1.',
+  g_s3_3: 'Paste the NTFY topic URL you created in step 2.2.',
+  g_s4_title: 'You\'re done ◉',
+  g_s4_desc: 'Your Páramo Kiln Monitor now has everything it needs to communicate with you over the internet. You will receive temperature alerts and fault notifications directly on your device.',
+  g_s5_title: 'Web app setup and usage',
+  g_s5_1_a: 'Open',
+  g_s5_1_b: 'On mobile, we suggest adding it to your home screen and using it as a web app.',
+  g_s5_2: 'This app relies on local cache. If you clear it, some configurations will be lost. Export them first using the toolbar — they can be re-imported on any device.',
+  g_s5_3_title: 'Add a kiln',
+  g_s5_3_desc: 'On first open there is a blank "Studio Kiln" entry. Open the Connection panel under it and enter your HiveMQ credentials to link the device with the web app. You can rename or delete kilns using the buttons to the right, and add as many as you want — each one needs its own Páramo monitor.',
+  g_s5_4_title: 'Other tools',
+  g_s5_4_power: 'bridges an MQTT relay to cut kiln power remotely in case of emergency. See the',
+  g_s5_4_power_link: 'Kiln Power Guide',
+  g_s5_4_power2: 'A solution for gas kilns is being studied.',
+  g_s5_4_mode: 'shows a reference ramp curve alongside your actual firing for easy comparison, and tags the session for later search in the Journal.',
+  g_s5_4_notes: 'write observations during or after a firing before exporting. Saved with the session in the Journal.',
+  g_s5_4_export: 'copy your configuration to other devices or reset all stored data.',
+  g_s5_4_journal: 'a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you\'d rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.',
+  g_footer: 'Having trouble?',
+  g_footer_contact: 'Contact us',
+  g_footer_or: 'or check the',
+  g_footer_ts: 'Troubleshooting guide',
   // licence
   licence_title: 'Licence',
   licence_sub:   'Open source',
   licence_lead:  'Páramo is released under copyleft licenses chosen to keep this project permanently open. Full details and license texts are on GitHub.',
+  licence_block: 'Firmware & Web Application\nGNU Affero General Public License v3.0\n\nHardware (PCB · Schematics · BOM · 3D / STL)\nCERN Open Hardware Licence Strongly Reciprocal v2.0\n\nDocumentation & Tutorials\nCreative Commons Attribution-ShareAlike 4.0\n\nThese licenses are complementary. AGPL covers all software layers and any derived online services — if you run a modified version as a service, you must publish the source. CERN-OHL-S covers physical designs — if you distribute derived hardware, the schematics stay open.\n\nNo permissive licenses (MIT, Apache, BSD) were used. Deliberately.\nFull license texts → github.com/ParamoStudio/KilnMonitor',
   licence_ethos_label: 'Why copyleft',
   licence_ethos: 'A kiln should not be firstly perceived as a consumer product. It is a tool built to last decades, passed between studios, repaired by hand, adapted to the specific needs of the person using it. The electronics and software we build around kilns should be no different. Any action towards encouraging the right to repair, understand, recycle and upgrade is a step towards what we deserve as communities. In any context given.',
   licence_ethos2: 'Páramo was built on open resources, community knowledge, and freely shared prior work. It will remain open in return. Copyleft licenses were chosen deliberately — not by default — to prevent proprietary capture of derivatives, whether as closed software forks, closed web services, or proprietary hardware products.',
@@ -789,42 +1018,74 @@ function applyStrings() {
   set('str-tab-guide',   s('info_tab_guide'));
   set('str-tab-licence', s('info_tab_licence'));
   // Contact
-  set('str-contact-title', s('contact_title'));
-  set('str-contact-sub',   s('contact_sub'));
-  set('str-contact-lead',  s('contact_lead'));
-  set('str-contact-direct-label', s('contact_direct_label'));
-  set('str-contact-direct-value', s('contact_direct_value'));
-  set('str-contact-name',    s('contact_name'));
-  set('str-contact-email',   s('contact_email'));
+  set('str-contact-title',   s('contact_title'));
+  set('str-contact-sub',     s('contact_sub'));
+  set('str-contact-lead',    s('contact_lead'));
+  set('str-contact-subject', s('contact_subject'));
   set('str-contact-message', s('contact_message'));
   set('str-contact-send',    s('contact_send'));
-  setAttr('input-name',    'value',       s('contact_name_ph'));
-  setAttr('input-email',   'value',       s('contact_email_ph'));
-  set('textarea-message',  s('contact_message_ph'));
+  set('str-contact-addr',    s('contact_addr'));
+  const subjectEl = document.getElementById('input-subject');
+  const messageEl = document.getElementById('input-message');
+  if (subjectEl) subjectEl.placeholder = s('contact_subject_ph');
+  if (messageEl) messageEl.placeholder = s('contact_message_ph');
   // Guide
-  set('str-guide-title', s('guide_title'));
-  set('str-guide-sub',   s('guide_sub'));
-  set('str-guide-lead',  s('guide_lead'));
-  set('str-step1-title', s('guide_step1_title'));
-  set('str-step1-desc',  s('guide_step1_desc'));
-  set('str-step2-title', s('guide_step2_title'));
-  set('str-step2-desc',  s('guide_step2_desc'));
-  set('str-step3-title', s('guide_step3_title'));
-  set('str-step3-desc',  s('guide_step3_desc'));
-  set('str-step4-title', s('guide_step4_title'));
-  set('str-step4-desc',  s('guide_step4_desc'));
-  set('str-step5-title', s('guide_step5_title'));
-  set('str-step5-desc',  s('guide_step5_desc'));
-  set('str-mqtt-temp-label', s('guide_mqtt_temp'));
-  set('str-mqtt-temp-val',   s('guide_mqtt_temp_val'));
-  set('str-mqtt-hist-label', s('guide_mqtt_hist'));
-  set('str-mqtt-hist-val',   s('guide_mqtt_hist_val'));
-  set('str-interval-label',  s('guide_interval'));
-  set('str-interval-val',    s('guide_interval_val'));
+  set('str-guide-title',       s('guide_title'));
+  set('str-guide-sub',         s('guide_sub'));
+  set('str-guide-lead',        s('guide_lead'));
+  set('str-guide-lead-gh',     s('guide_lead_gh'));
+  set('str-guide-lead-contact',s('guide_lead_contact'));
+  set('str-guide-lead-contact-link', s('guide_lead_contact_link'));
+  set('str-guide-section',     s('guide_section'));
+  set('str-g-s1-title',        s('g_s1_title'));
+  set('str-g-s1-desc',         s('g_s1_desc'));
+  set('str-g-s1-desc2',        s('g_s1_desc2'));
+  set('str-g-s1-link',         s('g_s1_link'));
+  set('str-g-s2-title',        s('g_s2_title'));
+  set('str-g-s2-1-title',      s('g_s2_1_title'));
+  set('str-g-s2-1-a',          s('g_s2_1_a'));
+  set('str-g-s2-1-link',       s('g_s2_1_link'));
+  set('str-g-s2-1-b',          s('g_s2_1_b'));
+  set('str-g-s2-1-c',          s('g_s2_1_c'));
+  set('str-g-s2-2-title',      s('g_s2_2_title'));
+  set('str-g-s2-2-a',          s('g_s2_2_a'));
+  set('str-g-s2-2-b',          s('g_s2_2_b'));
+  set('str-g-s2-2-c',          s('g_s2_2_c'));
+  set('str-g-s2-2-tip1',       s('g_s2_2_tip1'));
+  set('str-g-s2-2-d',          s('g_s2_2_d'));
+  set('str-g-s2-2-tip2',       s('g_s2_2_tip2'));
+  set('str-g-s3-title',        s('g_s3_title'));
+  set('str-g-s3-desc-a',       s('g_s3_desc_a'));
+  set('str-g-s3-portal',       s('g_s3_portal'));
+  set('str-g-s3-desc-b',       s('g_s3_desc_b'));
+  set('str-g-s3-1',            s('g_s3_1'));
+  set('str-g-s3-2',            s('g_s3_2'));
+  set('str-g-s3-3',            s('g_s3_3'));
+  set('str-g-s4-title',        s('g_s4_title'));
+  set('str-g-s4-desc',         s('g_s4_desc'));
+  set('str-g-s5-title',        s('g_s5_title'));
+  set('str-g-s5-1-a',          s('g_s5_1_a'));
+  set('str-g-s5-1-b',          s('g_s5_1_b'));
+  set('str-g-s5-2',            s('g_s5_2'));
+  set('str-g-s5-3-title',      s('g_s5_3_title'));
+  set('str-g-s5-3-desc',       s('g_s5_3_desc'));
+  set('str-g-s5-4-title',      s('g_s5_4_title'));
+  set('str-g-s5-4-power',      s('g_s5_4_power'));
+  set('str-g-s5-4-power-link', s('g_s5_4_power_link'));
+  set('str-g-s5-4-power2',     s('g_s5_4_power2'));
+  set('str-g-s5-4-mode',       s('g_s5_4_mode'));
+  set('str-g-s5-4-notes',      s('g_s5_4_notes'));
+  set('str-g-s5-4-export',     s('g_s5_4_export'));
+  set('str-g-s5-4-journal',    s('g_s5_4_journal'));
+  set('str-g-footer',          s('g_footer'));
+  set('str-g-footer-contact',  s('g_footer_contact'));
+  set('str-g-footer-or',       s('g_footer_or'));
+  set('str-g-footer-ts',       s('g_footer_ts'));
   // Licence
   set('str-licence-title',        s('licence_title'));
   set('str-licence-sub',          s('licence_sub'));
   set('str-licence-lead',         s('licence_lead'));
+  set('str-licence-block',        s('licence_block'));
   set('str-licence-ethos-label',  s('licence_ethos_label'));
   set('str-licence-ethos',        s('licence_ethos'));
   set('str-licence-ethos2',       s('licence_ethos2'));
@@ -976,6 +1237,17 @@ function switchTab(id, animate = true) {
   }
   draw();
 })();
+
+// ── CONTACT — mailto handler ─────────────────────────────────────────
+function sendContact() {
+  const subject = document.getElementById('input-subject').value.trim();
+  const message = document.getElementById('input-message').value.trim();
+  const email   = 'paramoyermo@disroot.org';
+  const mailto  = 'mailto:' + email
+    + '?subject=' + encodeURIComponent(subject || 'Páramo — message')
+    + (message ? '&body=' + encodeURIComponent(message) : '');
+  window.location.href = mailto;
+}
 
 // ── INIT ─────────────────────────────────────────────────────────────
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLang);
