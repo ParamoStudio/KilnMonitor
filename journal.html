@@ -8,8 +8,6 @@
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
 :root {
   --bg:#f4f1ed; --surface:rgba(255,255,255,0.55); --surface2:rgba(255,255,255,0.78);
@@ -467,8 +465,6 @@ async function _diaryInit() {
   delete _langCache[currentLang];
   await loadLangFile(currentLang);
   renderList();
-  // Auto-reconnect Drive if previously connected
-  await tryAutoReconnect();
 }
 
 // IMPORT MENU
@@ -516,159 +512,11 @@ function readFiles(files) {
     applyFilters();
   });
 }
-// ── GOOGLE DRIVE ───────────────────────────────────────────────────────
-const DRIVE_CLIENT_ID  = '80138126060-kg4ljcn15rcnf3t9s8ck44bqreo28in9.apps.googleusercontent.com';
-const DRIVE_SCOPE      = 'https://www.googleapis.com/auth/drive.file';
-const DRIVE_FOLDER_KEY = 'paramo.drive.folderId';
-const DRIVE_TOKEN_KEY  = 'paramo.drive.token';
-const FOLDER_NAME      = 'Páramo — Kiln Monitor';
-
-let driveToken     = localStorage.getItem(DRIVE_TOKEN_KEY) || null;
-let driveFolderId  = localStorage.getItem(DRIVE_FOLDER_KEY) || null;
-let driveConnected = false;
-
-function setDriveStatus(connected, label) {
-  driveConnected = connected;
-  const dot = document.getElementById('cloud-dot');
-  const lbl = document.getElementById('cloud-status-label');
-  if (dot) dot.classList.toggle('on', connected);
-  if (lbl) lbl.textContent = label || (connected ? 'Drive' : t('noCloud'));
-  const btn = document.getElementById('str-connect-drive');
-  if (btn) { btn.textContent = connected ? '✓ Google Drive' : t('connectDrive'); btn.classList.toggle('muted', !connected); }
-}
-
 function connectGoogleDrive() {
   document.getElementById('import-menu').classList.remove('open');
   document.getElementById('import-btn').classList.remove('active');
-
-  if (driveConnected) {
-    if (confirm('Disconnect Google Drive?')) {
-      driveToken = null; driveFolderId = null;
-      localStorage.removeItem(DRIVE_TOKEN_KEY);
-      localStorage.removeItem(DRIVE_FOLDER_KEY);
-      setDriveStatus(false);
-    }
-    return;
-  }
-
-  // Use Google Identity Services tokenClient — correct flow for SPA
-  gapi.load('client', async () => {
-    await gapi.client.init({});
-    const tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: DRIVE_CLIENT_ID,
-      scope: DRIVE_SCOPE,
-      callback: async (resp) => {
-        if (resp.error) { console.error('Drive auth:', resp.error); return; }
-        driveToken = resp.access_token;
-        localStorage.setItem(DRIVE_TOKEN_KEY, driveToken);
-        setDriveStatus(true, 'Connecting…');
-        driveFolderId = await getOrCreateFolder();
-        if (driveFolderId) {
-          localStorage.setItem(DRIVE_FOLDER_KEY, driveFolderId);
-          setDriveStatus(true, 'Drive');
-          await loadFromDrive();
-        }
-      }
-    });
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  });
+  alert('Google Drive integration coming soon.');
 }
-
-// Find or create the "Páramo — Kiln Monitor" folder in Drive root
-async function getOrCreateFolder() {
-  // Search for existing folder
-  const q = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-  const res = await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
-  if (!res) return null;
-  if (res.files && res.files.length > 0) return res.files[0].id;
-  // Create folder
-  const created = await driveRequest('https://www.googleapis.com/drive/v3/files', 'POST', {
-    name: FOLDER_NAME,
-    mimeType: 'application/vnd.google-apps.folder'
-  });
-  return created ? created.id : null;
-}
-
-// Load all JSON files from the Páramo folder
-async function loadFromDrive() {
-  if (!driveFolderId || !driveToken) return;
-  const q = encodeURIComponent(`'${driveFolderId}' in parents and mimeType='application/json' and trashed=false`);
-  const res = await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&orderBy=name`);
-  if (!res || !res.files || !res.files.length) return;
-
-  const fetches = res.files.map(f =>
-    driveRequest(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`)
-      .then(data => data && data.meta && data.datapoints ? { ...data, _filename: f.name, _driveId: f.id } : null)
-      .catch(() => null)
-  );
-  const results = (await Promise.all(fetches)).filter(Boolean);
-  results.forEach(f => {
-    if (!allFirings.some(x => x.meta.exportedAt === f.meta.exportedAt)) allFirings.push(f);
-  });
-  allFirings.sort((a, b) => b.meta.startedAt - a.meta.startedAt);
-  rebuildTypeFilter();
-  applyFilters();
-}
-
-// Upload a firing JSON to Drive folder
-async function driveUpload(payload, filename) {
-  if (!driveToken || !driveFolderId) return false;
-  const meta = JSON.stringify({ name: filename, parents: [driveFolderId] });
-  const body = JSON.stringify(payload, null, 2);
-  const boundary = 'paramo_boundary';
-  const multipart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
-
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + driveToken,
-      'Content-Type': `multipart/related; boundary=${boundary}`
-    },
-    body: multipart
-  });
-  return res.ok;
-}
-
-// Generic Drive API request helper
-async function driveRequest(url, method = 'GET', body = null) {
-  if (!driveToken) return null;
-  const opts = {
-    method,
-    headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json' }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  try {
-    const res = await fetch(url, opts);
-    if (res.status === 401) {
-      // Token expired — clear and prompt reconnect
-      driveToken = null; localStorage.removeItem(DRIVE_TOKEN_KEY);
-      setDriveStatus(false); return null;
-    }
-    if (!res.ok) return null;
-    const ct = res.headers.get('content-type') || '';
-    return ct.includes('application/json') ? res.json() : res.json().catch(() => res.text());
-  } catch(e) { return null; }
-}
-
-// Auto-reconnect on load if token was saved
-async function tryAutoReconnect() {
-  if (!driveToken) return;
-  // Verify token is still valid
-  const res = await driveRequest('https://www.googleapis.com/drive/v3/about?fields=user');
-  if (res) {
-    setDriveStatus(true, 'Drive');
-    if (driveFolderId) await loadFromDrive();
-    else {
-      driveFolderId = await getOrCreateFolder();
-      if (driveFolderId) { localStorage.setItem(DRIVE_FOLDER_KEY, driveFolderId); await loadFromDrive(); }
-    }
-  } else {
-    driveToken = null; localStorage.removeItem(DRIVE_TOKEN_KEY);
-    setDriveStatus(false);
-  }
-}
-
-
 
 // DYNAMIC TYPE FILTER — uses modeLabel (user-customized name) for both display and filtering
 function rebuildTypeFilter() {
@@ -726,6 +574,9 @@ function renderList() {
     document.getElementById('str-empty-title').textContent = t('noFiringsYet');
     document.getElementById('str-empty-sub').textContent   = t('noFiringsMsg');
     document.querySelector('.empty-actions').style.display = '';
+    // Update cloud button based on connection state
+    const cloudBtn = document.getElementById('str-empty-cloud');
+    if (cloudBtn) cloudBtn.textContent = driveConnected ? '✓ Disconnect Drive' : t('connectCloud');
     return;
   }
   const show = filtered;
