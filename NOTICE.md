@@ -18,7 +18,7 @@ concepts, methods, and implementations described herein through patents,
 utility models, or any other form of intellectual property claim filed after
 the date of this document's first public commit.
 
-Any patent or IP claim filed after 17 May 2025 that covers methods,
+Any patent or IP claim filed after 17 May 2026 that covers methods,
 architectures, or implementations substantially similar to those described
 below is anticipated by this prior art disclosure.
 
@@ -35,14 +35,13 @@ integrating:
 - Thermocouple temperature acquisition via MAX31856 IC (SPI interface),
   configured for Type S and Type K thermocouples.
 - Cold junction compensation handled in hardware by the MAX31856
-- Real-time temperature telemetry published over MQTT (TLS, port 8883) to a
-  cloud broker, with WebSocket bridge (port 8884) for browser clients
-- Solid State Relay (SSR) control output for kiln power management on
-  single-phase 230V circuits up to ~17.4A continuous draw
-- On-device circular temperature history buffer (350 samples, ~23h coverage)
+- Real-time temperature telemetry published over MQTT to a
+  cloud broker, with WebSocket bridge for browser clients
+- Solid State Relay (SSR) control output for kiln power management.
+- Gas kiln adaptations for closing it from affar in emergency situations on the works.
+- On-device temperature, stettings and threshold monitor. Installable in electrical boxes.
   published as retained MQTT JSON payload for frontend chart reconstruction
-- Telegram bot integration for hardware-level fault and threshold alerts with
-  per-message cooldowns
+- NTFY integration for hardware-level fault and threshold alerts.
 - OTA (Over The Air) firmware update capability
 
 **Physical interface**
