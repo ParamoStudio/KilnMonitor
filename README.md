@@ -14,7 +14,6 @@ Browser-based monitoring dashboard for the Páramo Kiln Monitor. Connects to you
 ├── info.html           # Guide, contact and licence page
 ├── journal.html        # Firing history and search tool
 ├── favicon.ico
-├── apple-touch-icon.png
 └── lang/
     ├── manifest.json   # Available languages
     ├── en.json         # English strings
