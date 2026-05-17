@@ -405,11 +405,17 @@ textarea.contact-input { resize: none; height: 90px; }
   opacity: 0.55;
 }
 
-/* ── THEME TOGGLE ── */
-.theme-btn {
+/* ── THEME + LANG CONTROLS ── */
+.top-controls {
   position: fixed;
   top: 20px; right: 22px;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme-btn {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -422,6 +428,69 @@ textarea.contact-input { resize: none; height: 90px; }
   transition: background 0.15s;
 }
 .theme-btn:hover { background: var(--input-bg); }
+
+/* ── LANG DROPDOWN ── */
+.hdd-wrap { position: relative; }
+.hdd-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  line-height: 1;
+  transition: background 0.15s;
+}
+.hdd-btn:hover { background: var(--input-bg); }
+.hdd-btn.active { border-color: var(--border2); }
+.hdd-chevron { font-size: 0.5rem; opacity: 0.6; }
+.hdd-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 6px;
+  min-width: 80px;
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  z-index: 500;
+  display: none;
+  animation: menuIn .2s cubic-bezier(.16,1,.3,1);
+}
+.hdd-menu.open { display: block; }
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+.hdd-item {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s;
+}
+.hdd-item:hover { background: var(--input-bg); }
+.hdd-item.active { color: var(--accent); }
 
 /* ── MOBILE ── */
 @media (max-width: 1024px) and (min-width: 601px) {
@@ -447,27 +516,35 @@ textarea.contact-input { resize: none; height: 90px; }
 
 <canvas id="blob-canvas"></canvas>
 
-<button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☽</button>
+<div class="top-controls">
+  <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☽</button>
+  <div class="hdd-wrap" id="hdd-lang-wrap">
+    <button class="hdd-btn" id="hdd-lang-btn" onclick="hddLangToggle()">
+      <span id="hdd-lang-label">EN</span><span class="hdd-chevron">▾</span>
+    </button>
+    <div class="hdd-menu" id="hdd-lang-menu" role="menu"></div>
+  </div>
+</div>
 
 <div class="stage">
   <div class="panel" id="panel">
 
     <!-- HEADER -->
     <div class="panel-header">
-      <span class="panel-wordmark">Páramo</span>
-      <a class="panel-back" href="javascript:window.close()" title="Back to monitor">Kiln monitor</a>
+      <span class="panel-wordmark" id="str-wordmark">Páramo</span>
+      <a class="panel-back" href="javascript:window.close()" title="Back to monitor" id="str-back">Kiln monitor</a>
     </div>
 
     <!-- TAB BAR -->
     <div class="tab-bar">
       <button class="tab-btn" data-tab="contact" onclick="switchTab('contact')">
-        <span class="tab-icon">✉</span> Contact
+        <span class="tab-icon">✉</span> <span id="str-tab-contact">Contact</span>
       </button>
       <button class="tab-btn" data-tab="guide" onclick="switchTab('guide')">
-        <span class="tab-icon">◎</span> Guide
+        <span class="tab-icon">◎</span> <span id="str-tab-guide">Guide</span>
       </button>
       <button class="tab-btn" data-tab="licence" onclick="switchTab('licence')">
-        <span class="tab-icon">⊙</span> Licence
+        <span class="tab-icon">⊙</span> <span id="str-tab-licence">Licence</span>
       </button>
     </div>
 
@@ -478,17 +555,17 @@ textarea.contact-input { resize: none; height: 90px; }
 
       <!-- ── CONTACT ── -->
       <div class="tab-pane" id="pane-contact">
-        <div class="pane-title">Contact</div>
-        <div class="pane-sub">Get in touch</div>
-        <p class="pane-lead">
+        <div class="pane-title" id="str-contact-title">Contact</div>
+        <div class="pane-sub" id="str-contact-sub">Get in touch</div>
+        <p class="pane-lead" id="str-contact-lead">
           Have a question about Páramo, want to collaborate, or found a bug?
           Reach out — this space is reserved for the right words.
         </p>
 
         <div class="placeholder-grid single">
           <div class="ph-block">
-            <div class="ph-label">Direct</div>
-            <div class="ph-value" style="color:var(--dimmer);font-style:italic;">
+            <div class="ph-label" id="str-contact-direct-label">Direct</div>
+            <div class="ph-value" id="str-contact-direct-value" style="color:var(--dimmer);font-style:italic;">
               hello@example.com — placeholder
             </div>
           </div>
@@ -497,25 +574,25 @@ textarea.contact-input { resize: none; height: 90px; }
         <div class="grad-rule"></div>
 
         <div class="contact-field">
-          <label class="contact-label">Name</label>
-          <input class="contact-input" data-placeholder value="Your name — coming soon" readonly/>
+          <label class="contact-label" id="str-contact-name">Name</label>
+          <input class="contact-input" id="input-name" data-placeholder value="Your name — coming soon" readonly/>
         </div>
         <div class="contact-field">
-          <label class="contact-label">Email</label>
-          <input class="contact-input" data-placeholder value="your@email.com — coming soon" readonly/>
+          <label class="contact-label" id="str-contact-email">Email</label>
+          <input class="contact-input" id="input-email" data-placeholder value="your@email.com — coming soon" readonly/>
         </div>
         <div class="contact-field">
-          <label class="contact-label">Message</label>
-          <textarea class="contact-input" data-placeholder readonly>Your message — coming soon</textarea>
+          <label class="contact-label" id="str-contact-message">Message</label>
+          <textarea class="contact-input" id="textarea-message" data-placeholder readonly>Your message — coming soon</textarea>
         </div>
-        <button class="contact-btn" disabled>Send message — coming soon</button>
+        <button class="contact-btn" id="str-contact-send" disabled>Send message — coming soon</button>
       </div>
 
       <!-- ── GUIDE ── -->
       <div class="tab-pane" id="pane-guide">
-        <div class="pane-title">Guide</div>
-        <div class="pane-sub">Setup & usage</div>
-        <p class="pane-lead">
+        <div class="pane-title" id="str-guide-title">Guide</div>
+        <div class="pane-sub" id="str-guide-sub">Setup & usage</div>
+        <p class="pane-lead" id="str-guide-lead">
           Páramo connects to your kiln's ESP32 over MQTT.
           Below you'll find setup instructions, connection details, and usage notes.
           Full documentation coming soon.
@@ -525,36 +602,36 @@ textarea.contact-input { resize: none; height: 90px; }
           <div class="step">
             <div class="step-num">01</div>
             <div class="step-body">
-              <div class="step-title">Configure your ESP32</div>
-              <div class="step-desc">Flash the Páramo firmware and set your WiFi credentials. The ESP32 will publish temperature data to the MQTT broker at regular intervals. — placeholder</div>
+              <div class="step-title" id="str-step1-title">Configure your ESP32</div>
+              <div class="step-desc"  id="str-step1-desc">Flash the Páramo firmware and set your WiFi credentials. The ESP32 will publish temperature data to the MQTT broker at regular intervals. — placeholder</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num">02</div>
             <div class="step-body">
-              <div class="step-title">Set up a HiveMQ broker</div>
-              <div class="step-desc">Create a free account at HiveMQ Cloud. Copy your cluster host, username, and password into the Connection panel in the sidebar. — placeholder</div>
+              <div class="step-title" id="str-step2-title">Set up a HiveMQ broker</div>
+              <div class="step-desc"  id="str-step2-desc">Create a free account at HiveMQ Cloud. Copy your cluster host, username, and password into the Connection panel in the sidebar. — placeholder</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num">03</div>
             <div class="step-body">
-              <div class="step-title">Connect & monitor</div>
-              <div class="step-desc">Hit Connect. The status pills in the header will turn green when both the MQTT server and kiln are reachable. Your firing data starts streaming. — placeholder</div>
+              <div class="step-title" id="str-step3-title">Connect &amp; monitor</div>
+              <div class="step-desc"  id="str-step3-desc">Hit Connect. The status pills in the header will turn green when both the MQTT server and kiln are reachable. Your firing data starts streaming. — placeholder</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num">04</div>
             <div class="step-body">
-              <div class="step-title">Set thresholds & firing mode</div>
-              <div class="step-desc">Use the Alarm Threshold card to receive an alert when a target temperature is reached. Select a firing mode to overlay a reference ramp curve on the chart. — placeholder</div>
+              <div class="step-title" id="str-step4-title">Set thresholds &amp; firing mode</div>
+              <div class="step-desc"  id="str-step4-desc">Use the Alarm Threshold card to receive an alert when a target temperature is reached. Select a firing mode to overlay a reference ramp curve on the chart. — placeholder</div>
             </div>
           </div>
           <div class="step">
             <div class="step-num">05</div>
             <div class="step-body">
-              <div class="step-title">Export your session</div>
-              <div class="step-desc">When the firing is complete, export the chart as JSON for archiving or analysis. Start a new firing session from the Session card. — placeholder</div>
+              <div class="step-title" id="str-step5-title">Export your session</div>
+              <div class="step-desc"  id="str-step5-desc">When the firing is complete, export the chart as JSON for archiving or analysis. Start a new firing session from the Session card. — placeholder</div>
             </div>
           </div>
         </div>
@@ -563,68 +640,75 @@ textarea.contact-input { resize: none; height: 90px; }
 
         <div class="placeholder-grid triple">
           <div class="ph-block">
-            <div class="ph-label">MQTT topic — temp</div>
-            <div class="ph-value" style="font-size:0.76rem;color:var(--dimmer);">kiln/tc — placeholder</div>
+            <div class="ph-label" id="str-mqtt-temp-label">MQTT topic — temp</div>
+            <div class="ph-value" id="str-mqtt-temp-val" style="font-size:0.76rem;color:var(--dimmer);">kiln/tc — placeholder</div>
           </div>
           <div class="ph-block">
-            <div class="ph-label">MQTT topic — history</div>
-            <div class="ph-value" style="font-size:0.76rem;color:var(--dimmer);">kiln/history — placeholder</div>
+            <div class="ph-label" id="str-mqtt-hist-label">MQTT topic — history</div>
+            <div class="ph-value" id="str-mqtt-hist-val" style="font-size:0.76rem;color:var(--dimmer);">kiln/history — placeholder</div>
           </div>
           <div class="ph-block">
-            <div class="ph-label">Update interval</div>
-            <div class="ph-value" style="font-size:0.76rem;color:var(--dimmer);">~5 s — placeholder</div>
+            <div class="ph-label" id="str-interval-label">Update interval</div>
+            <div class="ph-value" id="str-interval-val" style="font-size:0.76rem;color:var(--dimmer);">~5 s — placeholder</div>
           </div>
         </div>
       </div>
 
       <!-- ── LICENCE ── -->
       <div class="tab-pane" id="pane-licence">
-        <div class="pane-title">Licence</div>
-        <div class="pane-sub">Open source</div>
-        <p class="pane-lead">
-          Páramo is released under the AGLP Licence.
-          You are free to use and modify this software.
-          Credits and attributions below.
+        <div class="pane-title" id="str-licence-title">Licence</div>
+        <div class="pane-sub" id="str-licence-sub">Open source</div>
+        <p class="pane-lead" id="str-licence-lead">
+          Páramo is released under copyleft licenses chosen to keep this project
+          permanently open. Full details and license texts are on GitHub.
         </p>
 
-        <div class="licence-block">AGLP License
+        <div class="licence-block" id="str-licence-block">Firmware &amp; Web Application
+GNU Affero General Public License v3.0
 
-Copyright (c) 2025 Páramo — placeholder
+Hardware (PCB · Schematics · BOM · 3D / STL)
+CERN Open Hardware Licence Strongly Reciprocal v2.0
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Documentation &amp; Tutorials
+Creative Commons Attribution-ShareAlike 4.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+These licenses are complementary. AGPL covers all software layers and any
+derived online services — if you run a modified version as a service, you
+must publish the source. CERN-OHL-S covers physical designs — if you
+distribute derived hardware, the schematics stay open.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</div>
+No permissive licenses (MIT, Apache, BSD) were used. Deliberately.
+Full license texts → github.com/ParamoStudio/KilnMonitor</div>
 
         <div class="grad-rule"></div>
 
-        <div class="placeholder-grid">
-          <div class="ph-block">
-            <div class="ph-label">Built with</div>
-            <div class="ph-value">
-              <div class="ph-line med"></div>
-              <div class="ph-line short"></div>
-              <div class="ph-line med"></div>
-            </div>
-          </div>
-          <div class="ph-block">
-            <div class="ph-label">Credits</div>
-            <div class="ph-value">
-              <div class="ph-line short"></div>
-              <div class="ph-line med"></div>
-              <div class="ph-line short"></div>
-            </div>
-          </div>
-        </div>
+        <!-- ETHOS -->
+        <div class="pane-sub" id="str-licence-ethos-label">Why copyleft</div>
+        <p class="pane-lead" id="str-licence-ethos">
+          A kiln should not be firstly perceived as a consumer product. It is a tool built
+          to last decades, passed between studios, repaired by hand, adapted to the specific
+          needs of the person using it. The electronics and software we build around kilns
+          should be no different. Any action towards encouraging the right to repair,
+          understand, recycle and upgrade is a step towards what we deserve as communities.
+          In any context given.
+        </p>
+        <p class="pane-lead" style="margin-top:16px;" id="str-licence-ethos2">
+          Páramo was built on open resources, community knowledge, and freely shared prior
+          work. It will remain open in return. Copyleft licenses were chosen deliberately —
+          not by default — to prevent proprietary capture of derivatives, whether as closed
+          software forks, closed web services, or proprietary hardware products.
+        </p>
+
+        <div class="grad-rule"></div>
+
+        <!-- CREDITS -->
+        <div class="pane-sub" id="str-credits-label">Credits</div>
+        <p class="pane-lead" id="str-credits">
+          For every single generous artist, coder, engineer, and maker that has taught,
+          helped, or gifted — me or any other. Filling the well of abundant community
+          knowledge without profit and selfishness as a main drive: Thanks. We are much.
+          We are present. Open source is the way.
+        </p>
       </div>
 
     </div><!-- /.panel-body -->
@@ -632,8 +716,201 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</div>
 </div><!-- /.stage -->
 
 <script>
-// ── THEME (syncs with dashboard localStorage key) ──────────────────
+// ── CONFIG ──────────────────────────────────────────────────────────
+const LANG_BASE_URL = './';   // adjust if json files are in a subfolder
 const THEME_KEY = 'paramo.theme';
+const LANG_KEY  = 'paramo.lang';
+
+// ── FALLBACK STRINGS (en) — used if fetch fails ──────────────────────
+const FALLBACK = {
+  info_wordmark: 'Páramo',
+  info_back: 'Kiln monitor',
+  info_tab_contact: 'Contact',
+  info_tab_guide:   'Guide',
+  info_tab_licence: 'Licence',
+  // contact
+  contact_title: 'Contact',
+  contact_sub:   'Get in touch',
+  contact_lead:  'Have a question about Páramo, want to collaborate, or found a bug? Reach out — this space is reserved for the right words.',
+  contact_direct_label: 'Direct',
+  contact_direct_value: 'hello@example.com — placeholder',
+  contact_name:    'Name',
+  contact_name_ph: 'Your name — coming soon',
+  contact_email:   'Email',
+  contact_email_ph:'you@email.com — coming soon',
+  contact_message: 'Message',
+  contact_message_ph: 'Your message — coming soon',
+  contact_send:    'Send message — coming soon',
+  // guide
+  guide_title: 'Guide',
+  guide_sub:   'Setup and usage',
+  guide_lead:  "Páramo connects to your kiln's ESP32 via MQTT. Here you'll find setup instructions, connection details, and usage notes. Full documentation coming soon.",
+  guide_step1_title: 'Set up your ESP32',
+  guide_step1_desc:  'Flash the Páramo firmware and configure your WiFi credentials. The ESP32 will publish temperature data to the MQTT broker at regular intervals. — placeholder',
+  guide_step2_title: 'Set up a HiveMQ broker',
+  guide_step2_desc:  'Create a free account at HiveMQ Cloud. Copy the host, username and password into the Connection panel in the sidebar. — placeholder',
+  guide_step3_title: 'Connect and monitor',
+  guide_step3_desc:  'Press Connect. The status pills in the header will turn green when both the MQTT server and the kiln are reachable. Firing data will start flowing. — placeholder',
+  guide_step4_title: 'Set alarms and firing mode',
+  guide_step4_desc:  'Use the Alarm card to get an alert when a target temperature is reached. Select a firing mode to overlay a reference curve on the chart. — placeholder',
+  guide_step5_title: 'Export your session',
+  guide_step5_desc:  'When the firing is done, export the chart as JSON for archiving or analysis. Start a new session from the Session card. — placeholder',
+  guide_mqtt_temp:     'MQTT topic — temperature',
+  guide_mqtt_temp_val: 'kiln/tc — placeholder',
+  guide_mqtt_hist:     'MQTT topic — history',
+  guide_mqtt_hist_val: 'kiln/history — placeholder',
+  guide_interval:      'Update interval',
+  guide_interval_val:  '~5 s — placeholder',
+  // licence
+  licence_title: 'Licence',
+  licence_sub:   'Open source',
+  licence_lead:  'Páramo is released under copyleft licenses chosen to keep this project permanently open. Full details and license texts are on GitHub.',
+  licence_ethos_label: 'Why copyleft',
+  licence_ethos: 'A kiln should not be firstly perceived as a consumer product. It is a tool built to last decades, passed between studios, repaired by hand, adapted to the specific needs of the person using it. The electronics and software we build around kilns should be no different. Any action towards encouraging the right to repair, understand, recycle and upgrade is a step towards what we deserve as communities. In any context given.',
+  licence_ethos2: 'Páramo was built on open resources, community knowledge, and freely shared prior work. It will remain open in return. Copyleft licenses were chosen deliberately — not by default — to prevent proprietary capture of derivatives, whether as closed software forks, closed web services, or proprietary hardware products.',
+  credits_label: 'Credits',
+  credits: 'For every single generous artist, coder, engineer, and maker that has taught, helped, or gifted — me or any other. Filling the well of abundant community knowledge without profit and selfishness as a main drive: Thanks. We are much. We are present. Open source is the way.',
+};
+
+// ── I18N APPLY ───────────────────────────────────────────────────────
+let _strings = Object.assign({}, FALLBACK);
+function s(key) { return _strings[key] || FALLBACK[key] || key; }
+
+function applyStrings() {
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.textContent = v; };
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
+  const setAttr = (id, attr, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.setAttribute(attr, v); };
+
+  // Header
+  set('str-wordmark', s('info_wordmark'));
+  set('str-back',     s('info_back'));
+  // Tabs
+  set('str-tab-contact', s('info_tab_contact'));
+  set('str-tab-guide',   s('info_tab_guide'));
+  set('str-tab-licence', s('info_tab_licence'));
+  // Contact
+  set('str-contact-title', s('contact_title'));
+  set('str-contact-sub',   s('contact_sub'));
+  set('str-contact-lead',  s('contact_lead'));
+  set('str-contact-direct-label', s('contact_direct_label'));
+  set('str-contact-direct-value', s('contact_direct_value'));
+  set('str-contact-name',    s('contact_name'));
+  set('str-contact-email',   s('contact_email'));
+  set('str-contact-message', s('contact_message'));
+  set('str-contact-send',    s('contact_send'));
+  setAttr('input-name',    'value',       s('contact_name_ph'));
+  setAttr('input-email',   'value',       s('contact_email_ph'));
+  set('textarea-message',  s('contact_message_ph'));
+  // Guide
+  set('str-guide-title', s('guide_title'));
+  set('str-guide-sub',   s('guide_sub'));
+  set('str-guide-lead',  s('guide_lead'));
+  set('str-step1-title', s('guide_step1_title'));
+  set('str-step1-desc',  s('guide_step1_desc'));
+  set('str-step2-title', s('guide_step2_title'));
+  set('str-step2-desc',  s('guide_step2_desc'));
+  set('str-step3-title', s('guide_step3_title'));
+  set('str-step3-desc',  s('guide_step3_desc'));
+  set('str-step4-title', s('guide_step4_title'));
+  set('str-step4-desc',  s('guide_step4_desc'));
+  set('str-step5-title', s('guide_step5_title'));
+  set('str-step5-desc',  s('guide_step5_desc'));
+  set('str-mqtt-temp-label', s('guide_mqtt_temp'));
+  set('str-mqtt-temp-val',   s('guide_mqtt_temp_val'));
+  set('str-mqtt-hist-label', s('guide_mqtt_hist'));
+  set('str-mqtt-hist-val',   s('guide_mqtt_hist_val'));
+  set('str-interval-label',  s('guide_interval'));
+  set('str-interval-val',    s('guide_interval_val'));
+  // Licence
+  set('str-licence-title',        s('licence_title'));
+  set('str-licence-sub',          s('licence_sub'));
+  set('str-licence-lead',         s('licence_lead'));
+  set('str-licence-ethos-label',  s('licence_ethos_label'));
+  set('str-licence-ethos',        s('licence_ethos'));
+  set('str-licence-ethos2',       s('licence_ethos2'));
+  set('str-credits-label',        s('credits_label'));
+  set('str-credits',              s('credits'));
+}
+
+// ── LANG SYSTEM ──────────────────────────────────────────────────────
+let LANG_MANIFEST = ['en', 'es'];
+let currentLang   = localStorage.getItem(LANG_KEY) || 'en';
+const _langCache  = {};
+let _langOpen     = false;
+
+function hddLangToggle() {
+  const menu = document.getElementById('hdd-lang-menu');
+  const btn  = document.getElementById('hdd-lang-btn');
+  _langOpen  = !_langOpen;
+  menu.classList.toggle('open', _langOpen);
+  btn.classList.toggle('active', _langOpen);
+  if (_langOpen) {
+    setTimeout(() => document.addEventListener('click', closeLangOut, { once: true }), 0);
+  }
+}
+function closeLangOut(e) {
+  const wrap = document.getElementById('hdd-lang-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('hdd-lang-menu').classList.remove('open');
+    document.getElementById('hdd-lang-btn').classList.remove('active');
+    _langOpen = false;
+  }
+}
+function buildLangSelector() {
+  const menu = document.getElementById('hdd-lang-menu');
+  const lbl  = document.getElementById('hdd-lang-label');
+  menu.innerHTML = '';
+  // Filter out non-language entries like "add"
+  const langs = LANG_MANIFEST.filter(c => /^[a-z]{2}$/.test(c));
+  langs.forEach(code => {
+    const btn = document.createElement('button');
+    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
+    btn.id = 'hdd-lang-' + code;
+    btn.textContent = code.toUpperCase();
+    btn.onclick = () => {
+      langs.forEach(c => { const el = document.getElementById('hdd-lang-'+c); if (el) el.classList.remove('active'); });
+      btn.classList.add('active');
+      lbl.textContent = code.toUpperCase();
+      currentLang = code;
+      localStorage.setItem(LANG_KEY, code);
+      document.getElementById('hdd-lang-menu').classList.remove('open');
+      document.getElementById('hdd-lang-btn').classList.remove('active');
+      _langOpen = false;
+      delete _langCache[code];
+      loadLang(code);
+    };
+    menu.appendChild(btn);
+  });
+  if (lbl) lbl.textContent = currentLang.toUpperCase();
+}
+
+async function loadLang(code) {
+  if (_langCache[code]) { _strings = Object.assign({}, FALLBACK, _langCache[code]); applyStrings(); return; }
+  try {
+    const res = await fetch(LANG_BASE_URL + code + '.json');
+    if (!res.ok) throw new Error('');
+    const data = await res.json();
+    _langCache[code] = data;
+    _strings = Object.assign({}, FALLBACK, data);
+  } catch(e) {
+    _strings = Object.assign({}, FALLBACK);
+  }
+  applyStrings();
+}
+
+async function initLang() {
+  try {
+    const res = await fetch(LANG_BASE_URL + 'manifest.json');
+    if (res.ok) {
+      const d = await res.json();
+      if (Array.isArray(d)) LANG_MANIFEST = d;
+    }
+  } catch(e) {}
+  buildLangSelector();
+  await loadLang(currentLang);
+}
+
+// ── THEME ────────────────────────────────────────────────────────────
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
   document.querySelector('.theme-btn').textContent = dark ? '○' : '☽';
@@ -645,9 +922,8 @@ function toggleTheme() {
 }
 applyTheme(localStorage.getItem(THEME_KEY) === 'dark');
 
-// ── TABS ───────────────────────────────────────────────────────────
+// ── TABS ─────────────────────────────────────────────────────────────
 const TABS = ['contact', 'guide', 'licence'];
-
 function switchTab(id, animate = true) {
   if (!TABS.includes(id)) id = 'contact';
   TABS.forEach(t => {
@@ -655,40 +931,31 @@ function switchTab(id, animate = true) {
     const pane = document.getElementById('pane-' + t);
     if (t === id) {
       pane.classList.add('active');
-      // Re-trigger animation
-      if (animate) {
-        pane.style.animation = 'none';
-        requestAnimationFrame(() => { pane.style.animation = ''; });
-      }
+      if (animate) { pane.style.animation = 'none'; requestAnimationFrame(() => { pane.style.animation = ''; }); }
     } else {
       pane.classList.remove('active');
     }
   });
-  // Update URL without reload
   const url = new URL(window.location);
   url.searchParams.set('tab', id);
   history.replaceState(null, '', url);
 }
-
-// ── INIT: read ?tab= from URL ──────────────────────────────────────
 (function() {
   const params = new URLSearchParams(window.location.search);
-  const tab = params.get('tab') || 'contact';
-  switchTab(tab, false); // no animation on initial load (panel itself animates in)
+  switchTab(params.get('tab') || 'contact', false);
 })();
 
-// ── BACKGROUND BLOBS (identical to dashboard) ──────────────────────
+// ── BACKGROUND BLOBS ─────────────────────────────────────────────────
 (function(){
   const cv = document.getElementById('blob-canvas');
   const ctx = cv.getContext('2d');
   function resize(){ cv.width = window.innerWidth; cv.height = window.innerHeight; }
   resize(); window.addEventListener('resize', resize);
-
   const blobs = [
-    { x: 0.05, y: 0.05, r: 0.50, c: '#ff4800', t: 0,    ax: 0.18, ay: 0.14 },
-    { x: 0.92, y: 0.85, r: 0.42, c: '#de00ff', t: 2.1,  ax: 0.14, ay: 0.18 },
-    { x: 0.55, y: 0.65, r: 0.36, c: '#007cf0', t: 4.2,  ax: 0.16, ay: 0.12 },
-    { x: 0.70, y: 0.15, r: 0.28, c: '#3d3dff', t: 1.1,  ax: 0.12, ay: 0.14 }
+    { x: 0.05, y: 0.05, r: 0.50, c: '#ff4800', t: 0,   ax: 0.18, ay: 0.14 },
+    { x: 0.92, y: 0.85, r: 0.42, c: '#de00ff', t: 2.1, ax: 0.14, ay: 0.18 },
+    { x: 0.55, y: 0.65, r: 0.36, c: '#007cf0', t: 4.2, ax: 0.16, ay: 0.12 },
+    { x: 0.70, y: 0.15, r: 0.28, c: '#3d3dff', t: 1.1, ax: 0.12, ay: 0.14 }
   ];
   function draw(){
     ctx.clearRect(0, 0, cv.width, cv.height);
@@ -709,6 +976,10 @@ function switchTab(id, animate = true) {
   }
   draw();
 })();
+
+// ── INIT ─────────────────────────────────────────────────────────────
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLang);
+else initLang();
 </script>
 </body>
 </html>
