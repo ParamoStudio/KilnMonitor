@@ -98,8 +98,20 @@ body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2)
 .panel-body::-webkit-scrollbar{width:4px;}
 .panel-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .firing-list{display:flex;flex-direction:column;gap:8px;}
-.firing-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:14px 18px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-card);cursor:pointer;transition:border-color .18s,background .18s,transform .18s;backdrop-filter:blur(8px);animation:cardIn .3s cubic-bezier(.16,1,.3,1) both;}
+.firing-card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:14px 18px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-card);transition:border-color .18s,background .18s,transform .18s;backdrop-filter:blur(8px);animation:cardIn .3s cubic-bezier(.16,1,.3,1) both;}
 .firing-card:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px);}
+.firing-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.firing-delete{background:none;border:none;color:var(--dimmer);font-size:.7rem;cursor:pointer;padding:2px 4px;border-radius:4px;transition:color .15s;font-family:var(--mono);opacity:0;transition:opacity .15s;}
+.firing-card:hover .firing-delete{opacity:1;}
+.firing-delete:hover{color:var(--err);}
+/* post-firing notes in overlay */
+.post-notes-area{width:100%;min-height:80px;resize:vertical;padding:10px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;font-family:var(--mono);font-size:.82rem;color:var(--text);outline:none;line-height:1.55;transition:border-color .15s;}
+.post-notes-area:focus{border-color:var(--border2);}
+.post-notes-area::placeholder{color:var(--dimmer);}
+.post-notes-save{margin-top:6px;padding:6px 14px;border-radius:var(--r-pill);border:none;background:var(--accent);color:#fff;font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:opacity .15s;}
+.post-notes-save:hover{opacity:.85;}
+.import-item.danger{color:var(--err);}
+.import-item.danger:hover{background:rgba(200,56,56,.08);}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 .firing-date{font-size:.7rem;color:var(--dimmer);white-space:nowrap;min-width:80px;}
 .firing-info{display:flex;flex-direction:column;gap:3px;min-width:0;}
@@ -160,8 +172,8 @@ body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2)
   .filters{padding:10px 16px 0;gap:6px;}
   .filter-group{min-width:100px;}
   .panel-body{padding:10px 16px 16px;}
-  .firing-card{grid-template-columns:1fr auto;gap:8px;}
-  .firing-date{display:none;}
+  .firing-card{gap:8px;}
+  .firing-date{font-size:.62rem;}
   .overlay-stats{grid-template-columns:repeat(2,1fr);}
   .pill-btn{padding:4px 8px;font-size:.58rem;letter-spacing:.1em;}
   html,body{overflow-y:auto;height:auto;}
@@ -202,6 +214,8 @@ body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2)
           <div class="import-sep"></div>
           <div class="import-hint" id="str-cloud-hint">Cloud</div>
           <button class="import-item muted" onclick="connectGoogleDrive()" id="str-connect-drive">☁ Connect Google Drive</button>
+          <div class="import-sep"></div>
+          <button class="import-item danger" onclick="clearAllFirings()">⊗ Clear all</button>
         </div>
       </div>
 
@@ -298,7 +312,14 @@ body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2)
         <div class="overlay-note-label" id="str-notes-label">Notes</div>
         <div class="overlay-note-text" id="overlay-note-text">—</div>
       </div>
+      <!-- Post-firing notes -->
+      <div class="overlay-note" id="post-notes-section">
+        <div class="overlay-note-label">Post-firing comments</div>
+        <textarea class="post-notes-area" id="post-notes-area" placeholder="Add comments after the firing…"></textarea>
+        <button class="post-notes-save" onclick="savePostNotes()">Save comments</button>
+      </div>
       <div class="overlay-actions">
+        <button class="btn-outline" style="color:var(--err);border-color:rgba(200,56,56,.3);" onclick="deleteFiring()">⊗ Delete firing</button>
         <button class="btn-outline" id="str-share-png" onclick="exportOverlayPng()">↓ Share chart (PNG)</button>
       </div>
     </div>
@@ -700,14 +721,16 @@ function renderList() {
     const card = document.createElement('div');
     card.className='firing-card'; card.style.animationDelay=(i*.04)+'s';
     card.innerHTML=`
-      <div class="firing-date">${esc(date)}</div>
-      <div class="firing-info">
+      <div class="firing-info" style="cursor:pointer;">
+        <div class="firing-date">${esc(date)}</div>
         <div class="firing-name">${esc(m.kilnName||'Unnamed kiln')}</div>
-        <div class="firing-meta"><span>${esc(m.modeLabel||m.mode||'—')}</span><span>${dur}</span><span>${(f.datapoints||[]).length} pts</span></div>
-        ${m.note?`<div class="firing-note-preview">${esc(m.note)}</div>`:''}
+        <div class="firing-meta"><span>${esc(m.modeLabel||m.mode||'—')}</span></div>
       </div>
-      <div class="firing-temp">${m.maxTemp_c!=null?Math.round(m.maxTemp_c)+'°':'—'}</div>`;
-    card.onclick=()=>openOverlay(f);
+      <div class="firing-card-right">
+        <div class="firing-temp">${m.maxTemp_c!=null?Math.round(m.maxTemp_c)+'°':'—'}</div>
+        <button class="firing-delete" onclick="event.stopPropagation();deleteFiringById('${esc(String(f.meta.exportedAt))}')">⊗</button>
+      </div>`;
+    card.querySelector('.firing-info').onclick=()=>openOverlay(f);
     list.appendChild(card);
   });
 }
@@ -725,12 +748,99 @@ function openOverlay(firing) {
   document.getElementById('stat-mode').textContent=m.modeLabel||m.mode||'—';
   document.getElementById('overlay-note-text').textContent=m.note||'—';
   document.querySelector('.overlay-note').style.opacity=m.note?'1':'0.4';
+  document.getElementById('post-notes-area').value=m.postNotes||'';
   drawOverlayChart(firing.datapoints||[]);
   document.getElementById('overlay-backdrop').classList.add('visible');
   document.body.style.overflow='hidden';
 }
 function closeOverlay(e){if(e.target===document.getElementById('overlay-backdrop'))closeOverlayDirect();}
 function closeOverlayDirect(){document.getElementById('overlay-backdrop').classList.remove('visible');document.body.style.overflow='';activeFiring=null;}
+
+// Save post-firing comments — updates JSON in Drive if connected
+async function savePostNotes() {
+  if (!activeFiring) return;
+  const notes = document.getElementById('post-notes-area').value;
+  activeFiring.meta.postNotes = notes;
+  // Update in Drive if file has a Drive ID
+  if (activeFiring._driveId && driveToken) {
+    const ok = await driveUpdateFile(activeFiring._driveId, activeFiring);
+    const btn = document.querySelector('.post-notes-save');
+    btn.textContent = ok ? '✓ Saved' : '✗ Error';
+    setTimeout(() => btn.textContent = 'Save comments', 2000);
+  } else {
+    const btn = document.querySelector('.post-notes-save');
+    btn.textContent = '✓ Saved (local)';
+    setTimeout(() => btn.textContent = 'Save comments', 2000);
+  }
+}
+
+// Delete active firing (called from overlay)
+async function deleteFiring() {
+  if (!activeFiring) return;
+  if (!confirm('Delete this firing? This cannot be undone.')) return;
+  await _deleteFiring(activeFiring);
+  closeOverlayDirect();
+}
+
+// Delete by exportedAt ID (called from card ⊗ button)
+async function deleteFiringById(exportedAt) {
+  const f = allFirings.find(x => String(x.meta.exportedAt) === String(exportedAt));
+  if (!f) return;
+  if (!confirm('Delete this firing? This cannot be undone.')) return;
+  await _deleteFiring(f);
+}
+
+async function _deleteFiring(f) {
+  // Delete from Drive if connected and has Drive ID
+  if (f._driveId && driveToken) await driveDeleteFile(f._driveId);
+  // Remove from local array
+  allFirings = allFirings.filter(x => x.meta.exportedAt !== f.meta.exportedAt);
+  rebuildTypeFilter();
+  applyFilters();
+}
+
+// Clear all firings
+async function clearAllFirings() {
+  document.getElementById('import-menu').classList.remove('open');
+  document.getElementById('import-btn').classList.remove('active');
+  const hasDrive = driveConnected && driveToken;
+  const msg = hasDrive
+    ? 'Delete ALL firings from the journal and Google Drive? This cannot be undone.'
+    : 'Clear all loaded firings? (Local session only — Drive files unaffected if not connected.)';
+  if (!confirm(msg)) return;
+  if (hasDrive) {
+    // Delete all Drive files that have a _driveId
+    const withDrive = allFirings.filter(f => f._driveId);
+    await Promise.all(withDrive.map(f => driveDeleteFile(f._driveId)));
+  }
+  allFirings = []; filtered = [];
+  rebuildTypeFilter();
+  renderList();
+}
+
+// Drive: update existing file content
+async function driveUpdateFile(fileId, payload) {
+  if (!driveToken) return false;
+  try {
+    const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload, null, 2)
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// Drive: delete file
+async function driveDeleteFile(fileId) {
+  if (!driveToken || !fileId) return;
+  try {
+    await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + driveToken }
+    });
+  } catch(e) {}
+}
 
 // CHART
 function drawOverlayChart(dp) {
