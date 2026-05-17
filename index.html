@@ -1356,6 +1356,34 @@ body.dark .log-fab {
   opacity: 1;
   pointer-events: all;
 }
+/* ── UPLOAD TOAST ── */
+.upload-toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  z-index: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(.16,1,.3,1), opacity 0.3s;
+  white-space: nowrap;
+}
+.upload-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.upload-toast.ok   { border-color: rgba(76,175,80,0.4); color: #4caf50; }
+.upload-toast.err  { border-color: rgba(200,56,56,0.4); color: var(--err); }
 </style>
 </head>
 <body>
@@ -1803,6 +1831,9 @@ body.dark .log-fab {
   </svg>
   <span class="log-fab-badge" id="log-fab-badge" style="display:none;">0</span>
 </button>
+
+<!-- ── UPLOAD TOAST ── -->
+<div class="upload-toast" id="upload-toast"></div>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -2427,51 +2458,44 @@ function openExportModal()  { document.getElementById('export-modal-backdrop').c
 function closeExportModal() { document.getElementById('export-modal-backdrop').classList.remove('visible'); }
 
 function hddExportDownload() { hddCloseAll(); exportData(); }
+let _uploadToastTimer = null;
+function showUploadToast(msg, type = 'ok') {
+  const el = document.getElementById('upload-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'upload-toast ' + type + ' visible';
+  clearTimeout(_uploadToastTimer);
+  _uploadToastTimer = setTimeout(() => el.classList.remove('visible'), 3000);
+}
+
 function hddExportCloud() {
   hddCloseAll();
-  // Check if journal.html has Drive connected via shared localStorage
   const token    = localStorage.getItem('paramo.drive.token');
   const folderId = localStorage.getItem('paramo.drive.folderId');
-  if (!token || !folderId) {
-    // Not connected — open journal to connect
-    window.open('journal.html', '_blank');
-    return;
-  }
-  // Build the same payload as exportData()
-  const kiln = kilns.find(k => k.id === activeKilnId) || {};
-  const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
-  const now  = new Date();
-  const startedAt   = datapoints.length ? datapoints[0].ts : now.getTime();
+  if (!token || !folderId) { window.open('journal.html', '_blank'); return; }
+  const now = new Date();
+  const startedAt    = datapoints.length ? datapoints[0].ts : now.getTime();
   const duration_min = datapoints.length > 1 ? Math.round((datapoints[datapoints.length-1].ts - datapoints[0].ts) / 60000) : 0;
   const tcs = datapoints.map(d => d.tc).filter(v => !isNaN(v));
   const maxTemp_c = tcs.length ? Math.round(Math.max(...tcs) * 10) / 10 : 0;
-  const payload = {
-    meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note },
-    datapoints
-  };
+  const kiln = kilns.find(k => k.id === activeKilnId) || {};
+  const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
+  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note }, datapoints };
   const dateStr = now.toISOString().slice(0,10);
   const durStr  = duration_min < 60 ? Math.round(duration_min)+'m' : Math.floor(duration_min/60)+'h'+(duration_min%60?(duration_min%60)+'m':'');
   const filename = 'Paramo_' + dateStr + '_' + Math.round(maxTemp_c) + 'C_' + durStr + '.json';
-  // Upload via Drive API using stored token
   const boundary = 'paramo_boundary';
-  const meta = JSON.stringify({ name: filename, parents: [folderId] });
-  const body = JSON.stringify(payload, null, 2);
-  const multipart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+  const multipart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:filename,parents:[folderId]})}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(payload,null,2)}\r\n--${boundary}--`;
+  showUploadToast('Uploading…', 'ok');
   fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':`multipart/related; boundary=${boundary}`},
     body: multipart
   }).then(res => {
-    if (res.ok) {
-      log('Uploaded to Google Drive: ' + filename, 'ok');
-    } else if (res.status === 401) {
-      localStorage.removeItem('paramo.drive.token');
-      log('Drive session expired — reconnect in Journal', 'warn');
-      window.open('journal.html', '_blank');
-    } else {
-      log('Drive upload failed — try again', 'err');
-    }
-  }).catch(() => log('Drive upload error — check connection', 'err'));
+    if (res.ok) { showUploadToast('✓ Uploaded to Drive', 'ok'); log('Uploaded to Google Drive: '+filename, 'ok'); }
+    else if (res.status === 401) { localStorage.removeItem('paramo.drive.token'); showUploadToast('Session expired — reconnect in Journal', 'err'); window.open('journal.html','_blank'); }
+    else { showUploadToast('Upload failed — try again', 'err'); }
+  }).catch(() => showUploadToast('Upload error — check connection', 'err'));
 }
 
 function openNoteModal() {
