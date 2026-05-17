@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Páramo — Info</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Roboto+Mono:wght@100;200;300&display=swap" rel="stylesheet">
+<style>
+/* ── THEME — identical tokens to dashboard ── */
+:root {
+  --bg:        #f4f1ed;
+  --surface:   rgba(255,255,255,0.55);
+  --surface2:  rgba(255,255,255,0.78);
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.14);
+  --text:      #0f0d08;
+  --text-soft: #2a2620;
+  --muted:     #635b50;
+  --dimmer:    #9a9286;
+  --c-orange:  #ff4800;
+  --c-magenta: #de00ff;
+  --c-indigo:  #3d3dff;
+  --c-azure:   #007cf0;
+  --accent:    #d8421a;
+  --mono:      'DM Mono', monospace;
+  --serif:     'Fraunces', serif;
+  --input-bg:  rgba(255,255,255,0.65);
+}
+body.dark {
+  --bg:        #14110d;
+  --surface:   rgba(48,42,32,0.65);
+  --surface2:  rgba(58,50,38,0.85);
+  --border:    rgba(255,255,255,0.10);
+  --border2:   rgba(255,255,255,0.20);
+  --text:      #fff8e8;
+  --text-soft: #e8e0d0;
+  --muted:     #b8b0a0;
+  --dimmer:    #807868;
+  --c-orange:  #ff7040;
+  --c-magenta: #ff60ff;
+  --c-indigo:  #8080ff;
+  --c-azure:   #5cb8ff;
+  --accent:    #ff7040;
+  --input-bg:  rgba(255,255,255,0.06);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── LAYOUT ── */
+.stage {
+  position: relative; z-index: 2;
+  width: 100%;
+  height: 100vh;
+  height: 100svh; /* safe viewport — respects browser chrome on iOS/iPad */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+
+/* ── BACKGROUND CANVAS ── */
+#blob-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── NOISE OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025; pointer-events: none; z-index: 1;
+}
+
+/* ── GLASS PANEL ── */
+.panel {
+  width: 100%;
+  max-width: 780px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 28px;
+  backdrop-filter: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.10),
+    0 2px 12px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.55);
+
+  /* Entry animation */
+  opacity: 0;
+  transform: scale(0.96) translateY(12px);
+  animation: panelIn 0.45s cubic-bezier(.16,1,.3,1) 0.05s forwards;
+}
+body.dark .panel {
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.35),
+    0 2px 12px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+@keyframes panelIn {
+  to { opacity: 1; transform: none; }
+}
+
+/* ── PANEL HEADER ── */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 26px 0;
+  flex-shrink: 0;
+}
+
+.panel-wordmark {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 1.1rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.panel-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-decoration: none;
+  transition: color 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  padding: 0;
+}
+.panel-back:hover { color: var(--text); }
+.panel-back::before { content: '←'; font-size: 0.8rem; }
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 20px 26px 0;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: var(--r-pill, 999px);
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(.16,1,.3,1);
+  white-space: nowrap;
+}
+.tab-btn:hover {
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+.tab-btn.active {
+  color: var(--text);
+  background: var(--surface2);
+  border-color: var(--border2);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+body.dark .tab-btn.active {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+.tab-icon { font-size: 0.85rem; }
+
+/* ── DIVIDER ── */
+.panel-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 26px 0;
+  flex-shrink: 0;
+}
+
+/* ── CONTENT AREA ── */
+.panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 32px 36px 36px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.panel-body::-webkit-scrollbar { width: 4px; }
+.panel-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── TAB PANE ── */
+.tab-pane {
+  display: none;
+  animation: paneIn 0.3s cubic-bezier(.16,1,.3,1);
+}
+.tab-pane.active { display: block; }
+
+@keyframes paneIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── TYPOGRAPHY inside panes ── */
+.pane-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 2.4rem;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.pane-sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+}
+
+.pane-lead {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-soft);
+  margin-bottom: 28px;
+  max-width: 56ch;
+}
+
+/* ── PLACEHOLDER BLOCKS ── */
+.placeholder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.placeholder-grid.single { grid-template-columns: 1fr; }
+.placeholder-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+.ph-block {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ph-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.ph-value {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.ph-line {
+  height: 10px;
+  background: var(--border2);
+  border-radius: 5px;
+  margin-bottom: 7px;
+  opacity: 0.5;
+}
+.ph-line.short { width: 60%; }
+.ph-line.med   { width: 80%; }
+.ph-line:last-child { margin-bottom: 0; }
+
+/* ── GRADIENT RULE ── */
+.grad-rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2) 20%, var(--border2) 80%, transparent);
+  margin: 28px 0;
+}
+
+/* ── LICENCE MONO BLOCK ── */
+.licence-block {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.75;
+  color: var(--muted);
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  white-space: pre-wrap;
+}
+
+/* ── GUIDE STEPS ── */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  padding-top: 2px;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.step-body { flex: 1; }
+.step-title {
+  font-size: 0.82rem;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+.step-desc {
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ── CONTACT FIELDS placeholder ── */
+.contact-field {
+  margin-bottom: 12px;
+}
+.contact-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+  display: block;
+}
+.contact-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.contact-input:focus { border-color: var(--accent); }
+.contact-input[data-placeholder] { color: var(--dimmer); pointer-events: none; }
+textarea.contact-input { resize: none; height: 90px; }
+
+.contact-btn {
+  width: 100%;
+  padding: 11px;
+  background: linear-gradient(135deg, var(--c-orange), var(--c-magenta), var(--c-azure));
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: not-allowed;
+  margin-top: 4px;
+  opacity: 0.55;
+}
+
+/* ── THEME TOGGLE ── */
+.theme-btn {
+  position: fixed;
+  top: 20px; right: 22px;
+  z-index: 10;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 1rem;
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  line-height: 1;
+  transition: background 0.15s;
+}
+.theme-btn:hover { background: var(--input-bg); }
+
+/* ── MOBILE ── */
+@media (max-width: 1024px) and (min-width: 601px) {
+  .stage { padding: 24px 20px; }
+}
+
+@media (max-width: 600px) {
+  .stage { padding: 16px 12px; justify-content: flex-start; padding-top: 60px; }
+  .panel { border-radius: 20px; max-height: none; }
+  .panel-body { padding: 24px 20px 28px; }
+  .panel-header { padding: 16px 20px 0; }
+  .tab-bar { padding: 16px 20px 0; gap: 3px; overflow-x: auto; }
+  .tab-btn { padding: 6px 12px; font-size: 0.66rem; }
+  .panel-divider { margin: 12px 20px 0; }
+  .pane-title { font-size: 1.8rem; }
+  .placeholder-grid { grid-template-columns: 1fr; }
+  .placeholder-grid.triple { grid-template-columns: 1fr; }
+  html, body { overflow-y: auto; height: auto; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="blob-canvas"></canvas>
+
+<button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☽</button>
+
+<div class="stage">
+  <div class="panel" id="panel">
+
+    <!-- HEADER -->
+    <div class="panel-header">
+      <span class="panel-wordmark">Páramo</span>
+      <a class="panel-back" href="javascript:window.close()" title="Back to monitor">Kiln monitor</a>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn" data-tab="contact" onclick="switchTab('contact')">
+        <span class="tab-icon">✉</span> Contact
+      </button>
+      <button class="tab-btn" data-tab="guide" onclick="switchTab('guide')">
+        <span class="tab-icon">◎</span> Guide
+      </button>
+      <button class="tab-btn" data-tab="licence" onclick="switchTab('licence')">
+        <span class="tab-icon">⊙</span> Licence
+      </button>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- BODY -->
+    <div class="panel-body">
+
+      <!-- ── CONTACT ── -->
+      <div class="tab-pane" id="pane-contact">
+        <div class="pane-title">Contact</div>
+        <div class="pane-sub">Get in touch</div>
+        <p class="pane-lead">
+          Have a question about Páramo, want to collaborate, or found a bug?
+          Reach out — this space is reserved for the right words.
+        </p>
+
+        <div class="placeholder-grid single">
+          <div class="ph-block">
+            <div class="ph-label">Direct</div>
+            <div class="ph-value" style="color:var(--dimmer);font-style:italic;">
+              hello@example.com — placeholder
+            </div>
+          </div>
+        </div>
+
+        <div class="grad-rule"></div>
+
+        <div class="contact-field">
+          <label class="contact-label">Name</label>
+          <input class="contact-input" data-placeholder value="Your name — coming soon" readonly/>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label">Email</label>
+          <input class="contact-input" data-placeholder value="your@email.com — coming soon" readonly/>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label">Message</label>
+          <textarea class="contact-input" data-placeholder readonly>Your message — coming soon</textarea>
+        </div>
+        <button class="contact-btn" disabled>Send message — coming soon</button>
+      </div>
+
+      <!-- ── GUIDE ── -->
+      <div class="tab-pane" id="pane-guide">
+        <div class="pane-title">Guide</div>
+        <div class="pane-sub">Setup & usage</div>
+        <p class="pane-lead">
+          Páramo connects to your kiln's ESP32 over MQTT.
+          Below you'll find setup instructions, connection details, and usage notes.
+          Full documentation coming soon.
+        </p>
+
+        <div class="step-list">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <div class="step-title">Configure your ESP32</div>
+              <div class="step-desc">Flash the Páramo firmware and set your WiFi credentials. The ESP32 will publish temperature data to the MQTT broker at regular intervals. — placeholder</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <div class="step-title">Set up a HiveMQ broker</div>
+              <div class="step-desc">Create a free account at HiveMQ Cloud. Copy your cluster host, username, and password into the Connection panel in the sidebar. — placeholder</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <div class="step-title">Connect & monitor</div>
+              <div class="step-desc">Hit Connect. The status pills in the header will turn green when both the MQTT server and kiln are reachable. Your firing data starts streaming. — placeholder</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <div class="step-title">Set thresholds & firing mode</div>
+              <div class="step-desc">Use the Alarm Threshold card to receive an alert when a target temperature is reached. Select a firing mode to overlay a reference ramp curve on the chart. — placeholder</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">05</div>
+            <div class="step-body">
+              <div class="step-title">Export your session</div>
+              <div class="step-desc">When the firing is complete, export the chart as JSON for archiving or analysis. Start a new firing session from the Session card. — placeholder</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grad-rule"></div>
+
+        <div class="placeholder-grid triple">
+          <div class="ph-block">
+            <div class="ph-label">MQTT topic — temp</div>
+            <div class="ph-value" style="font-size:0.76rem;color:var(--dimmer);">kiln/tc — placeholder</div>
+          </div>
+          <div class="ph-block">
+            <div class="ph-label">MQTT topic — history</div>
+            <div class="ph-value" style="font-size:0.76rem;color:var(--dimmer);">kiln/history — placeholder</div>
+          </div>
+          <div class="ph-block">
+            <div class="ph-label">Update interval</div>
+            <div class="ph-value" style="font-size:0.76rem;color:var(--dimmer);">~5 s — placeholder</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LICENCE ── -->
+      <div class="tab-pane" id="pane-licence">
+        <div class="pane-title">Licence</div>
+        <div class="pane-sub">Open source</div>
+        <p class="pane-lead">
+          Páramo is released under the MIT Licence.
+          You are free to use, modify, and distribute this software.
+          Credits and attributions below.
+        </p>
+
+        <div class="licence-block">MIT License
+
+Copyright (c) 2025 Páramo — placeholder
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</div>
+
+        <div class="grad-rule"></div>
+
+        <div class="placeholder-grid">
+          <div class="ph-block">
+            <div class="ph-label">Built with</div>
+            <div class="ph-value">
+              <div class="ph-line med"></div>
+              <div class="ph-line short"></div>
+              <div class="ph-line med"></div>
+            </div>
+          </div>
+          <div class="ph-block">
+            <div class="ph-label">Credits</div>
+            <div class="ph-value">
+              <div class="ph-line short"></div>
+              <div class="ph-line med"></div>
+              <div class="ph-line short"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.panel-body -->
+  </div><!-- /.panel -->
+</div><!-- /.stage -->
+
+<script>
+// ── THEME (syncs with dashboard localStorage key) ──────────────────
+const THEME_KEY = 'paramo.theme';
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  document.querySelector('.theme-btn').textContent = dark ? '○' : '☽';
+}
+function toggleTheme() {
+  const dark = !document.body.classList.contains('dark');
+  localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+  applyTheme(dark);
+}
+applyTheme(localStorage.getItem(THEME_KEY) === 'dark');
+
+// ── TABS ───────────────────────────────────────────────────────────
+const TABS = ['contact', 'guide', 'licence'];
+
+function switchTab(id, animate = true) {
+  if (!TABS.includes(id)) id = 'contact';
+  TABS.forEach(t => {
+    document.querySelector(`[data-tab="${t}"]`).classList.toggle('active', t === id);
+    const pane = document.getElementById('pane-' + t);
+    if (t === id) {
+      pane.classList.add('active');
+      // Re-trigger animation
+      if (animate) {
+        pane.style.animation = 'none';
+        requestAnimationFrame(() => { pane.style.animation = ''; });
+      }
+    } else {
+      pane.classList.remove('active');
+    }
+  });
+  // Update URL without reload
+  const url = new URL(window.location);
+  url.searchParams.set('tab', id);
+  history.replaceState(null, '', url);
+}
+
+// ── INIT: read ?tab= from URL ──────────────────────────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab') || 'contact';
+  switchTab(tab, false); // no animation on initial load (panel itself animates in)
+})();
+
+// ── BACKGROUND BLOBS (identical to dashboard) ──────────────────────
+(function(){
+  const cv = document.getElementById('blob-canvas');
+  const ctx = cv.getContext('2d');
+  function resize(){ cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  const blobs = [
+    { x: 0.05, y: 0.05, r: 0.50, c: '#ff4800', t: 0,    ax: 0.18, ay: 0.14 },
+    { x: 0.92, y: 0.85, r: 0.42, c: '#de00ff', t: 2.1,  ax: 0.14, ay: 0.18 },
+    { x: 0.55, y: 0.65, r: 0.36, c: '#007cf0', t: 4.2,  ax: 0.16, ay: 0.12 },
+    { x: 0.70, y: 0.15, r: 0.28, c: '#3d3dff', t: 1.1,  ax: 0.12, ay: 0.14 }
+  ];
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const W = cv.width, H = cv.height;
+    blobs.forEach(b => {
+      b.t += 0.006;
+      const x = (b.x + Math.sin(b.t * 1.1) * b.ax) * W;
+      const y = (b.y + Math.cos(b.t * 0.85) * b.ay) * H;
+      const r = b.r * Math.min(W, H);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0,   b.c + '40');
+      g.addColorStop(0.5, b.c + '1c');
+      g.addColorStop(1,   b.c + '00');
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
