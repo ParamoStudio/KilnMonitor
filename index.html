@@ -2358,6 +2358,7 @@ function newFiring(skipConfirm) {
     if (!confirm(msg)) return;
   }
   clearDatapoints();
+  localStorage.removeItem('paramo.note.' + activeKilnId);
   espDpCount = 0;
   if (connected) {
     mqttClient.publish('kiln/session/clear', '1');
@@ -3394,8 +3395,9 @@ function clearChartOnly() {
     ? 'Limpiar la gráfica?\n\n· Se borra el cache local.\n· Los puntos de la ESP32 se recargarán automáticamente si está conectada.'
     : 'Clear chart?\n\n· Local cache will be cleared.\n· ESP32 datapoints will reload automatically if connected.')) return;
   clearDatapoints();
+  localStorage.removeItem('paramo.note.' + activeKilnId);
   espDpCount = 0;
-  log('Chart cleared — reloading ESP datapoints…', 'warn');
+  log(t('log_cleared'), 'warn');
   updateMeta();
   // Request ESP to republish — ESP points reappear automatically
   if (mqttClient && mqttClient.connected) {
