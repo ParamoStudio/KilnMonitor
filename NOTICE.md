@@ -1,9 +1,9 @@
 # NOTICE — Páramo Kiln Monitor
 
-**Project:** Páramo Kiln Monitor  
-**Author:** Páramo Studio  
-**Repository:** https://github.com/ParamoStudio/KilnMonitor  
-**First public disclosure:** 17 May 2025  
+**Project:** Páramo Kiln Monitor 
+**Author:** Páramo Studio 
+**Repository:** https://github.com/ParamoStudio/KilnMonitor
+**First public disclosure:** 17 May 2026 
 **License:** GNU AGPL v3.0 (firmware, web application) · CERN-OHL-S v2.0 (hardware)
 
 ---
@@ -33,8 +33,7 @@ microcontroller family (specifically tested on ESP32-C6 Super Mini),
 integrating:
 
 - Thermocouple temperature acquisition via MAX31856 IC (SPI interface),
-  configured for Type S and Type K thermocouples with 50Hz mains noise
-  filtering for European 50Hz mains
+  configured for Type S and Type K thermocouples.
 - Cold junction compensation handled in hardware by the MAX31856
 - Real-time temperature telemetry published over MQTT (TLS, port 8883) to a
   cloud broker, with WebSocket bridge (port 8884) for browser clients
@@ -64,7 +63,7 @@ Features include:
 - Live temperature chart with historical overlay
 - Firing profile visualisation and ramp rate analysis
 - Per-mode behavioural thresholds (Bisque, Glaze, Crystalline, Raku)
-- Browser-dispatched Telegram notifications for behavioural/ramp alerts
+- Microcontroller-dispatched notifications for temperature alerts
 - Full state reconstructed from retained MQTT topics on subscribe
 
 **Firmware architecture**
@@ -80,14 +79,14 @@ updates. Main .ino entry point contains only setup() and loop().
 A system specifically designed for extending the operational lifespan of
 older electric ceramic kilns and for modernising wood, gas, or custom-built
 kilns through low-cost open hardware and a lightweight web-based firing
-interface. Anti-obsolescence, DIY-maintainable, and fully independent of
-proprietary cloud services, vendor lock-in, or subscription models.
+interface. Anti-obsolescence, DIY-maintainable, and as independent of
+proprietary cloud services as possible, vendor lock-in, or subscription models.
 
 ---
 
 ## Copyright notice
 
-Copyright (C) 2025 Páramo Studio
+Copyright (C) 2026 Páramo Studio
 
 This project and all its components are released under free and open source
 licenses as described in the LICENSE file at the root of this repository
