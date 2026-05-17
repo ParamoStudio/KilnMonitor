@@ -900,7 +900,7 @@ async function loadLang(code) {
 
 async function initLang() {
   try {
-    const res = await fetch(LANG_BASE_URL + 'manifest.json');
+    const res = await fetch(LANG_BASE_URL + '/Lang/manifest.json');
     if (res.ok) {
       const d = await res.json();
       if (Array.isArray(d)) LANG_MANIFEST = d;
