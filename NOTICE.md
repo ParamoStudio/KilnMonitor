@@ -1,9 +1,13 @@
 # NOTICE — Páramo Kiln Monitor
 
 **Project:** Páramo Kiln Monitor 
+
 **Author:** Páramo Studio 
+
 **Repository:** https://github.com/ParamoStudio/KilnMonitor
+
 **First public disclosure:** 17 May 2026 
+
 **License:** GNU AGPL v3.0 (firmware, web application) · CERN-OHL-S v2.0 (hardware)
 
 ---
