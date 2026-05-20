@@ -139,7 +139,7 @@ body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2)
 .overlay-chart{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;height:220px;position:relative;overflow:hidden;flex-shrink:0;}
 .overlay-chart canvas{width:100%;height:100%;}
 .overlay-chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--dimmer);letter-spacing:.14em;text-transform:uppercase;}
-.overlay-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.overlay-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .stat-block{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
 .stat-label{font-size:.58rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dimmer);margin-bottom:4px;}
 .stat-value{font-size:.92rem;color:var(--text);font-weight:500;}
@@ -294,6 +294,8 @@ body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2)
         <div class="stat-block"><div class="stat-label" id="str-stat-dur">Duration</div><div class="stat-value" id="stat-duration">—</div></div>
         <div class="stat-block"><div class="stat-label" id="str-stat-pts">Datapoints</div><div class="stat-value" id="stat-points">—</div></div>
         <div class="stat-block"><div class="stat-label" id="str-stat-mode">Firing type</div><div class="stat-value" id="stat-mode">—</div></div>
+        <div class="stat-block"><div class="stat-label" id="str-stat-energy">Energy</div><div class="stat-value" id="stat-energy">—</div></div>
+        <div class="stat-block"><div class="stat-label" id="str-stat-cost">Cost</div><div class="stat-value" id="stat-cost">—</div></div>
       </div>
       <div class="overlay-note">
         <div class="overlay-note-label" id="str-notes-label">Notes</div>
@@ -353,6 +355,7 @@ const STRINGS = {
     importLabel:'↑ Import', localHint:'Local', loadFilesMenu:'↓ Load files', cloudHint:'Cloud', connectDrive:'☁ Connect Google Drive',
     backBtn:'← Kiln monitor', noCloud:'No cloud',
     statMaxTemp:'Max temp', statDuration:'Duration', statPoints:'Datapoints', statMode:'Firing type',
+    statEnergy:'Energy', statCost:'Cost',
     notesLabel:'Notes', sharePng:'↓ Share chart (PNG)', noDatapoints:'No datapoints',
     contact:'Contact', guide:'Guide', licence:'Licence',
   },
@@ -365,6 +368,7 @@ const STRINGS = {
     importLabel:'↑ Importar', localHint:'Local', loadFilesMenu:'↓ Cargar archivos', cloudHint:'Nube', connectDrive:'☁ Conectar Google Drive',
     backBtn:'←', noCloud:'Sin nube',
     statMaxTemp:'Temp. máx.', statDuration:'Duración', statPoints:'Puntos', statMode:'Tipo',
+    statEnergy:'Energía', statCost:'Coste',
     notesLabel:'Notas', sharePng:'↓ Compartir gráfica (PNG)', noDatapoints:'Sin datos',
     contact:'Contacto', guide:'Guía', licence:'Licencia',
   }
@@ -399,6 +403,8 @@ function _applyStrings(s) {
   set('str-stat-dur',   t('statDuration'));
   set('str-stat-pts',   t('statPoints'));
   set('str-stat-mode',  t('statMode'));
+  set('str-stat-energy',t('statEnergy'));
+  set('str-stat-cost',  t('statCost'));
   set('str-notes-label',t('notesLabel'));
   set('str-share-png',  t('sharePng'));
   const sel = document.getElementById('f-mode');
@@ -716,6 +722,32 @@ function openOverlay(firing) {
   document.getElementById('stat-duration').textContent=dur;
   document.getElementById('stat-points').textContent=(firing.datapoints||[]).length;
   document.getElementById('stat-mode').textContent=m.modeLabel||m.mode||'—';
+
+  // Energy & cost — only shown if the firing JSON includes an energy block
+  const e = m.energy;
+  const eEl = document.getElementById('stat-energy');
+  const cEl = document.getElementById('stat-cost');
+  if (e && typeof e.energyTotal_wh === 'number' && e.energyTotal_wh > 0) {
+    const kWh = e.energyTotal_wh / 1000;
+    eEl.textContent = kWh < 1 ? (e.energyTotal_wh.toFixed(0) + ' Wh') : (kWh.toFixed(2) + ' kWh');
+    if (typeof e.pricePerKwh === 'number' && e.pricePerKwh > 0) {
+      const cost = kWh * e.pricePerKwh;
+      const cur = e.currency || 'EUR';
+      try {
+        cEl.textContent = new Intl.NumberFormat(undefined, {
+          style: 'currency', currency: cur, maximumFractionDigits: 2
+        }).format(cost);
+      } catch(_) {
+        cEl.textContent = cost.toFixed(2) + ' ' + cur;
+      }
+    } else {
+      cEl.textContent = '—';
+    }
+  } else {
+    eEl.textContent = '—';
+    cEl.textContent = '—';
+  }
+
   document.getElementById('overlay-note-text').textContent=m.note||'—';
   document.querySelector('.overlay-note').style.opacity=m.note?'1':'0.4';
   drawOverlayChart(firing.datapoints||[]);
