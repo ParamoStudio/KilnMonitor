@@ -2402,7 +2402,9 @@ function connectMqtt() {
         if (mqttClient && mqttClient.connected)
           mqttClient.publish('kiln/history/request', '1');
       }, 1500); });
-    mqttClient.subscribe('shellies/#');  // wildcard — captures any Ogemray on this broker
+    mqttClient.subscribe('shellies/#');  // power/snapshot from paramo script
+    mqttClient.subscribe('+/status/switch:0');  // relay status
+    mqttClient.subscribe('+/events/rpc');        // relay events
   });
   mqttClient.on('message', onMqttMessage);
   mqttClient.on('error', (e) => { log(t('log_mqttError').replace('{msg}', e.message), 'err'); });
@@ -2502,17 +2504,25 @@ function onMqttMessage(topic, payload) {
     } catch(e) { log('Could not parse kiln/history: ' + e.message, 'err'); }
   }
   else if (topic.startsWith('shellies/')) {
-    // Auto-detect device ID from first incoming message (persisted for RPC replies)
+    // power/snapshot published by the paramo script (uses shellies/ prefix)
     const parts = topic.split('/');
-    if (parts[1] && parts[1] !== relayDeviceId) {
-      relayDeviceId = parts[1];
-      localStorage.setItem('paramo.relayDeviceId', relayDeviceId);
-    }
-    const suffix = '/' + parts.slice(2).join('/');
-    if (suffix === '/events/rpc' || suffix === '/status/switch:0') {
-      handleRelayConfirm(v);
-    } else if (suffix === '/power/snapshot') {
+    if (parts.slice(2).join('/') === 'power/snapshot') {
       handlePowerSnapshot(v);
+    }
+  }
+  else if (relayDeviceId && topic.startsWith(relayDeviceId + '/')) {
+    // Status and events use plain <device_id>/ prefix (no shellies/)
+    const suffix = topic.slice(relayDeviceId.length);
+    if (suffix === '/status/switch:0' || suffix === '/events/rpc') {
+      handleRelayConfirm(v);
+    }
+  }
+  else if (!relayDeviceId && !topic.startsWith('kiln/')) {
+    // Auto-detect device ID from first non-kiln message before we know the ID
+    const parts = topic.split('/');
+    if (parts.length >= 2 && (parts[1] === 'status' || parts[1] === 'events')) {
+      relayDeviceId = parts[0];
+      localStorage.setItem('paramo.relayDeviceId', relayDeviceId);
     }
   }
 }
@@ -2749,7 +2759,8 @@ let relayState = 'unknown';
 let relayDeviceId = localStorage.getItem('paramo.relayDeviceId') || null;
 
 function relayTopic(suffix) {
-  return 'shellies/' + (relayDeviceId || '+') + suffix;
+  // topic_prefix = device_id (no shellies/ prefix — that's only in the power snapshot script)
+  return (relayDeviceId || '+') + suffix;
 }
 function saveRelayCfg() { /* no-op — device ID is auto-detected from incoming messages */ }
 
@@ -2759,12 +2770,20 @@ function relayToggle() {
   const msg = turningOn ? t('confirm_relayOn') || 'Turn kiln ON? The relay will close and power the kiln.'
                         : t('confirm_relayOff') || 'Turn kiln OFF? The relay will open and cut kiln power.';
   if (!confirm(msg)) return;
-  mqttClient.publish(relayTopic('/rpc'), JSON.stringify({
-    id: Date.now(), src: 'paramo-web',
-    method: 'Switch.Set', params: { id: 0, on: turningOn }
-  }));
-  setRelayUI('pending');
+  // MQTT Control interface: plain text on/off to <prefix>/command/switch:0
+  mqttClient.publish(relayTopic('/command/switch:0'), turningOn ? 'on' : 'off');
+  // Optimistic update — UI changes immediately, reverts if no confirmation in 8s
+  const optimisticState = turningOn ? 'on' : 'off';
+  setRelayUI(optimisticState);
   log(t('log_relayCmd'), 'ok');
+  const optimisticTs = Date.now();
+  setTimeout(() => {
+    // If state hasn't been confirmed by a real message, revert to unknown
+    if (relayState === optimisticState && optimisticTs > (window._lastRelayConfirmTs || 0)) {
+      setRelayUI('unknown');
+      log(t('log_relayTimeout'), 'warn');
+    }
+  }, 8000);
 }
 function setRelayUI(state) {
   relayState = state;
@@ -2775,10 +2794,10 @@ function setRelayUI(state) {
   val.className = 'relay-status-val';
   btn.disabled = false;
   if (state === 'on') {
-    btn.classList.add('action-off'); btn.textContent = t('turnOff');
+    btn.classList.add('action-off'); btn.textContent = t('turnOff') || '◌ Turn off';
     val.classList.add('confirmed-on'); val.textContent = t('relayOn') || 'On';
   } else if (state === 'off') {
-    btn.classList.add('action-on'); btn.textContent = t('turnOn');
+    btn.classList.add('action-on'); btn.textContent = t('turnOn') || '◉ Turn on';
     val.classList.add('confirmed-off'); val.textContent = t('relayOff') || 'Off';
   } else if (state === 'pending') {
     btn.classList.add('action-pending'); btn.textContent = '⋯ Pending';
@@ -2791,19 +2810,26 @@ function setRelayUI(state) {
       }
     }, 8000);
   } else {
-    btn.textContent = '◌ Turn on'; val.textContent = '—';
+    btn.textContent = t('turnOn') || '◉ Turn on'; val.textContent = '—';
   }
 }
 function handleRelayConfirm(payload) {
   try {
     const msg = JSON.parse(payload);
     let output = null;
-    if (msg.result && typeof msg.result.output === 'boolean') output = msg.result.output;
+    // status/switch:0 — output at root level: {"id":0,"output":true,"apower":...}
+    if (typeof msg.output === 'boolean') output = msg.output;
+    // events/rpc NotifyStatus — {"params":{"switch:0":{"output":true,...}}}
     else if (msg.params && msg.params['switch:0'] && typeof msg.params['switch:0'].output === 'boolean')
       output = msg.params['switch:0'].output;
+    // RPC response — {"result":{"output":true}}
+    else if (msg.result && typeof msg.result.output === 'boolean') output = msg.result.output;
     if (output !== null) {
-      setRelayUI(output ? 'on' : 'off');
-      log(output ? t('log_relayOn') : t('log_relayOff'), 'ok');
+      window._lastRelayConfirmTs = Date.now();
+      const newState = output ? 'on' : 'off';
+      const changed = (newState !== relayState);
+      setRelayUI(newState);
+      if (changed) log(output ? t('log_relayOn') : t('log_relayOff'), 'ok');
     }
   } catch(e) {}
 }
@@ -3911,8 +3937,8 @@ const STRINGS = {
     newFiring: 'New firing',
     clearChart: 'Clear chart',
     resetCfg: 'Reset configuration',
-    turnOn: '◉ Turn on',
-    turnOff: '◌ Turn off',
+    turnOn: '◌ Turn on',
+    turnOff: '◉ Turn off',
     futurePh: 'future · placeholder',
     set: 'Set',
     waitingData: 'Waiting for data…',
@@ -4013,8 +4039,8 @@ const STRINGS = {
     newFiring: 'Nueva horneada',
     clearChart: 'Limpiar gráfica',
     resetCfg: 'Reset configuración',
-    turnOn: '◉ Encender',
-    turnOff: '◌ Apagar',
+    turnOn: '◌ Encender',
+    turnOff: '◉ Apagar',
     futurePh: 'futuro · placeholder',
     set: 'Aplicar',
     waitingData: 'Esperando datos…',
