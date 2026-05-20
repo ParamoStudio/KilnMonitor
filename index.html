@@ -2805,7 +2805,8 @@ let fxFetched = false;
 
 function fetchFxRates() {
   if (fxFetched) return Promise.resolve();
-  return fetch('https://api.frankfurter.app/latest?from=EUR')
+  // exchangerate-api.com open endpoint — no key, CORS-friendly
+  return fetch('https://open.er-api.com/v6/latest/EUR')
     .then(r => r.json())
     .then(data => {
       if (data && data.rates) {
