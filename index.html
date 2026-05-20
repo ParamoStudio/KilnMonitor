@@ -2405,6 +2405,13 @@ function connectMqtt() {
     mqttClient.subscribe('shellies/#');  // power/snapshot from paramo script
     mqttClient.subscribe('+/status/switch:0');  // relay status
     mqttClient.subscribe('+/events/rpc');        // relay events
+    // Request immediate status from Ogemray so UI reflects real state on connect
+    if (relayDeviceId) {
+      setTimeout(() => {
+        if (mqttClient && mqttClient.connected)
+          mqttClient.publish(relayDeviceId + '/command', 'status_update');
+      }, 1500);
+    }
   });
   mqttClient.on('message', onMqttMessage);
   mqttClient.on('error', (e) => { log(t('log_mqttError').replace('{msg}', e.message), 'err'); });
@@ -2523,6 +2530,9 @@ function onMqttMessage(topic, payload) {
     if (parts.length >= 2 && (parts[1] === 'status' || parts[1] === 'events')) {
       relayDeviceId = parts[0];
       localStorage.setItem('paramo.relayDeviceId', relayDeviceId);
+      // Now that we know the ID, request immediate status
+      if (mqttClient && mqttClient.connected)
+        mqttClient.publish(relayDeviceId + '/command', 'status_update');
     }
   }
 }
@@ -2777,6 +2787,7 @@ function relayToggle() {
   setRelayUI(optimisticState);
   log(t('log_relayCmd'), 'ok');
   const optimisticTs = Date.now();
+  window._relayCmdTs = optimisticTs; // suppress echo logs for 3s after command
   setTimeout(() => {
     // If state hasn't been confirmed by a real message, revert to unknown
     if (relayState === optimisticState && optimisticTs > (window._lastRelayConfirmTs || 0)) {
@@ -2829,7 +2840,9 @@ function handleRelayConfirm(payload) {
       const newState = output ? 'on' : 'off';
       const changed = (newState !== relayState);
       setRelayUI(newState);
-      if (changed) log(output ? t('log_relayOn') : t('log_relayOff'), 'ok');
+      // Suppress log for 3s after command to avoid echo from optimistic update
+      const suppressLog = (Date.now() - (window._relayCmdTs || 0)) < 3000;
+      if (changed && !suppressLog) log(output ? t('log_relayOn') : t('log_relayOff'), 'ok');
     }
   } catch(e) {}
 }
