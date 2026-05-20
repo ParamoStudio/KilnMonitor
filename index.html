@@ -818,7 +818,7 @@ body::after {
 }
 .energy-val.stale { color: var(--dimmer); }
 
-/* ── PRICE ROW — input + currency selector ── */
+/* ── PRICE ROW — input + currency trigger ── */
 .price-row {
   display: flex;
   gap: 6px;
@@ -830,20 +830,32 @@ body::after {
 .price-row select {
   width: 72px;
   flex-shrink: 0;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  padding: 0 6px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  text-align: center;
 }
-.price-row select:hover { border-color: var(--border2); }
-.price-row select:focus { outline: none; border-color: var(--accent); }
+
+/* ── CURRENCY MENU — 3-column grid ── */
+.hdd-menu-grid {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 6px;
+  min-width: 192px;
+}
+.hdd-menu-grid.open { display: grid !important; }
+.hdd-menu-grid .cur-item {
+  display: block;
+  text-align: center;
+  padding: 7px 4px;
+  font-size: 0.72rem;
+  border-radius: 7px;
+}
+.hdd-menu-grid .cur-item.active::after {
+  display: none;
+}
+.hdd-menu-grid .cur-item.active {
+  background: var(--input-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
 
 /* ── EVENT LOG ── */
 .log {
@@ -1527,6 +1539,32 @@ body.dark .log-fab {
   <button class="hdd-item" id="hdd-unit-C" onclick="hddSetUnit('C')">&#176;C</button>
   <button class="hdd-item" id="hdd-unit-F" onclick="hddSetUnit('F')">&#176;F</button>
 </div>
+<div class="hdd-menu hdd-menu-grid" id="hdd-currency-menu" role="menu" style="display:none;grid-template-columns:repeat(3,1fr);min-width:200px;padding:6px;gap:2px;">
+  <button class="hdd-item cur-item" id="hdd-cur-EUR" onclick="hddSetCurrency('EUR')">EUR</button>
+  <button class="hdd-item cur-item" id="hdd-cur-USD" onclick="hddSetCurrency('USD')">USD</button>
+  <button class="hdd-item cur-item" id="hdd-cur-GBP" onclick="hddSetCurrency('GBP')">GBP</button>
+  <button class="hdd-item cur-item" id="hdd-cur-JPY" onclick="hddSetCurrency('JPY')">JPY</button>
+  <button class="hdd-item cur-item" id="hdd-cur-CHF" onclick="hddSetCurrency('CHF')">CHF</button>
+  <button class="hdd-item cur-item" id="hdd-cur-CAD" onclick="hddSetCurrency('CAD')">CAD</button>
+  <button class="hdd-item cur-item" id="hdd-cur-AUD" onclick="hddSetCurrency('AUD')">AUD</button>
+  <button class="hdd-item cur-item" id="hdd-cur-CNY" onclick="hddSetCurrency('CNY')">CNY</button>
+  <button class="hdd-item cur-item" id="hdd-cur-BRL" onclick="hddSetCurrency('BRL')">BRL</button>
+  <button class="hdd-item cur-item" id="hdd-cur-MXN" onclick="hddSetCurrency('MXN')">MXN</button>
+  <button class="hdd-item cur-item" id="hdd-cur-SEK" onclick="hddSetCurrency('SEK')">SEK</button>
+  <button class="hdd-item cur-item" id="hdd-cur-NOK" onclick="hddSetCurrency('NOK')">NOK</button>
+  <button class="hdd-item cur-item" id="hdd-cur-DKK" onclick="hddSetCurrency('DKK')">DKK</button>
+  <button class="hdd-item cur-item" id="hdd-cur-PLN" onclick="hddSetCurrency('PLN')">PLN</button>
+  <button class="hdd-item cur-item" id="hdd-cur-CZK" onclick="hddSetCurrency('CZK')">CZK</button>
+  <button class="hdd-item cur-item" id="hdd-cur-HUF" onclick="hddSetCurrency('HUF')">HUF</button>
+  <button class="hdd-item cur-item" id="hdd-cur-TRY" onclick="hddSetCurrency('TRY')">TRY</button>
+  <button class="hdd-item cur-item" id="hdd-cur-KRW" onclick="hddSetCurrency('KRW')">KRW</button>
+  <button class="hdd-item cur-item" id="hdd-cur-SGD" onclick="hddSetCurrency('SGD')">SGD</button>
+  <button class="hdd-item cur-item" id="hdd-cur-HKD" onclick="hddSetCurrency('HKD')">HKD</button>
+  <button class="hdd-item cur-item" id="hdd-cur-NZD" onclick="hddSetCurrency('NZD')">NZD</button>
+  <button class="hdd-item cur-item" id="hdd-cur-ZAR" onclick="hddSetCurrency('ZAR')">ZAR</button>
+  <button class="hdd-item cur-item" id="hdd-cur-INR" onclick="hddSetCurrency('INR')">INR</button>
+</div>
+
 <div class="hdd-menu" id="hdd-cfg-menu" role="menu">
   <div class="hdd-label" id="str-cfg-label">Configuration</div>
   <button class="hdd-item" id="str-cfg-export" onclick="hddCfgExport()">&#8593; Export config</button>
@@ -1789,31 +1827,12 @@ body.dark .log-fab {
               <label id="str-price-kwh-label">Avg. price per kWh</label>
               <div class="price-row">
                 <input id="price-kwh" type="number" step="0.0001" min="0" placeholder="0.1500" oninput="savePriceKwh()"/>
-                <select id="price-currency" onchange="onCurrencyChange()">
-                  <option value="EUR">EUR</option>
-                  <option value="USD">USD</option>
-                  <option value="GBP">GBP</option>
-                  <option value="JPY">JPY</option>
-                  <option value="CHF">CHF</option>
-                  <option value="CAD">CAD</option>
-                  <option value="AUD">AUD</option>
-                  <option value="CNY">CNY</option>
-                  <option value="BRL">BRL</option>
-                  <option value="MXN">MXN</option>
-                  <option value="SEK">SEK</option>
-                  <option value="NOK">NOK</option>
-                  <option value="DKK">DKK</option>
-                  <option value="PLN">PLN</option>
-                  <option value="CZK">CZK</option>
-                  <option value="HUF">HUF</option>
-                  <option value="TRY">TRY</option>
-                  <option value="KRW">KRW</option>
-                  <option value="SGD">SGD</option>
-                  <option value="HKD">HKD</option>
-                  <option value="NZD">NZD</option>
-                  <option value="ZAR">ZAR</option>
-                  <option value="INR">INR</option>
-                </select>
+                <div class="hdd-wrap" id="hdd-currency-wrap" style="flex-shrink:0;">
+                  <button class="hdd-trigger" id="hdd-currency-btn" onclick="hddToggle('currency')" aria-haspopup="true" aria-expanded="false" style="padding:5px 9px;font-size:0.75rem;">
+                    <span id="hdd-currency-label">EUR</span>
+                    <span class="hdd-chevron">&#8964;</span>
+                  </button>
+                </div>
               </div>
             </div>
             <div class="energy-note" id="str-energy-note">Saved per firing — used in Journal to estimate cost.</div>
@@ -2008,6 +2027,7 @@ function hddToggle(id) {
     const menu = document.getElementById('hdd-' + id + '-menu');
     const rect = btn.getBoundingClientRect();
     menu.classList.add('open');
+    if (id === 'currency') menu.style.display = 'grid';
     const menuW = menu.offsetWidth || 180;
     const menuH = menu.offsetHeight || 120;
     // Kiln + Export dropdowns: open below, aligned to button left
@@ -2025,11 +2045,14 @@ function hddToggle(id) {
 }
 
 function hddCloseAll() {
-  ['lang','unit','cfg','kiln','export'].forEach(id => {
+  ['lang','unit','cfg','kiln','export','currency'].forEach(id => {
     const menu = document.getElementById('hdd-' + id + '-menu');
     const btnId = (id === 'export') ? 'str-export-firing' : ('hdd-' + id + '-btn');
     const btn  = document.getElementById(btnId);
-    if (menu) { menu.classList.remove('open'); }
+    if (menu) {
+      menu.classList.remove('open');
+      if (id === 'currency') menu.style.display = 'none';
+    }
     if (btn)  { btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
   });
 }
@@ -2833,16 +2856,33 @@ function fromEUR(eurAmount) {
 }
 
 (function initCurrencyUI() {
-  const sel = document.getElementById('price-currency');
-  if (sel) {
-    sel.value = selectedCurrency;
-    // If stored value doesn't match any option, default to EUR
-    if (sel.value !== selectedCurrency) { sel.value = 'EUR'; selectedCurrency = 'EUR'; }
-  }
+  // Set the trigger label
+  const lbl = document.getElementById('hdd-currency-label');
+  if (lbl) lbl.textContent = selectedCurrency;
+  // Mark active item
+  const activeBtn = document.getElementById('hdd-cur-' + selectedCurrency);
+  if (activeBtn) activeBtn.classList.add('active');
   const i = document.getElementById('price-kwh');
   if (i && pricePerKwh != null) i.value = pricePerKwh;
   fetchFxRates();
 })();
+
+function hddSetCurrency(cur) {
+  // Remove active from previous
+  const prev = document.getElementById('hdd-cur-' + selectedCurrency);
+  if (prev) prev.classList.remove('active');
+  // Set new
+  selectedCurrency = cur;
+  localStorage.setItem('paramo.currency', cur);
+  const lbl = document.getElementById('hdd-currency-label');
+  if (lbl) lbl.textContent = cur;
+  const next = document.getElementById('hdd-cur-' + cur);
+  if (next) next.classList.add('active');
+  hddCloseAll();
+  fetchFxRates();
+}
+
+function onCurrencyChange() { /* no-op — handled by hddSetCurrency */ }
 
 function savePriceKwh() {
   const v = parseFloat(document.getElementById('price-kwh').value);
@@ -2853,13 +2893,6 @@ function savePriceKwh() {
     pricePerKwh = v;
     localStorage.setItem('paramo.pricePerKwh', String(v));
   }
-}
-
-function onCurrencyChange() {
-  const sel = document.getElementById('price-currency');
-  selectedCurrency = sel ? sel.value : 'EUR';
-  localStorage.setItem('paramo.currency', selectedCurrency);
-  fetchFxRates(); // ensure rates are loaded for the new currency
 }
 
 function handlePowerSnapshot(payload) {
