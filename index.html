@@ -752,6 +752,99 @@ body::after {
   line-height: 1.5;
 }
 
+/* ── ENERGY & CONSUMPTION ── */
+.energy-block {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.energy-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.energy-cell {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.energy-val {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.1;
+}
+.energy-lbl {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-top: 4px;
+}
+.energy-row-sub {
+  grid-template-columns: 1fr 1fr;
+}
+.energy-cell-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 2px;
+  font-family: var(--mono);
+}
+.energy-sub-lbl {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+}
+.energy-sub-val {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+.energy-note {
+  font-size: 0.62rem;
+  color: var(--dimmer);
+  font-family: var(--mono);
+  letter-spacing: 0.03em;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.energy-val.stale { color: var(--dimmer); }
+
+/* ── PRICE ROW — input + currency selector ── */
+.price-row {
+  display: flex;
+  gap: 6px;
+}
+.price-row input {
+  flex: 1;
+  min-width: 0;
+}
+.price-row select {
+  width: 72px;
+  flex-shrink: 0;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0 6px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: center;
+}
+.price-row select:hover { border-color: var(--border2); }
+.price-row select:focus { outline: none; border-color: var(--accent); }
+
 /* ── EVENT LOG ── */
 .log {
   max-height: 140px;
@@ -1669,18 +1762,61 @@ body.dark .log-fab {
               <span class="relay-status-val" id="relay-status-val">—</span>
             </div>
           </div>
-          <button class="collapse-toggle" id="relay-cfg-toggle" onclick="toggleRelayCfg()" style="margin-top:8px;"><span id="str-relay-config">Relay config</span></button>
-          <div class="collapse closed" id="relay-cfg-collapse">
-            <div class="collapse-inner">
-              <div class="field">
-                <label id="str-relay-device-id-label">Ogemray Device ID</label>
-                <input id="relay-device-id" placeholder="ogemray-kiln" oninput="saveRelayCfg()"/>
+
+          <!-- ENERGY & CONSUMPTION — fed by shellies/{id}/power/snapshot -->
+          <div class="energy-block" id="energy-block">
+            <div class="energy-row">
+              <div class="energy-cell">
+                <div class="energy-val" id="energy-watts">—</div>
+                <div class="energy-lbl">W</div>
               </div>
-              <div class="relay-config-note">
-                <span id="str-relay-config-note">Device ID = MQTT Client ID set in the Ogemray's MQTT settings.</span><br>
-                Cmd: <code>shellies/{id}/rpc</code> · Confirm: <code>shellies/{id}/events/rpc</code>
+              <div class="energy-cell">
+                <div class="energy-val" id="energy-amps">—</div>
+                <div class="energy-lbl">A</div>
               </div>
             </div>
+            <div class="energy-row energy-row-sub">
+              <div class="energy-cell-sub">
+                <span class="energy-sub-lbl" id="str-energy-volts">Volts</span>
+                <span class="energy-sub-val" id="energy-volts">—</span>
+              </div>
+              <div class="energy-cell-sub">
+                <span class="energy-sub-lbl" id="str-energy-tc">Relay temp</span>
+                <span class="energy-sub-val" id="energy-tc">—</span>
+              </div>
+            </div>
+            <div class="field" style="margin-top:6px;">
+              <label id="str-price-kwh-label">Avg. price per kWh</label>
+              <div class="price-row">
+                <input id="price-kwh" type="number" step="0.0001" min="0" placeholder="0.1500" oninput="savePriceKwh()"/>
+                <select id="price-currency" onchange="onCurrencyChange()">
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                  <option value="JPY">JPY</option>
+                  <option value="CHF">CHF</option>
+                  <option value="CAD">CAD</option>
+                  <option value="AUD">AUD</option>
+                  <option value="CNY">CNY</option>
+                  <option value="BRL">BRL</option>
+                  <option value="MXN">MXN</option>
+                  <option value="SEK">SEK</option>
+                  <option value="NOK">NOK</option>
+                  <option value="DKK">DKK</option>
+                  <option value="PLN">PLN</option>
+                  <option value="CZK">CZK</option>
+                  <option value="HUF">HUF</option>
+                  <option value="TRY">TRY</option>
+                  <option value="KRW">KRW</option>
+                  <option value="SGD">SGD</option>
+                  <option value="HKD">HKD</option>
+                  <option value="NZD">NZD</option>
+                  <option value="ZAR">ZAR</option>
+                  <option value="INR">INR</option>
+                </select>
+              </div>
+            </div>
+            <div class="energy-note" id="str-energy-note">Saved per firing — used in Journal to estimate cost.</div>
           </div>
         </div>
       </div>
@@ -2243,8 +2379,7 @@ function connectMqtt() {
         if (mqttClient && mqttClient.connected)
           mqttClient.publish('kiln/history/request', '1');
       }, 1500); });
-    mqttClient.subscribe(relayTopic('/events/rpc'));
-    mqttClient.subscribe(relayTopic('/status/switch:0'));
+    mqttClient.subscribe('shellies/#');  // wildcard — captures any Ogemray on this broker
   });
   mqttClient.on('message', onMqttMessage);
   mqttClient.on('error', (e) => { log(t('log_mqttError').replace('{msg}', e.message), 'err'); });
@@ -2343,8 +2478,19 @@ function onMqttMessage(topic, payload) {
       mergeEspHistory(arr);
     } catch(e) { log('Could not parse kiln/history: ' + e.message, 'err'); }
   }
-  else if (topic === relayTopic('/events/rpc') || topic === relayTopic('/status/switch:0')) {
-    handleRelayConfirm(v);
+  else if (topic.startsWith('shellies/')) {
+    // Auto-detect device ID from first incoming message (persisted for RPC replies)
+    const parts = topic.split('/');
+    if (parts[1] && parts[1] !== relayDeviceId) {
+      relayDeviceId = parts[1];
+      localStorage.setItem('paramo.relayDeviceId', relayDeviceId);
+    }
+    const suffix = '/' + parts.slice(2).join('/');
+    if (suffix === '/events/rpc' || suffix === '/status/switch:0') {
+      handleRelayConfirm(v);
+    } else if (suffix === '/power/snapshot') {
+      handlePowerSnapshot(v);
+    }
   }
 }
 
@@ -2380,6 +2526,7 @@ function newFiring(skipConfirm) {
   clearDatapoints();
   localStorage.removeItem('paramo.note.' + activeKilnId);
   espDpCount = 0;
+  if (typeof resetPowerSamples === 'function') resetPowerSamples();
   if (connected) {
     mqttClient.publish('kiln/session/clear', '1');
     log(t('log_newFiringEsp'), 'ok');
@@ -2387,6 +2534,33 @@ function newFiring(skipConfirm) {
     log(t('log_newFiringLocal'), 'warn');
   }
   updateMeta();
+}
+
+// Build energy block to attach to the firing JSON.
+// energyTotal_wh is delta vs. baseline (energy consumed during this firing)
+// or last sample's energyWh if baseline wasn't captured.
+function buildEnergyMeta() {
+  if (!firingPowerSamples.length) return null;
+  const last = firingPowerSamples[firingPowerSamples.length - 1];
+  let energyTotalWh = 0;
+  if (firingPowerBaselineWh !== null && typeof last.energyWh === 'number') {
+    energyTotalWh = Math.max(0, last.energyWh - firingPowerBaselineWh);
+  } else if (typeof last.energyWh === 'number') {
+    energyTotalWh = last.energyWh;
+  }
+  const watts = firingPowerSamples.map(s => s.watts).filter(w => typeof w === 'number');
+  const avgWatts = watts.length ? watts.reduce((a,b) => a+b, 0) / watts.length : 0;
+  const maxWatts = watts.length ? Math.max(...watts) : 0;
+  return {
+    pricePerKwh:    (typeof pricePerKwh === 'number') ? pricePerKwh : null,
+    currency:       selectedCurrency || 'EUR',
+    fxRateToEUR:    (selectedCurrency && fxRates[selectedCurrency]) ? fxRates[selectedCurrency] : 1,
+    energyTotal_wh: Math.round(energyTotalWh * 100) / 100,
+    avgWatts:       Math.round(avgWatts * 10) / 10,
+    maxWatts:       Math.round(maxWatts * 10) / 10,
+    sampleCount:    firingPowerSamples.length,
+    samples:        firingPowerSamples
+  };
 }
 
 function exportData() {
@@ -2453,7 +2627,8 @@ function exportData() {
       mode:         currentMode || '',
       modeLabel:    (currentMode && MODES[currentMode]) ? MODES[currentMode].label : '',
       kilnName:     kiln.name || '',
-      note
+      note,
+      energy:       buildEnergyMeta()
     },
     datapoints
   };
@@ -2501,7 +2676,7 @@ function hddExportCloud() {
   const maxTemp_c = tcs.length ? Math.round(Math.max(...tcs) * 10) / 10 : 0;
   const kiln = kilns.find(k => k.id === activeKilnId) || {};
   const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
-  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note }, datapoints };
+  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note, energy:buildEnergyMeta() }, datapoints };
   const dateStr = now.toISOString().slice(0,10);
   const durStr  = duration_min < 60 ? Math.round(duration_min)+'m' : Math.floor(duration_min/60)+'h'+(duration_min%60?(duration_min%60)+'m':'');
   const filename = 'Paramo_' + dateStr + '_' + Math.round(maxTemp_c) + 'C_' + durStr + '.json';
@@ -2542,20 +2717,19 @@ function resetConfig() {
 }
 
 // ── RELAY (Ogemray / Shelly Gen2) ────────────────────────────────
+// The Ogemray publishes under shellies/<its-own-id>/...
+// We subscribe with MQTT wildcards so no device ID config is needed in the frontend.
 let relayState = 'unknown';
-let relayDeviceId = localStorage.getItem('paramo.relayDeviceId') || 'ogemray-kiln';
+
+// The Ogemray script auto-detects its own device ID, so we track it from the first
+// incoming message and use it when publishing RPC commands.
+let relayDeviceId = localStorage.getItem('paramo.relayDeviceId') || null;
 
 function relayTopic(suffix) {
-  return 'shellies/' + relayDeviceId + suffix;
+  return 'shellies/' + (relayDeviceId || '+') + suffix;
 }
-function saveRelayCfg() {
-  relayDeviceId = (document.getElementById('relay-device-id').value || '').trim() || 'ogemray-kiln';
-  localStorage.setItem('paramo.relayDeviceId', relayDeviceId);
-  if (connected) {
-    mqttClient.subscribe(relayTopic('/events/rpc'));
-    mqttClient.subscribe(relayTopic('/status/switch:0'));
-  }
-}
+function saveRelayCfg() { /* no-op — device ID is auto-detected from incoming messages */ }
+
 function relayToggle() {
   if (!connected) { log(t('log_connectFirst'), 'warn'); return; }
   const turningOn = (relayState !== 'on');
@@ -2610,14 +2784,131 @@ function handleRelayConfirm(payload) {
     }
   } catch(e) {}
 }
-function toggleRelayCfg() {
-  const col = document.getElementById('relay-cfg-collapse');
-  const tog = document.getElementById('relay-cfg-toggle');
-  const open = !col.classList.contains('closed');
-  col.classList.toggle('closed', open);
-  tog.classList.toggle('active', !open);
+function toggleRelayCfg() { /* no-op: relay config UI removed */ }
+
+// ── ENERGY & CONSUMPTION ─────────────────────────────────────────
+// Fed by shellies/{id}/power/snapshot (script on the Shelly).
+// Live values are displayed; samples are accumulated in firingPowerSamples[]
+// and written to the firing JSON on export.
+let firingPowerSamples = [];      // [{ts, watts, amps, volts, tC, energyWh}, ...]
+let firingPowerBaselineWh = null; // aenergy.total at firing start, for delta
+let lastPowerSnapshot = null;
+
+let pricePerKwh = parseFloat(localStorage.getItem('paramo.pricePerKwh'));
+if (isNaN(pricePerKwh)) pricePerKwh = null;
+
+let selectedCurrency = localStorage.getItem('paramo.currency') || 'EUR';
+
+// EUR→selectedCurrency rate fetched once per session from Frankfurter (ECB data, no key needed)
+let fxRates = {};   // { USD: 1.08, GBP: 0.86, ... }
+let fxFetched = false;
+
+function fetchFxRates() {
+  if (fxFetched) return Promise.resolve();
+  return fetch('https://api.frankfurter.app/latest?from=EUR')
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.rates) {
+        fxRates = data.rates;
+        fxRates['EUR'] = 1; // base
+        fxFetched = true;
+      }
+    })
+    .catch(() => {
+      // Offline or fetch failed — fall back to local price as-is
+    });
 }
-(function(){ const i = document.getElementById('relay-device-id'); if(i) i.value = relayDeviceId; })();
+
+// Convert an amount in the user's currency to EUR (for consistent storage)
+function toEUR(amount) {
+  if (selectedCurrency === 'EUR' || !fxRates[selectedCurrency]) return amount;
+  return amount / fxRates[selectedCurrency];
+}
+
+// Convert EUR amount to display currency
+function fromEUR(eurAmount) {
+  if (selectedCurrency === 'EUR' || !fxRates[selectedCurrency]) return eurAmount;
+  return eurAmount * fxRates[selectedCurrency];
+}
+
+(function initCurrencyUI() {
+  const sel = document.getElementById('price-currency');
+  if (sel) {
+    sel.value = selectedCurrency;
+    // If stored value doesn't match any option, default to EUR
+    if (sel.value !== selectedCurrency) { sel.value = 'EUR'; selectedCurrency = 'EUR'; }
+  }
+  const i = document.getElementById('price-kwh');
+  if (i && pricePerKwh != null) i.value = pricePerKwh;
+  fetchFxRates();
+})();
+
+function savePriceKwh() {
+  const v = parseFloat(document.getElementById('price-kwh').value);
+  if (isNaN(v) || v < 0) {
+    pricePerKwh = null;
+    localStorage.removeItem('paramo.pricePerKwh');
+  } else {
+    pricePerKwh = v;
+    localStorage.setItem('paramo.pricePerKwh', String(v));
+  }
+}
+
+function onCurrencyChange() {
+  const sel = document.getElementById('price-currency');
+  selectedCurrency = sel ? sel.value : 'EUR';
+  localStorage.setItem('paramo.currency', selectedCurrency);
+  fetchFxRates(); // ensure rates are loaded for the new currency
+}
+
+function handlePowerSnapshot(payload) {
+  try {
+    const d = JSON.parse(payload);
+    lastPowerSnapshot = d;
+
+    // Update live UI
+    const w = document.getElementById('energy-watts');
+    const a = document.getElementById('energy-amps');
+    const v = document.getElementById('energy-volts');
+    const tc = document.getElementById('energy-tc');
+    if (w)  w.textContent  = (typeof d.watts === 'number') ? d.watts.toFixed(1) : '—';
+    if (a)  a.textContent  = (typeof d.amps  === 'number') ? d.amps.toFixed(2) : '—';
+    if (v)  v.textContent  = (typeof d.volts === 'number') ? d.volts.toFixed(0) + ' V' : '—';
+    if (tc) tc.textContent = (typeof d.tC    === 'number') ? d.tC.toFixed(0) + ' °C' : '—';
+
+    // Establish baseline if this is the first sample of a firing
+    if (firingPowerBaselineWh === null && typeof d.energyWh === 'number') {
+      firingPowerBaselineWh = d.energyWh;
+    }
+
+    // Accumulate for the export
+    firingPowerSamples.push({
+      ts:       d.ts || Math.floor(Date.now()/1000),
+      output:   !!d.output,
+      watts:    (typeof d.watts    === 'number') ? d.watts    : 0,
+      amps:     (typeof d.amps     === 'number') ? d.amps     : 0,
+      volts:    (typeof d.volts    === 'number') ? d.volts    : 0,
+      tC:       (typeof d.tC       === 'number') ? d.tC       : null,
+      energyWh: (typeof d.energyWh === 'number') ? d.energyWh : 0
+    });
+  } catch(e) {
+    log('Could not parse power snapshot: ' + e.message, 'warn');
+  }
+}
+
+function resetPowerSamples() {
+  firingPowerSamples = [];
+  firingPowerBaselineWh = null;
+  lastPowerSnapshot = null;
+  const w = document.getElementById('energy-watts');
+  const a = document.getElementById('energy-amps');
+  const v = document.getElementById('energy-volts');
+  const tc = document.getElementById('energy-tc');
+  if (w)  w.textContent  = '—';
+  if (a)  a.textContent  = '—';
+  if (v)  v.textContent  = '—';
+  if (tc) tc.textContent = '—';
+}
 
 
 // ══════════════════════════════════════════════════════════════════
@@ -3606,6 +3897,10 @@ const STRINGS = {
     relayConfig: 'Relay config',
     relayDeviceIdLabel: 'Ogemray Device ID',
     relayConfigNote: 'Device ID = MQTT Client ID set in the Ogemray\'s MQTT settings.',
+    energyVolts: 'Volts',
+    energyRelayTemp: 'Relay temp',
+    priceKwhLabel: 'Avg. price per kWh',
+    energyNote: 'Saved per firing — used in Journal to estimate cost.',
     cfgLabel: 'Configuration',
     cfgExport: '↑ Export config',
     cfgImport: '↓ Import config',
@@ -3704,6 +3999,10 @@ const STRINGS = {
     relayConfig: 'Config. relé',
     relayDeviceIdLabel: 'ID del dispositivo Ogemray',
     relayConfigNote: 'ID del dispositivo = Client ID MQTT configurado en los ajustes MQTT del Ogemray.',
+    energyVolts: 'Voltios',
+    energyRelayTemp: 'Temp. relé',
+    priceKwhLabel: 'Precio medio por kWh',
+    energyNote: 'Se guarda con cada horneada — usado en Journal para estimar el coste.',
     cfgLabel: 'Configuración',
     cfgExport: '↑ Exportar config',
     cfgImport: '↓ Importar config',
@@ -3921,6 +4220,15 @@ function _applyStrings(s) {
 
   const strRelayNote = document.getElementById('str-relay-config-note');
   if (strRelayNote) strRelayNote.textContent = s.relayConfigNote || 'Device ID = MQTT Client ID set in the Ogemray\'s MQTT settings.';
+
+  const strEnergyVolts = document.getElementById('str-energy-volts');
+  if (strEnergyVolts) strEnergyVolts.textContent = s.energyVolts || 'Volts';
+  const strEnergyTc = document.getElementById('str-energy-tc');
+  if (strEnergyTc) strEnergyTc.textContent = s.energyRelayTemp || 'Relay temp';
+  const strPriceLbl = document.getElementById('str-price-kwh-label');
+  if (strPriceLbl) strPriceLbl.textContent = s.priceKwhLabel || 'Avg. price per kWh';
+  const strEnergyNote = document.getElementById('str-energy-note');
+  if (strEnergyNote) strEnergyNote.textContent = s.energyNote || 'Saved per firing — used in Journal to estimate cost.';
 
   const strLogPanelTitle = document.getElementById('str-log-panel-title');
   if (strLogPanelTitle) strLogPanelTitle.textContent = s.eventLog || 'Event Log';
