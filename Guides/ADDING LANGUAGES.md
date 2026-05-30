@@ -11,7 +11,7 @@
 
 ---
 
-## ⚠️ IMPORTANT: Alphabet limitations / Limitación de alfabetos
+## IMPORTANT: Alphabet limitations / Limitación de alfabetos
 
 **EN —** The OLED fonts (U8g2 `*_tr` fonts) only contain **basic Latin
 (ASCII)** characters: `a–z`, `A–Z`, digits and common symbols. They do
