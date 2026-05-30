@@ -275,6 +275,7 @@ body::after {
 .dot.connecting { background: var(--warn); box-shadow: 0 0 8px rgba(192,120,0,0.6); animation: dotPulse 1.2s ease-in-out infinite; }
 @keyframes dotPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 .dot.off { background: var(--err); box-shadow: 0 0 8px rgba(200,56,56,0.6); }
+.dot.sleep { background: var(--c-azure); box-shadow: 0 0 8px rgba(0,124,240,0.55); }
 
 
 .card {
@@ -658,6 +659,19 @@ body::after {
   line-height: 1.45;
   padding: 4px 0 0;
 }
+
+/* ── COOLDOWN ACCORDION ── */
+.cooldown-acc { margin-top: 10px; border-top: 1px solid var(--border, rgba(255,255,255,0.08)); padding-top: 8px; }
+.cooldown-acc summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--muted);
+  list-style: revert;
+  user-select: none;
+  padding: 2px 0;
+}
+.cooldown-acc summary:hover { color: var(--fg, #fff); }
+.cooldown-acc[open] summary { margin-bottom: 2px; }
 
 /* ── ACTIONS ── */
 .actions { display: flex; flex-direction: column; gap: 6px; }
@@ -1529,6 +1543,21 @@ body.dark .log-fab {
   </div>
 </div>
 
+<!-- ── KILN IDLE MODAL — shown when ESP reports deep sleep (firing ended) ── -->
+<div class="modal-backdrop" id="idle-modal">
+  <div class="modal">
+    <h3 id="idle-title">Kiln idle</h3>
+    <div class="modal-sub" id="idle-sub">Deep sleep mode active</div>
+    <div class="modal-body" id="idle-body">
+      Páramo Kiln Monitor is in deep sleep mode, so the previous firing has likely ended.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" data-idle="export" onclick="idleModalAction('export')">Export</button>
+      <button class="modal-btn primary" data-idle="new" onclick="idleModalAction('new')">New firing</button>
+    </div>
+  </div>
+</div>
+
 <canvas id="blob-canvas"></canvas>
 
 <!-- ── HEADER DROPDOWN MENUS — direct body children to escape stacking contexts ── -->
@@ -1769,6 +1798,16 @@ body.dark .log-fab {
             <button class="btn off-btn" onclick="clearThreshold()">Off</button>
           </div>
           <div class="mode-note">Sent to ESP32 — alarm fires once when reached.</div>
+
+          <!-- COOLDOWN (acordeón) -->
+          <details class="cooldown-acc">
+            <summary>Cooldown Alarm Threshold</summary>
+            <div class="threshold-row" style="margin-top:8px">
+              <input id="cool-input" type="number" min="150" max="550" placeholder="°C" value="400" onfocus="this._userEditing=true" onblur="this._userEditing=false"/>
+              <button class="btn gradient" onclick="setCooldown()">Set</button>
+            </div>
+            <div class="mode-note">Notifies once when the kiln cools past this point (150–550°C).</div>
+          </details>
         </div>
       </div>
       <!-- SESSION -->
@@ -1789,53 +1828,69 @@ body.dark .log-fab {
 
       <!-- KILN POWER -->
       <div class="card">
-        <div class="card-hdr"><div class="card-title">Kiln Power</div></div>
-        <div class="card-pad">
-          <div class="kiln-power">
-            <button class="btn-power" id="relay-action-btn" onclick="relayToggle()">
-              ◌ Turn on
-            </button>
-            <div class="relay-status">
-              <span class="relay-status-lbl">Status</span>
-              <span class="relay-status-val" id="relay-status-val">—</span>
+        <div class="card-hdr" onclick="toggleKilnPower()" style="cursor:pointer;user-select:none;">
+          <div class="card-title" id="str-kiln-power-title">Kiln Power</div>
+          <span id="kiln-power-chevron" style="font-size:1rem;color:var(--muted);transition:transform 0.25s;display:inline-block;">⌃</span>
+        </div>
+        <div class="collapse closed" id="kiln-power-collapse">
+          <div class="collapse-inner" style="padding-top:8px;">
+            <div class="kiln-power">
+              <button class="btn-power" id="relay-action-btn" onclick="relayToggle()">
+                ◌ Turn on
+              </button>
+              <div class="relay-status">
+                <span class="relay-status-lbl">Status</span>
+                <span class="relay-status-val" id="relay-status-val">—</span>
+              </div>
             </div>
-          </div>
 
-          <!-- ENERGY & CONSUMPTION — fed by shellies/{id}/power/snapshot -->
-          <div class="energy-block" id="energy-block">
-            <div class="energy-row">
-              <div class="energy-cell">
-                <div class="energy-val" id="energy-watts">—</div>
-                <div class="energy-lbl">W</div>
-              </div>
-              <div class="energy-cell">
-                <div class="energy-val" id="energy-amps">—</div>
-                <div class="energy-lbl">A</div>
-              </div>
-            </div>
-            <div class="energy-row energy-row-sub">
-              <div class="energy-cell-sub">
-                <span class="energy-sub-lbl" id="str-energy-volts">Volts</span>
-                <span class="energy-sub-val" id="energy-volts">—</span>
-              </div>
-              <div class="energy-cell-sub">
-                <span class="energy-sub-lbl" id="str-energy-tc">Relay temp</span>
-                <span class="energy-sub-val" id="energy-tc">—</span>
-              </div>
-            </div>
-            <div class="field" style="margin-top:6px;">
-              <label id="str-price-kwh-label">Avg. price per kWh</label>
-              <div class="price-row">
-                <input id="price-kwh" type="number" step="0.0001" min="0" placeholder="0.1500" oninput="savePriceKwh()"/>
-                <div class="hdd-wrap" id="hdd-currency-wrap" style="flex-shrink:0;">
-                  <button class="hdd-trigger" id="hdd-currency-btn" onclick="hddToggle('currency')" aria-haspopup="true" aria-expanded="false" style="padding:5px 9px;font-size:0.75rem;">
-                    <span id="hdd-currency-label">EUR</span>
-                    <span class="hdd-chevron">&#8964;</span>
-                  </button>
+            <!-- ENERGY & CONSUMPTION — fed by shellies/{id}/power/snapshot -->
+            <div class="energy-block" id="energy-block">
+              <div class="energy-row">
+                <div class="energy-cell">
+                  <div class="energy-val" id="energy-watts">—</div>
+                  <div class="energy-lbl">W</div>
+                </div>
+                <div class="energy-cell">
+                  <div class="energy-val" id="energy-amps">—</div>
+                  <div class="energy-lbl">A</div>
                 </div>
               </div>
+              <div class="energy-row energy-row-sub">
+                <div class="energy-cell-sub">
+                  <span class="energy-sub-lbl" id="str-energy-volts">Volts</span>
+                  <span class="energy-sub-val" id="energy-volts">—</span>
+                </div>
+                <div class="energy-cell-sub">
+                  <span class="energy-sub-lbl" id="str-energy-tc">Relay temp</span>
+                  <span class="energy-sub-val" id="energy-tc">—</span>
+                </div>
+              </div>
+              <div class="field" style="margin-top:6px;">
+                <label id="str-price-kwh-label">Avg. price per kWh</label>
+                <div class="price-row">
+                  <input id="price-kwh" type="number" step="0.0001" min="0" placeholder="0.1500" oninput="savePriceKwh()"/>
+                  <div class="hdd-wrap" id="hdd-currency-wrap" style="flex-shrink:0;">
+                    <button class="hdd-trigger" id="hdd-currency-btn" onclick="hddToggle('currency')" aria-haspopup="true" aria-expanded="false" style="padding:5px 9px;font-size:0.75rem;">
+                      <span id="hdd-currency-label">EUR</span>
+                      <span class="hdd-chevron">&#8964;</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="energy-note" id="str-energy-note">Saved per firing — used in Journal to estimate cost.</div>
             </div>
-            <div class="energy-note" id="str-energy-note">Saved per firing — used in Journal to estimate cost.</div>
+
+            <!-- KILN TYPE -->
+            <div class="field" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+              <label id="str-kiln-type-label">Kiln type</label>
+              <select id="kiln-type-select" class="kiln-select" onchange="saveKilnType()">
+                <option value="electric" id="str-kt-electric">Electric</option>
+                <option value="gas"      id="str-kt-gas">Gas</option>
+                <option value="wood"     id="str-kt-wood">Wood</option>
+                <option value="other"    id="str-kt-other">Other</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -2112,6 +2167,9 @@ let mqttClient = null;
 let connected  = false;
 let _mqttJustConnected = false; // suppresses retained stale messages on first connect
 let espOnline  = false;
+let kilnSleepState = null;        // null | 'active' | 'sleep' (única verdad: retained MQTT)
+let _startupModalShown = false;   // Modal A ("previous firing") mostrado en esta carga
+let _sleepModalHandled = false;   // Modal B ("kiln idle") ya evaluado tras conectar
 let currentMode = 'bisque';
 
 // Zoom state
@@ -2391,13 +2449,14 @@ function connectMqtt() {
   mqttClient.on('connect', () => {
     connected = true;
     _mqttJustConnected = true;
+    window._relayConnectSkip = true; // skip first relay status message after connect
     setStatusDots();
     document.getElementById('connect-btn').textContent = 'Disconnect';
     document.getElementById('dot-esp').className = 'dot connecting';
     document.getElementById('lbl-esp').textContent = t('pillKilnConnecting') || 'Kiln…';
     log(t('log_brokerConnected'), 'ok');
     mqttClient.subscribe(['kiln/thermocouple','kiln/coldjunction','kiln/status','kiln/fault',
-                          'kiln/threshold','kiln/history','kiln/alert','kiln/uptime','kiln/rssi'],
+                          'kiln/threshold','kiln/cooldown','kiln/history','kiln/alert','kiln/uptime','kiln/rssi','kiln/sleep_state'],
       (err) => { if (!err) setTimeout(() => {
         if (mqttClient && mqttClient.connected)
           mqttClient.publish('kiln/history/request', '1');
@@ -2440,7 +2499,7 @@ function disconnectMqtt() {
 // ── Auto-refresh ESP datapoints every 5 minutes ───────────────────
 // Requests ESP to republish history while web is open and ESP is online
 setInterval(() => {
-  if (connected && espOnline && mqttClient && mqttClient.connected) {
+  if (connected && espOnline && kilnSleepState !== 'sleep' && mqttClient && mqttClient.connected) {
     mqttClient.publish('kiln/history/request', '1');
     log('Auto-refreshing ESP datapoints…', 'info');
   }
@@ -2504,11 +2563,30 @@ function onMqttMessage(topic, payload) {
     const thrEl = document.getElementById('thr-input');
     if (thrEl && !thrEl._userEditing) thrEl.value = v;
   }
+  else if (topic === 'kiln/cooldown') {
+    const coolEl = document.getElementById('cool-input');
+    if (coolEl && !coolEl._userEditing) coolEl.value = v;
+  }
   else if (topic === 'kiln/history') {
     try {
       const arr = JSON.parse(v);
       mergeEspHistory(arr);
     } catch(e) { log('Could not parse kiln/history: ' + e.message, 'err'); }
+  }
+  else if (topic === 'kiln/sleep_state') {
+    const wasSleep = (kilnSleepState === 'sleep');
+    kilnSleepState = (v === 'sleep') ? 'sleep' : 'active';
+    setStatusDots();
+    // Log sólo en cambios reales (el retained inicial entra una vez al conectar).
+    if (kilnSleepState === 'sleep' && !wasSleep)      log(t('log_sleepOn'),  'info');
+    else if (kilnSleepState === 'active' && wasSleep) log(t('log_sleepOff'), 'ok');
+    // Modal "kiln idle": sólo en el primer sleep_state tras conectar.
+    // El setTimeout deja asentar espOnline (status retained) y el merge de
+    // datapoints (history/request a 1500ms) antes de decidir si mostrarlo.
+    if (!_sleepModalHandled && kilnSleepState === 'sleep') {
+      _sleepModalHandled = true;
+      setTimeout(maybeShowIdleModal, 1800);
+    }
   }
   else if (topic.startsWith('shellies/')) {
     // power/snapshot published by the paramo script (uses shellies/ prefix)
@@ -2540,8 +2618,16 @@ function onMqttMessage(topic, payload) {
 function setStatusDots() {
   document.getElementById('dot-mqtt').className = 'dot ' + (connected ? 'on' : 'off');
   document.getElementById('lbl-mqtt').textContent = t('pillServer') || 'Server';
-  document.getElementById('dot-esp').className = 'dot ' + (espOnline ? 'on' : 'off');
-  document.getElementById('lbl-esp').textContent = espOnline ? (t('pillKilnOnline') || 'Kiln online') : (t('pillKiln') || 'Kiln');
+  // Kiln: el estado sleep tiene prioridad visual cuando el ESP está online y dormido.
+  const espDot = document.getElementById('dot-esp');
+  const espLbl = document.getElementById('lbl-esp');
+  if (espOnline && kilnSleepState === 'sleep') {
+    espDot.className = 'dot sleep';
+    espLbl.textContent = t('pillKilnSleeping') || 'Kiln idle';
+  } else {
+    espDot.className = 'dot ' + (espOnline ? 'on' : 'off');
+    espLbl.textContent = espOnline ? (t('pillKilnOnline') || 'Kiln online') : (t('pillKiln') || 'Kiln');
+  }
   if (typeof updateFiringButton === 'function') updateFiringButton();
 }
 
@@ -2550,6 +2636,16 @@ function setThreshold() {
   const v = document.getElementById('thr-input').value;
   mqttClient.publish('kiln/threshold/set', v);
   log(t('log_thresholdSet').replace('{v}', v + unitSym()), 'ok');
+}
+
+function setCooldown() {
+  if (!connected) { log(t('log_connectFirst'), 'warn'); return; }
+  let v = parseInt(document.getElementById('cool-input').value, 10);
+  if (isNaN(v)) return;
+  v = Math.max(150, Math.min(550, v));            // validar rango antes de enviar
+  document.getElementById('cool-input').value = v; // reflejar el valor recortado
+  mqttClient.publish('kiln/cooldown/set', String(v));
+  log('Cooldown threshold set: ' + v + unitSym(), 'ok');
 }
 
 function clearThreshold() {
@@ -2667,6 +2763,7 @@ function exportData() {
       startedAt,
       duration_min,
       maxTemp_c,
+      kilnType:     getKilnType(),
       mode:         currentMode || '',
       modeLabel:    (currentMode && MODES[currentMode]) ? MODES[currentMode].label : '',
       kilnName:     kiln.name || '',
@@ -2719,7 +2816,7 @@ function hddExportCloud() {
   const maxTemp_c = tcs.length ? Math.round(Math.max(...tcs) * 10) / 10 : 0;
   const kiln = kilns.find(k => k.id === activeKilnId) || {};
   const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
-  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note, energy:buildEnergyMeta() }, datapoints };
+  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, kilnType:getKilnType(), mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note, energy:buildEnergyMeta() }, datapoints };
   const dateStr = now.toISOString().slice(0,10);
   const durStr  = duration_min < 60 ? Math.round(duration_min)+'m' : Math.floor(duration_min/60)+'h'+(duration_min%60?(duration_min%60)+'m':'');
   const filename = 'Paramo_' + dateStr + '_' + Math.round(maxTemp_c) + 'C_' + durStr + '.json';
@@ -2842,11 +2939,56 @@ function handleRelayConfirm(payload) {
       setRelayUI(newState);
       // Suppress log for 3s after command to avoid echo from optimistic update
       const suppressLog = (Date.now() - (window._relayCmdTs || 0)) < 3000;
-      if (changed && !suppressLog) log(output ? t('log_relayOn') : t('log_relayOff'), 'ok');
+      if (changed && !suppressLog) {
+        log(output ? t('log_relayOn') : t('log_relayOff'), 'ok');
+        // Publish for ESP32 → ntfy — skip the first relay message after connect (auto status poll)
+        if (window._relayConnectSkip) {
+          window._relayConnectSkip = false; // consume: only skip once
+        } else if (mqttClient && mqttClient.connected) {
+          mqttClient.publish('kiln/relay/status', newState);
+        }
+      }
     }
   } catch(e) {}
 }
 function toggleRelayCfg() { /* no-op: relay config UI removed */ }
+
+// ── KILN POWER COLLAPSE ──────────────────────────────────────────
+function toggleKilnPower() {
+  const col = document.getElementById('kiln-power-collapse');
+  const chv = document.getElementById('kiln-power-chevron');
+  const open = col.classList.contains('open');
+  col.classList.toggle('open', !open);
+  col.classList.toggle('closed', open);
+  if (chv) chv.style.transform = !open ? 'rotate(180deg)' : '';
+  localStorage.setItem('paramo.kilnPowerOpen', !open ? '1' : '0');
+}
+// Restore collapse state
+(function(){
+  if (localStorage.getItem('paramo.kilnPowerOpen') === '1') {
+    const col = document.getElementById('kiln-power-collapse');
+    const chv = document.getElementById('kiln-power-chevron');
+    if (col) { col.classList.replace('closed','open'); }
+    if (chv) chv.style.transform = 'rotate(180deg)';
+  }
+})();
+
+// ── KILN TYPE ────────────────────────────────────────────────────
+function _kilnTypeKey() { return 'paramo.kilnType.' + (activeKilnId || 'default'); }
+function loadKilnType() {
+  const v = localStorage.getItem(_kilnTypeKey()) || 'electric';
+  const sel = document.getElementById('kiln-type-select');
+  if (sel) sel.value = v;
+  return v;
+}
+function saveKilnType() {
+  const sel = document.getElementById('kiln-type-select');
+  if (sel) localStorage.setItem(_kilnTypeKey(), sel.value);
+}
+function getKilnType() {
+  return localStorage.getItem(_kilnTypeKey()) || 'electric';
+}
+(function(){ loadKilnType(); })();
 
 // ── ENERGY & CONSUMPTION ─────────────────────────────────────────
 // Fed by shellies/{id}/power/snapshot (script on the Shelly).
@@ -3826,6 +3968,7 @@ function checkStartupState() {
 }
 
 function showStartupModal(count, ageHours) {
+  _startupModalShown = true;  // Modal A tiene prioridad sobre el modal "kiln idle"
   document.getElementById('modal-count').textContent = count;
   let ageStr;
   if (ageHours < 48) ageStr = 'about a day ago';
@@ -3852,6 +3995,48 @@ function modalAction(action) {
   if (action === 'new') {
     newFiring(true); // skip confirm — already chosen via modal
     closeStartupModal();
+    return;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  KILN IDLE MODAL — shown when ESP reports deep sleep (firing ended)
+//  Complementa al startup modal: A cubre ">24h sin actividad local",
+//  B cubre "el ESP confirma que la horneada acabó". En conflicto, gana A.
+// ══════════════════════════════════════════════════════════════════
+function maybeShowIdleModal() {
+  if (kilnSleepState !== 'sleep') return;   // el estado cambió mientras esperábamos
+  if (!espOnline) return;                   // ESP apagado/offline → ignorar (por diseño)
+  if (datapoints.length === 0) return;      // nada que exportar ni que limpiar
+  if (_startupModalShown) return;           // Modal A ya tomó prioridad esta carga
+  if (document.getElementById('startup-modal').classList.contains('open')) return;
+  showIdleModal();
+}
+
+function showIdleModal() {
+  const m = document.getElementById('idle-modal');
+  document.getElementById('idle-title').textContent = t('idle_title');
+  document.getElementById('idle-sub').textContent   = t('idle_sub');
+  document.getElementById('idle-body').textContent  = t('idle_body');
+  const bExp = m.querySelector('[data-idle="export"]');
+  const bNew = m.querySelector('[data-idle="new"]');
+  if (bExp) bExp.textContent = t('modal_export');
+  if (bNew) bNew.textContent = t('modal_new');
+  m.classList.add('open');
+}
+
+function closeIdleModal() {
+  document.getElementById('idle-modal').classList.remove('open');
+}
+
+function idleModalAction(action) {
+  if (action === 'export') {
+    exportData();
+    return; // mantener abierto para que el usuario aún elija
+  }
+  if (action === 'new') {
+    newFiring(true); // skip confirm — ya elegido vía modal
+    closeIdleModal();
     return;
   }
 }
@@ -3970,6 +4155,8 @@ const STRINGS = {
     relayConfig: 'Relay config',
     relayDeviceIdLabel: 'Ogemray Device ID',
     relayConfigNote: 'Device ID = MQTT Client ID set in the Ogemray\'s MQTT settings.',
+    kilnTypeLabel: 'Kiln type',
+    ktElectric: 'Electric', ktGas: 'Gas', ktWood: 'Wood', ktOther: 'Other',
     energyVolts: 'Volts',
     energyRelayTemp: 'Relay temp',
     priceKwhLabel: 'Avg. price per kWh',
@@ -4072,6 +4259,8 @@ const STRINGS = {
     relayConfig: 'Config. relé',
     relayDeviceIdLabel: 'ID del dispositivo Ogemray',
     relayConfigNote: 'ID del dispositivo = Client ID MQTT configurado en los ajustes MQTT del Ogemray.',
+    kilnTypeLabel: 'Tipo de horno',
+    ktElectric: 'Eléctrico', ktGas: 'Gas', ktWood: 'Leña', ktOther: 'Otro',
     energyVolts: 'Voltios',
     energyRelayTemp: 'Temp. relé',
     priceKwhLabel: 'Precio medio por kWh',
@@ -4296,6 +4485,14 @@ function _applyStrings(s) {
 
   const strEnergyVolts = document.getElementById('str-energy-volts');
   if (strEnergyVolts) strEnergyVolts.textContent = s.energyVolts || 'Volts';
+
+  const strKilnPowerTitle = document.getElementById('str-kiln-power-title');
+  if (strKilnPowerTitle) strKilnPowerTitle.textContent = s.kilnPower || 'Kiln Power';
+  const strKilnTypeLbl = document.getElementById('str-kiln-type-label');
+  if (strKilnTypeLbl) strKilnTypeLbl.textContent = s.kilnTypeLabel || 'Kiln type';
+  const ktMap = {electric:'str-kt-electric',gas:'str-kt-gas',wood:'str-kt-wood',other:'str-kt-other'};
+  const ktStr = {electric:s.ktElectric||'Electric',gas:s.ktGas||'Gas',wood:s.ktWood||'Wood',other:s.ktOther||'Other'};
+  Object.entries(ktMap).forEach(([v,id])=>{ const el=document.getElementById(id); if(el) el.textContent=ktStr[v]; });
   const strEnergyTc = document.getElementById('str-energy-tc');
   if (strEnergyTc) strEnergyTc.textContent = s.energyRelayTemp || 'Relay temp';
   const strPriceLbl = document.getElementById('str-price-kwh-label');
