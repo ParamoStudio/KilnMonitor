@@ -78,6 +78,9 @@ const char* const STRINGS_DE[STR_COUNT] = {
 Tip: leave a string as `nullptr` to fall back to English for that entry. /
 Consejo: deja una cadena como `nullptr` para usar el inglés en esa entrada.
 
+NOTE: The NTFY Strings can contain any character since they will be viewed on your devices, such as phones. Even Emojis.
+NOTA: Los textos NTFY pueden contener cualquier carácter, ya que se visualizarán en tus dispositivos, como teléfonos móviles. Incluso Emojis.
+
 ### ☐ 2. Edit `lang_manager.h` (4 changes) / Editar `lang_manager.h` (4 cambios)
 
 **a.** Add the ID to `enum LangID`, before `LANG_COUNT`: / Añade el ID al
