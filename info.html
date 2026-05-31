@@ -6,7 +6,6 @@
 <title>Páramo — Info</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Roboto+Mono:wght@100;200;300&display=swap" rel="stylesheet">
-<link rel="icon" href="/KilnMonitor/favicon.ico">
 <style>
 /* ── THEME — identical tokens to dashboard ── */
 :root {
@@ -699,7 +698,7 @@ textarea.contact-input { resize: none; height: 120px; }
               <div class="step-title" id="str-g-s1-title">Connect your thermocouple</div>
               <div class="step-desc">
                 <span id="str-g-s1-desc">Páramo uses a Type S thermocouple for accurate high-temperature readings. See the</span>
-                <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Thermocouple" target="_blank" id="str-g-s1-link">Thermocouples Guide</a>
+                <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Thermocouples.md" target="_blank" id="str-g-s1-link">Thermocouples Guide</a>
                 <span id="str-g-s1-desc2">for recommended models and wiring instructions.</span>
               </div>
             </div>
@@ -718,7 +717,7 @@ textarea.contact-input { resize: none; height: 120px; }
                     <div class="substep-title" id="str-g-s2-1-title">HiveMQ account</div>
                     <div class="substep-desc">
                       <span id="str-g-s2-1-a">We chose this free MQTT server because it provides more than enough capacity without extra costs for the end user. Alternative self-hosted servers are possible for more technical users — see the</span>
-                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Server" target="_blank" id="str-g-s2-1-link">Servers Guide</a>.<br><br>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Server.md" target="_blank" id="str-g-s2-1-link">Servers Guide</a>.<br><br>
                       <span id="str-g-s2-1-b">Go to</span>
                       <a class="guide-link" href="https://www.hivemq.com/" target="_blank">hivemq.com</a>,
                       <span id="str-g-s2-1-c">create a free account, and set a username and password. You will also be given a cluster token. Save all three for the next step.</span>
@@ -827,12 +826,19 @@ textarea.contact-input { resize: none; height: 120px; }
                     <div class="substep-title" id="str-g-s5-4-title">Other tools</div>
                     <div class="substep-desc">
                       <strong>Kiln Power</strong> — <span id="str-g-s5-4-power">bridges an MQTT relay to cut kiln power remotely in case of emergency. See the</span>
-                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power" target="_blank" id="str-g-s5-4-power-link">Kiln Power Guide</a>.
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power.md" target="_blank" id="str-g-s5-4-power-link">Kiln Power Guide</a>.
                       <span id="str-g-s5-4-power2">A solution for gas kilns is being studied.</span><br><br>
                       <strong>Firing Mode</strong> — <span id="str-g-s5-4-mode">shows a reference ramp curve alongside your actual firing for easy comparison, and tags the session for later search in the Journal.</span><br><br>
-                      <strong>Add Notes</strong> — <span id="str-g-s5-4-notes">write observations during or after a firing before exporting. Saved with the session in the Journal.</span><br><br>
-                      <strong>Export / Import / Reset</strong> — <span id="str-g-s5-4-export">copy your configuration to other devices or reset all stored data.</span><br><br>
-                      <strong>Journal</strong> — <span id="str-g-s5-4-journal">a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you'd rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.</span>
+                      <strong id="str-g-s5-4-cooldown-name">Cooldown Alarm</strong> — <span id="str-g-s5-4-cooldown">an alarm that triggers on the way down, once a firing has been detected and the kiln cools past a temperature you set. Useful to know when it is safe to start unloading. Adjustable from the Alarm Threshold card (150–550 °C).</span><br><br>
+                      <strong id="str-g-s5-4-cone-name">Target Cone</strong> — <span id="str-g-s5-4-cone">note the Orton cone you are aiming for at the top of the Session card. It is purely a reference — it travels with the firing record and lets you search and group firings by cone in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-ktype-name">Kiln Type</strong> — <span id="str-g-s5-4-ktype">choose your kiln type (electric, gas, wood or other) to control which power options are shown, or simply to tag the firing so you can filter by kiln type in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-notes-name">Add Notes</strong> — <span id="str-g-s5-4-notes">write observations during or after a firing before exporting. Saved with the session in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-export-name">Export / Import / Reset</strong> — <span id="str-g-s5-4-export">copy your configuration to other devices or reset all stored data.</span><br><br>
+                      <strong id="str-g-s5-4-journal-name">Journal</strong> — <span id="str-g-s5-4-journal">a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you'd rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.</span><br><br>
+                      <strong id="str-g-s5-4-share-name">Share as PNG</strong> — <span id="str-g-s5-4-share">export any firing from the Journal as a printable greyscale image — chart, key data and notes laid out on an A4 sheet — to share with fellow potters or keep on paper.</span><br><br>
+                      <strong id="str-g-s5-4-energy-name">Energy &amp; Cost</strong> — <span id="str-g-s5-4-energy">set your price per kWh and currency to get a rough cost estimate per firing. This is an approximation only and should not be taken as a single source of truth — it cannot account for the complexity of a real electricity bill (tariff bands, standing charges, taxes, time-of-use rates).</span><br><br>
+                      <strong id="str-g-s5-4-lang-name">Language</strong> — <span id="str-g-s5-4-lang">the app is available in several languages, selectable from the toolbar. Missing yours, or spotted a translation that could be better? You can contribute one — see the</span>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Add%20a%20Language.md" target="_blank" id="str-g-s5-4-lang-link">Add a Language Guide</a>.
                     </div>
                   </div>
                 </div>
@@ -849,7 +855,7 @@ textarea.contact-input { resize: none; height: 120px; }
           <span id="str-g-footer">Having trouble?</span>
           <a class="guide-link" href="?tab=contact" id="str-g-footer-contact">Contact us</a>
           <span id="str-g-footer-or">or check the</span>
-          <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Troubleshooting" target="_blank" id="str-g-footer-ts">Troubleshooting guide</a>.
+          <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Troubleshooting.md" target="_blank" id="str-g-footer-ts">Troubleshooting guide</a>.
         </p>
 
       </div>
@@ -986,6 +992,22 @@ const FALLBACK = {
   g_s5_4_notes: 'write observations during or after a firing before exporting. Saved with the session in the Journal.',
   g_s5_4_export: 'copy your configuration to other devices or reset all stored data.',
   g_s5_4_journal: 'a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you\'d rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.',
+  g_s5_4_cooldown: 'an alarm that triggers on the way down, once a firing has been detected and the kiln cools past a temperature you set. Useful to know when it is safe to start unloading. Adjustable from the Alarm Threshold card (150–550 °C).',
+  g_s5_4_cone: 'note the Orton cone you are aiming for at the top of the Session card. It is purely a reference — it travels with the firing record and lets you search and group firings by cone in the Journal.',
+  g_s5_4_ktype: 'choose your kiln type (electric, gas, wood or other) to control which power options are shown, or simply to tag the firing so you can filter by kiln type in the Journal.',
+  g_s5_4_share: 'export any firing from the Journal as a printable greyscale image — chart, key data and notes laid out on an A4 sheet — to share with fellow potters or keep on paper.',
+  g_s5_4_energy: 'set your price per kWh and currency to get a rough cost estimate per firing. This is an approximation only and should not be taken as a single source of truth — it cannot account for the complexity of a real electricity bill (tariff bands, standing charges, taxes, time-of-use rates).',
+  g_s5_4_lang: 'the app is available in several languages, selectable from the toolbar. Missing yours, or spotted a translation that could be better? You can contribute one — see the',
+  g_s5_4_lang_link: 'Add a Language Guide',
+  g_s5_4_cooldown_name: 'Cooldown Alarm',
+  g_s5_4_cone_name: 'Target Cone',
+  g_s5_4_ktype_name: 'Kiln Type',
+  g_s5_4_notes_name: 'Add Notes',
+  g_s5_4_export_name: 'Export / Import / Reset',
+  g_s5_4_journal_name: 'Journal',
+  g_s5_4_share_name: 'Share as PNG',
+  g_s5_4_energy_name: 'Energy & Cost',
+  g_s5_4_lang_name: 'Language',
   g_footer: 'Having trouble?',
   g_footer_contact: 'Contact us',
   g_footer_or: 'or check the',
@@ -1075,9 +1097,26 @@ function applyStrings() {
   set('str-g-s5-4-power-link', s('g_s5_4_power_link'));
   set('str-g-s5-4-power2',     s('g_s5_4_power2'));
   set('str-g-s5-4-mode',       s('g_s5_4_mode'));
+  set('str-g-s5-4-cooldown',   s('g_s5_4_cooldown'));
+  set('str-g-s5-4-cone',       s('g_s5_4_cone'));
+  set('str-g-s5-4-ktype',      s('g_s5_4_ktype'));
   set('str-g-s5-4-notes',      s('g_s5_4_notes'));
   set('str-g-s5-4-export',     s('g_s5_4_export'));
   set('str-g-s5-4-journal',    s('g_s5_4_journal'));
+  set('str-g-s5-4-share',      s('g_s5_4_share'));
+  set('str-g-s5-4-energy',     s('g_s5_4_energy'));
+  set('str-g-s5-4-lang',       s('g_s5_4_lang'));
+  set('str-g-s5-4-lang-link',  s('g_s5_4_lang_link'));
+  // Other tools — bold names (the descriptions above are already mapped)
+  set('str-g-s5-4-cooldown-name', s('g_s5_4_cooldown_name'));
+  set('str-g-s5-4-cone-name',     s('g_s5_4_cone_name'));
+  set('str-g-s5-4-ktype-name',    s('g_s5_4_ktype_name'));
+  set('str-g-s5-4-notes-name',    s('g_s5_4_notes_name'));
+  set('str-g-s5-4-export-name',   s('g_s5_4_export_name'));
+  set('str-g-s5-4-journal-name',  s('g_s5_4_journal_name'));
+  set('str-g-s5-4-share-name',    s('g_s5_4_share_name'));
+  set('str-g-s5-4-energy-name',   s('g_s5_4_energy_name'));
+  set('str-g-s5-4-lang-name',     s('g_s5_4_lang_name'));
   set('str-g-footer',          s('g_footer'));
   set('str-g-footer-contact',  s('g_footer_contact'));
   set('str-g-footer-or',       s('g_footer_or'));
