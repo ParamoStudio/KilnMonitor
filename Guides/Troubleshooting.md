@@ -42,7 +42,7 @@ This is the most common area, and most of it comes down to the thermocouple. See
 | Symptom | Likely cause | What to do |
 |---|---|---|
 | Monitor won't join your WiFi | Wrong password, or 5 GHz-only network | Most hobby microcontrollers only support **2.4 GHz** WiFi. Make sure you're giving it a 2.4 GHz network, not 5 GHz only. Double-check the password. |
-| A "Páramo" WiFi network appears | The monitor is in setup mode (captive portal) | This is normal on first use or after a reset. Connect your phone to it and enter your home WiFi details in the page that opens. |
+| A "Kiln Setup" WiFi network appears | The monitor is in setup mode (captive portal) | This is normal on first use or after a reset. Connect your phone to it and enter your home WiFi details in the page that opens. |
 | Connects but drops out repeatedly | Weak signal where the kiln is | Kilns are often in garages or outbuildings with poor coverage. Consider a WiFi extender or moving the router closer. |
 | Was working, now offline | Router changed, password changed, or signal lost | If you changed your WiFi, re-run setup. Otherwise check signal and power-cycle. |
 
@@ -50,7 +50,7 @@ This is the most common area, and most of it comes down to the thermocouple. See
 
 ## The web dashboard
 
-The dashboard and the monitor both connect to an MQTT server in the middle — see the [MQTT Server guide](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/MQTT%20Server.md). Most dashboard problems are really connection problems.
+The dashboard and the monitor both connect to an MQTT server in the middle — see the [MQTT Server guide](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Server.md). Most dashboard problems are really connection problems.
 
 | Symptom | Likely cause | What to do |
 |---|---|---|
@@ -136,7 +136,7 @@ Es la zona más habitual, y casi todo se reduce al termopar. Consulta la [guía 
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
 | El monitor no se une a tu WiFi | Contraseña incorrecta, o red solo de 5 GHz | La mayoría de microcontroladores de aficionado solo admiten WiFi de **2,4 GHz**. Asegúrate de darle una red de 2,4 GHz, no una solo de 5 GHz. Revisa la contraseña. |
-| Aparece una red WiFi llamada "Páramo" | El monitor está en modo configuración (portal captivo) | Es normal en el primer uso o tras un reinicio de fábrica. Conecta tu móvil a ella e introduce los datos de tu WiFi de casa en la página que se abre. |
+| Aparece una red WiFi llamada "Kiln Setup" | El monitor está en modo configuración (portal captivo) | Es normal en el primer uso o tras un reinicio de fábrica. Conecta tu móvil a ella e introduce los datos de tu WiFi de casa en la página que se abre. |
 | Conecta pero se cae repetidamente | Señal débil donde está el horno | Los hornos suelen estar en garajes o casetas con mala cobertura. Plantéate un repetidor WiFi o acercar el router. |
 | Funcionaba y ahora está desconectado | Cambió el router, la contraseña, o se perdió señal | Si cambiaste tu WiFi, vuelve a hacer la configuración. Si no, comprueba la señal y apaga y enciende. |
 
@@ -144,7 +144,7 @@ Es la zona más habitual, y casi todo se reduce al termopar. Consulta la [guía 
 
 ## El panel web
 
-El panel y el monitor se conectan los dos a un servidor MQTT intermedio — mira la [guía del servidor MQTT](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/MQTT%20Server.md). La mayoría de problemas del panel son en realidad problemas de conexión.
+El panel y el monitor se conectan los dos a un servidor MQTT intermedio — mira la [guía del servidor MQTT](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Server.md). La mayoría de problemas del panel son en realidad problemas de conexión.
 
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
