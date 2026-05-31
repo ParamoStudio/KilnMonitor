@@ -6,7 +6,7 @@
 
 > **This is a living document.** Páramo is an evolving, one-person project, and some failure modes will only surface (and get properly documented) after extensive real-world firing. If you hit something not listed here, it's genuinely useful feedback — please open an issue on GitHub.
 
-This guide is aimed at the **everyday user** of a Páramo monitor that's already built or bought: what you might see, and what to do about it, in plain terms. Anything that involves wiring, code, the serial console, or flashing firmware lives in the separate **[Build Your Own](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Build%20Your%20Own.md)**, not here.
+This guide is aimed at the **everyday user** of a Páramo monitor that's already built or bought: what you might see, and what to do about it, in plain terms. Anything that involves wiring, code, the serial console, or flashing firmware lives in the separate **[Build Your Own](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Build%20Your%20Own.md)** guide, not here.
 
 A general rule before anything else: **if something behaves strangely, the first thing to try is turning the monitor off and on again.** A surprising number of transient glitches clear with a clean restart.
 
@@ -100,7 +100,7 @@ If you've worked through the relevant section and it's still not right, open an 
 
 > **Este es un documento vivo.** Páramo es un proyecto en evolución y de una sola persona, y algunos fallos solo saldrán a la luz (y se documentarán como es debido) tras hornear mucho en el mundo real. Si te encuentras con algo que no está aquí, es información muy útil — por favor, abre una incidencia en GitHub.
 
-Esta guía está pensada para el **usuario corriente** de un monitor Páramo ya montado o comprado: qué puedes ver y qué hacer al respecto, en términos sencillos. Todo lo que implique cableado, código, la consola serie o flashear el firmware vive en la **[Build Your Own](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Build%20Your%20Own.md)** aparte, no aquí.
+Esta guía está pensada para el **usuario corriente** de un monitor Páramo ya montado o comprado: qué puedes ver y qué hacer al respecto, en términos sencillos. Todo lo que implique cableado, código, la consola serie o flashear el firmware vive en la guia **[Build Your Own](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Build%20Your%20Own.md)** aparte, no aquí.
 
 Una regla general antes de nada: **si algo se comporta de forma rara, lo primero que hay que probar es apagar el monitor y volver a encenderlo.** Un número sorprendente de fallos pasajeros se arregla con un reinicio limpio.
 
