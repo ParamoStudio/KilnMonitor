@@ -718,6 +718,13 @@ body::after {
 }
 .btn-power:hover { background: var(--input-bg-hover); border-color: var(--border2); }
 .btn-power:disabled { opacity: 0.45; cursor: not-allowed; }
+/* Zonas atenuadas según kiln type (wood/other/gas): visibles pero inertes */
+.power-dimmed { opacity: 0.4; pointer-events: none; filter: grayscale(0.6); }
+.power-gas-note {
+  font-size: 0.74rem; color: var(--muted); line-height: 1.4;
+  padding: 4px 0 8px;
+}
+.power-gas-note a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
 .btn-power.action-on  { color: var(--ok);  border-color: rgba(55,147,82,0.35); }
 .btn-power.action-on:hover  { background: rgba(55,147,82,0.07); border-color: var(--ok); }
 .btn-power.action-off { color: var(--err); border-color: rgba(200,56,56,0.35); }
@@ -1529,16 +1536,16 @@ body.dark .log-fab {
 <!-- ── STARTUP MODAL ── -->
 <div class="modal-backdrop" id="startup-modal">
   <div class="modal">
-    <h3 id="modal-title">Previous firing detected</h3>
+    <h3 id="str-modal-title-prev">Previous firing detected</h3>
     <div class="modal-sub" id="modal-sub">Last activity over 24 hours ago</div>
     <div class="modal-body">
-      You have <b id="modal-count">—</b> stored datapoints from a previous session.
-      What would you like to do?
+      <span id="str-modal-stored">You have <b id="modal-count">—</b> stored datapoints from a previous session.</span>
+      <span id="str-modal-question">What would you like to do?</span>
     </div>
     <div class="modal-actions">
-      <button class="modal-btn" onclick="modalAction('export')">Export</button>
-      <button class="modal-btn" onclick="modalAction('continue')">Continue</button>
-      <button class="modal-btn primary" onclick="modalAction('new')">New firing</button>
+      <button class="modal-btn" id="str-modal-export" onclick="modalAction('export')">Export</button>
+      <button class="modal-btn" id="str-modal-continue" onclick="modalAction('continue')">Continue</button>
+      <button class="modal-btn primary" id="str-modal-new" onclick="modalAction('new')">New firing</button>
     </div>
   </div>
 </div>
@@ -1594,6 +1601,50 @@ body.dark .log-fab {
   <button class="hdd-item cur-item" id="hdd-cur-INR" onclick="hddSetCurrency('INR')">INR</button>
 </div>
 
+<div class="hdd-menu hdd-menu-grid" id="hdd-cone-menu" role="menu" style="display:none;grid-template-columns:repeat(4,1fr);min-width:200px;padding:6px;gap:2px;">
+  <button class="hdd-item cur-item" id="hdd-cone-_none" onclick="setCone('')" style="grid-column:span 4;"><span id="str-cone-none">— None —</span></button>
+  <button class="hdd-item cur-item" id="hdd-cone-022" onclick="setCone('022')">022</button>
+  <button class="hdd-item cur-item" id="hdd-cone-021" onclick="setCone('021')">021</button>
+  <button class="hdd-item cur-item" id="hdd-cone-020" onclick="setCone('020')">020</button>
+  <button class="hdd-item cur-item" id="hdd-cone-019" onclick="setCone('019')">019</button>
+  <button class="hdd-item cur-item" id="hdd-cone-018" onclick="setCone('018')">018</button>
+  <button class="hdd-item cur-item" id="hdd-cone-017" onclick="setCone('017')">017</button>
+  <button class="hdd-item cur-item" id="hdd-cone-016" onclick="setCone('016')">016</button>
+  <button class="hdd-item cur-item" id="hdd-cone-015" onclick="setCone('015')">015</button>
+  <button class="hdd-item cur-item" id="hdd-cone-014" onclick="setCone('014')">014</button>
+  <button class="hdd-item cur-item" id="hdd-cone-013" onclick="setCone('013')">013</button>
+  <button class="hdd-item cur-item" id="hdd-cone-012" onclick="setCone('012')">012</button>
+  <button class="hdd-item cur-item" id="hdd-cone-011" onclick="setCone('011')">011</button>
+  <button class="hdd-item cur-item" id="hdd-cone-010" onclick="setCone('010')">010</button>
+  <button class="hdd-item cur-item" id="hdd-cone-09" onclick="setCone('09')">09</button>
+  <button class="hdd-item cur-item" id="hdd-cone-08" onclick="setCone('08')">08</button>
+  <button class="hdd-item cur-item" id="hdd-cone-07" onclick="setCone('07')">07</button>
+  <button class="hdd-item cur-item" id="hdd-cone-06" onclick="setCone('06')">06</button>
+  <button class="hdd-item cur-item" id="hdd-cone-05" onclick="setCone('05')">05</button>
+  <button class="hdd-item cur-item" id="hdd-cone-04" onclick="setCone('04')">04</button>
+  <button class="hdd-item cur-item" id="hdd-cone-03" onclick="setCone('03')">03</button>
+  <button class="hdd-item cur-item" id="hdd-cone-02" onclick="setCone('02')">02</button>
+  <button class="hdd-item cur-item" id="hdd-cone-01" onclick="setCone('01')">01</button>
+  <button class="hdd-item cur-item" id="hdd-cone-1" onclick="setCone('1')">1</button>
+  <button class="hdd-item cur-item" id="hdd-cone-2" onclick="setCone('2')">2</button>
+  <button class="hdd-item cur-item" id="hdd-cone-3" onclick="setCone('3')">3</button>
+  <button class="hdd-item cur-item" id="hdd-cone-4" onclick="setCone('4')">4</button>
+  <button class="hdd-item cur-item" id="hdd-cone-5" onclick="setCone('5')">5</button>
+  <button class="hdd-item cur-item" id="hdd-cone-6" onclick="setCone('6')">6</button>
+  <button class="hdd-item cur-item" id="hdd-cone-7" onclick="setCone('7')">7</button>
+  <button class="hdd-item cur-item" id="hdd-cone-8" onclick="setCone('8')">8</button>
+  <button class="hdd-item cur-item" id="hdd-cone-9" onclick="setCone('9')">9</button>
+  <button class="hdd-item cur-item" id="hdd-cone-10" onclick="setCone('10')">10</button>
+  <button class="hdd-item cur-item" id="hdd-cone-11" onclick="setCone('11')">11</button>
+  <button class="hdd-item cur-item" id="hdd-cone-12" onclick="setCone('12')">12</button>
+  <button class="hdd-item cur-item" id="hdd-cone-13" onclick="setCone('13')">13</button>
+  <button class="hdd-item cur-item" id="hdd-cone-14" onclick="setCone('14')">14</button>
+  <div class="hdd-sep" style="grid-column:span 4;"></div>
+  <input id="cone-custom-input" maxlength="5" placeholder="Custom" autocomplete="off"
+         style="grid-column:span 4;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;padding:7px 9px;font-family:inherit;font-size:0.72rem;color:var(--text);outline:none;text-align:center;"
+         oninput="setConeCustom(this.value)" onclick="event.stopPropagation()">
+</div>
+
 <div class="hdd-menu" id="hdd-cfg-menu" role="menu">
   <div class="hdd-label" id="str-cfg-label">Configuration</div>
   <button class="hdd-item" id="str-cfg-export" onclick="hddCfgExport()">&#8593; Export config</button>
@@ -1607,6 +1658,12 @@ body.dark .log-fab {
 </div>
 <div class="hdd-menu" id="hdd-kiln-menu" role="menu">
   <!-- populated by rebuildKilnSelect() -->
+</div>
+<div class="hdd-menu hdd-menu-grid" id="hdd-ktype-menu" role="menu" style="display:none;grid-template-columns:repeat(2,1fr);min-width:180px;padding:6px;gap:2px;">
+  <button class="hdd-item cur-item" id="hdd-ktype-electric" onclick="setKilnType('electric')">Electric</button>
+  <button class="hdd-item cur-item" id="hdd-ktype-gas"      onclick="setKilnType('gas')">Gas</button>
+  <button class="hdd-item cur-item" id="hdd-ktype-wood"     onclick="setKilnType('wood')">Wood</button>
+  <button class="hdd-item cur-item" id="hdd-ktype-other"    onclick="setKilnType('other')">Other</button>
 </div>
 
 <!-- ── EXPORT FIRING MODAL ── -->
@@ -1705,29 +1762,29 @@ body.dark .log-fab {
     <div class="card chart-card">
       <div class="temp-hero">
         <div class="temp-main">
-          <div class="temp-main-lbl">Thermocouple</div>
+          <div class="temp-main-lbl" id="str-temp-main">Thermocouple</div>
           <div class="temp-main-val">
             <span id="tc-val">—</span><span class="temp-unit" id="unit-main">°C</span>
           </div>
         </div>
         <div class="temp-side">
           <div class="temp-mini">
-            <div class="temp-mini-lbl">Cold Junction</div>
+            <div class="temp-mini-lbl" id="str-temp-cj">Cold Junction</div>
             <div class="temp-mini-val"><span id="cj-val">—</span> <span id="unit-cj">°C</span></div>
           </div>
           <div class="temp-mini">
-            <div class="temp-mini-lbl">Δ Δt</div>
+            <div class="temp-mini-lbl" id="str-temp-rate">Δ Δt</div>
             <div class="temp-mini-val"><span id="rate-val">—</span> <span id="unit-rate">°C/min</span></div>
           </div>
         </div>
       </div>
 
       <div class="chart-meta">
-        <div class="chart-stat"><div class="chart-stat-lbl">Session High</div><div class="chart-stat-val" id="m-high">—</div></div>
-        <div class="chart-stat"><div class="chart-stat-lbl">Session Low</div><div class="chart-stat-val" id="m-low">—</div></div>
-        <div class="chart-stat"><div class="chart-stat-lbl">Duration</div><div class="chart-stat-val" id="m-dur">—</div></div>
+        <div class="chart-stat"><div class="chart-stat-lbl" id="str-stat-high">Session High</div><div class="chart-stat-val" id="m-high">—</div></div>
+        <div class="chart-stat"><div class="chart-stat-lbl" id="str-stat-low">Session Low</div><div class="chart-stat-val" id="m-low">—</div></div>
+        <div class="chart-stat"><div class="chart-stat-lbl" id="str-stat-dur">Duration</div><div class="chart-stat-val" id="m-dur">—</div></div>
         <div class="chart-stat">
-          <div class="chart-stat-lbl">Datapoints</div>
+          <div class="chart-stat-lbl" id="str-stat-dp">Datapoints</div>
           <div class="chart-stat-val">
             <span id="m-dp-local">0</span>
             <span class="src-badge" id="m-dp-source">0 esp · 0 live</span>
@@ -1755,7 +1812,7 @@ body.dark .log-fab {
 
       <!-- KILN + CONNECTION -->
       <div class="card">
-        <div class="card-hdr"><div class="card-title">Kiln</div></div>
+        <div class="card-hdr"><div class="card-title" id="str-card-kiln">Kiln</div></div>
         <div class="kiln-row">
           <div class="hdd-wrap" id="hdd-kiln-wrap" style="flex:1;min-width:0;">
             <button class="hdd-trigger" id="hdd-kiln-btn" onclick="hddToggle('kiln')"
@@ -1772,25 +1829,25 @@ body.dark .log-fab {
         <div class="collapse closed" id="conn-collapse">
           <div class="collapse-inner">
             <div class="field">
-              <label>HiveMQ Host</label>
+              <label id="str-lbl-host">HiveMQ Host</label>
               <input id="mqtt-host" placeholder="abc.s1.eu.hivemq.cloud"/>
             </div>
             <div class="field">
-              <label>Username</label>
+              <label id="str-lbl-user">Username</label>
               <input id="mqtt-user" placeholder="username"/>
             </div>
             <div class="field">
-              <label>Password</label>
+              <label id="str-lbl-pass">Password</label>
               <input id="mqtt-pass" type="password" placeholder="••••••••"/>
             </div>
-            <button class="btn gradient" id="connect-btn" onclick="connectMqtt()">Connect</button>
           </div>
         </div>
+        <button class="btn gradient" id="connect-btn" onclick="connectMqtt()" style="width:100%;margin-top:10px;">Connect</button>
       </div>
 
       <!-- THRESHOLD -->
       <div class="card">
-        <div class="card-hdr"><div class="card-title">Alarm Threshold</div></div>
+        <div class="card-hdr"><div class="card-title" id="str-card-alarm">Alarm Threshold</div></div>
         <div class="card-pad">
           <div class="threshold-row">
             <input id="thr-input" type="number" placeholder="°C" value="0" onfocus="this._userEditing=true" onblur="this._userEditing=false"/>
@@ -1801,19 +1858,30 @@ body.dark .log-fab {
 
           <!-- COOLDOWN (acordeón) -->
           <details class="cooldown-acc">
-            <summary>Cooldown Alarm Threshold</summary>
+            <summary id="str-cooldown-title">Cooldown Alarm Threshold</summary>
             <div class="threshold-row" style="margin-top:8px">
               <input id="cool-input" type="number" min="150" max="550" placeholder="°C" value="400" onfocus="this._userEditing=true" onblur="this._userEditing=false"/>
               <button class="btn gradient" onclick="setCooldown()">Set</button>
             </div>
-            <div class="mode-note">Notifies once when the kiln cools past this point (150–550°C).</div>
+            <div class="mode-note" id="str-cooldown-note">Notifies once when the kiln cools past this point (150–550°C).</div>
           </details>
         </div>
       </div>
       <!-- SESSION -->
       <div class="card">
-        <div class="card-hdr"><div class="card-title">Session</div></div>
+        <div class="card-hdr"><div class="card-title" id="str-card-session">Session</div></div>
         <div class="card-pad">
+          <!-- TARGET CONE (orientativo, por sesión) -->
+          <div class="field" style="margin-bottom:12px;">
+            <label id="str-cone-label">Target cone</label>
+            <div class="hdd-wrap" id="hdd-cone-wrap" style="width:100%;">
+              <button class="hdd-trigger" id="hdd-cone-btn" onclick="hddToggle('cone')" aria-haspopup="true" aria-expanded="false" style="width:100%;justify-content:space-between;">
+                <span id="hdd-cone-label">—</span>
+                <span class="hdd-chevron">&#8964;</span>
+              </button>
+            </div>
+            <div class="energy-note" id="str-cone-note">Reference only — used to tag and search firings in the Journal.</div>
+          </div>
           <div class="actions">
             <div class="actions-row">
               <button class="btn-sm" id="str-add-note" onclick="openNoteModal()" style="flex:1;">Add note</button>
@@ -1834,13 +1902,34 @@ body.dark .log-fab {
         </div>
         <div class="collapse closed" id="kiln-power-collapse">
           <div class="collapse-inner" style="padding-top:8px;">
-            <div class="kiln-power">
-              <button class="btn-power" id="relay-action-btn" onclick="relayToggle()">
-                ◌ Turn on
-              </button>
-              <div class="relay-status">
-                <span class="relay-status-lbl">Status</span>
-                <span class="relay-status-val" id="relay-status-val">—</span>
+
+            <!-- KILN TYPE (arriba — define qué se muestra debajo) -->
+            <div class="field" style="margin-bottom:10px;">
+              <label id="str-kiln-type-label">Kiln type</label>
+              <div class="hdd-wrap" id="hdd-ktype-wrap" style="width:100%;">
+                <button class="hdd-trigger" id="hdd-ktype-btn" onclick="hddToggle('ktype')" aria-haspopup="true" aria-expanded="false" style="width:100%;justify-content:space-between;">
+                  <span id="hdd-ktype-label">Electric</span>
+                  <span class="hdd-chevron">&#8964;</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GAS NOTICE — solo visible en modo gas -->
+            <div class="power-gas-note" id="power-gas-note" style="display:none;">
+              <span id="str-gas-unavailable">Unavailable at the moment.</span>
+              <a href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power" target="_blank" rel="noopener" id="str-gas-read">Read: Kiln Power Guide</a>
+            </div>
+
+            <!-- CONTROL ZONE (turn on + status) -->
+            <div id="power-control-zone">
+              <div class="kiln-power">
+                <button class="btn-power" id="relay-action-btn" onclick="relayToggle()">
+                  ◌ Turn on
+                </button>
+                <div class="relay-status">
+                  <span class="relay-status-lbl" id="str-relay-status-lbl">Status</span>
+                  <span class="relay-status-val" id="relay-status-val">—</span>
+                </div>
               </div>
             </div>
 
@@ -1881,29 +1970,19 @@ body.dark .log-fab {
               <div class="energy-note" id="str-energy-note">Saved per firing — used in Journal to estimate cost.</div>
             </div>
 
-            <!-- KILN TYPE -->
-            <div class="field" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-              <label id="str-kiln-type-label">Kiln type</label>
-              <select id="kiln-type-select" class="kiln-select" onchange="saveKilnType()">
-                <option value="electric" id="str-kt-electric">Electric</option>
-                <option value="gas"      id="str-kt-gas">Gas</option>
-                <option value="wood"     id="str-kt-wood">Wood</option>
-                <option value="other"    id="str-kt-other">Other</option>
-              </select>
-            </div>
           </div>
         </div>
       </div>
 
       <!-- FIRING MODE -->
       <div class="card">
-        <div class="card-hdr"><div class="card-title">Firing Mode</div></div>
+        <div class="card-hdr"><div class="card-title" id="str-card-mode">Firing Mode</div></div>
         <div class="card-pad">
           <div class="mode-grid">
-            <button class="mode-tile active" data-mode="bisque" onclick="selectMode(this)">Bisque</button>
-            <button class="mode-tile" data-mode="glaze" onclick="selectMode(this)">Glaze</button>
-            <button class="mode-tile" data-mode="crystalline" onclick="selectMode(this)">Crystalline</button>
-            <button class="mode-tile" data-mode="raku" onclick="selectMode(this)">Raku</button>
+            <button class="mode-tile active" id="str-mode-bisque" data-mode="bisque" onclick="selectMode(this)">Bisque</button>
+            <button class="mode-tile" id="str-mode-glaze" data-mode="glaze" onclick="selectMode(this)">Glaze</button>
+            <button class="mode-tile" id="str-mode-crystalline" data-mode="crystalline" onclick="selectMode(this)">Crystalline</button>
+            <button class="mode-tile" id="str-mode-raku" data-mode="raku" onclick="selectMode(this)">Raku</button>
           </div>
           <div class="mode-note" id="mode-note"></div>
 
@@ -1965,11 +2044,11 @@ body.dark .log-fab {
 
 <!-- ── FOOTER — direct body child, same flex level as shell ── -->
 <footer class="footer">
-  <a class="footer-pill" href="info.html?tab=contact" target="_blank" title="Contact">✉ Contact</a>
+  <a class="footer-pill" id="str-footer-contact" href="info.html?tab=contact" target="_blank" title="Contact">✉ Contact</a>
   <div class="footer-sep"></div>
-  <a class="footer-pill" href="info.html?tab=guide" target="_blank" title="Guide">◎ Guide</a>
+  <a class="footer-pill" id="str-footer-guide" href="info.html?tab=guide" target="_blank" title="Guide">◎ Guide</a>
   <div class="footer-sep"></div>
-  <a class="footer-pill" href="info.html?tab=licence" target="_blank" title="Licence">⊙ Licence</a>
+  <a class="footer-pill" id="str-footer-licence" href="info.html?tab=licence" target="_blank" title="Licence">⊙ Licence</a>
 </footer>
 
 <!-- ── ALARM MODAL ── -->
@@ -1981,10 +2060,10 @@ body.dark .log-fab {
         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
       </svg>
     </div>
-    <div class="fault-modal-title" style="color:var(--warn);">Alarm threshold reached</div>
+    <div class="fault-modal-title" id="str-alarm-modal-title" style="color:var(--warn);">Alarm threshold reached</div>
     <div class="fault-modal-msg" id="alarm-modal-msg">—</div>
     <div class="fault-modal-actions" style="justify-content:center;">
-      <button class="btn gradient" onclick="closeAlarmModal()" style="max-width:160px;">OK</button>
+      <button class="btn gradient" id="str-alarm-modal-ok" onclick="closeAlarmModal()" style="max-width:160px;">OK</button>
     </div>
   </div>
 </div>
@@ -2003,12 +2082,12 @@ body.dark .log-fab {
         <line x1="12" y1="20" x2="12.01" y2="20"/>
       </svg>
     </div>
-    <div class="fault-modal-title">WiFi error</div>
-    <div class="fault-modal-msg">Connection lost</div>
-    <div class="fault-modal-sub">The kiln controller or the computer lost WiFi suddenly.<br>Please check your connection and reconnect.</div>
+    <div class="fault-modal-title" id="str-wifi-modal-title">WiFi error</div>
+    <div class="fault-modal-msg" id="str-wifi-modal-msg">Connection lost</div>
+    <div class="fault-modal-sub" id="str-wifi-modal-sub">The kiln controller or the computer lost WiFi suddenly.<br>Please check your connection and reconnect.</div>
     <div class="fault-modal-actions">
       <button class="btn btn-guide fault-modal-actions" onclick="window.open('info.html?tab=guide','_blank')">Guide</button>
-      <button class="btn gradient" onclick="closeWifiErrorModal()">OK</button>
+      <button class="btn gradient" id="str-wifi-modal-ok" onclick="closeWifiErrorModal()">OK</button>
     </div>
   </div>
 </div>
@@ -2025,7 +2104,7 @@ body.dark .log-fab {
     </div>
     <div class="fault-modal-title" id="str-fault-title">Thermocouple fault</div>
     <div class="fault-modal-msg" id="fault-toast-msg">—</div>
-    <div class="fault-modal-sub">Check thermocouple connection and wiring.<br>The kiln should not be operated until this is resolved.</div>
+    <div class="fault-modal-sub" id="str-fault-modal-sub">Check thermocouple connection and wiring.<br>The kiln should not be operated until this is resolved.</div>
     <div class="fault-modal-actions">
       <button class="btn btn-guide fault-modal-actions" onclick="window.open('info.html?tab=guide','_blank')" id="str-fault-guide">Guide</button>
       <button class="btn gradient" onclick="closeFaultToast()" id="str-fault-dismiss">OK</button>
@@ -2083,6 +2162,8 @@ function hddToggle(id) {
     const rect = btn.getBoundingClientRect();
     menu.classList.add('open');
     if (id === 'currency') menu.style.display = 'grid';
+    if (id === 'cone') menu.style.display = 'grid';
+    if (id === 'ktype') menu.style.display = 'grid';
     const menuW = menu.offsetWidth || 180;
     const menuH = menu.offsetHeight || 120;
     // Kiln + Export dropdowns: open below, aligned to button left
@@ -2090,6 +2171,10 @@ function hddToggle(id) {
       menu.style.top  = (rect.bottom + 7) + 'px';
       menu.style.left = Math.max(8, rect.left) + 'px';
       menu.style.minWidth = rect.width + 'px';
+    } else if (id === 'cone' || id === 'ktype') {
+      // Ancho propio del grid, alineado a la izquierda del botón
+      menu.style.top  = (rect.bottom + 7) + 'px';
+      menu.style.left = Math.max(8, rect.left) + 'px';
     } else {
       menu.style.top  = (rect.bottom + 7) + 'px';
       menu.style.left = Math.max(8, rect.right - menuW) + 'px';
@@ -2100,13 +2185,13 @@ function hddToggle(id) {
 }
 
 function hddCloseAll() {
-  ['lang','unit','cfg','kiln','export','currency'].forEach(id => {
+  ['lang','unit','cfg','kiln','export','currency','cone','ktype'].forEach(id => {
     const menu = document.getElementById('hdd-' + id + '-menu');
     const btnId = (id === 'export') ? 'str-export-firing' : ('hdd-' + id + '-btn');
     const btn  = document.getElementById(btnId);
     if (menu) {
       menu.classList.remove('open');
-      if (id === 'currency') menu.style.display = 'none';
+      if (id === 'currency' || id === 'cone' || id === 'ktype') menu.style.display = 'none';
     }
     if (btn)  { btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
   });
@@ -2303,6 +2388,8 @@ function switchKiln() {
   saveKilns();
   fillKilnFields();
   loadDatapoints();
+  loadCone();
+  loadKilnType();
   if (connected) disconnectMqtt();
   rebuildKilnSelect();
 }
@@ -2354,6 +2441,11 @@ function openConn() {
   document.getElementById('conn-collapse').classList.add('open');
   document.getElementById('conn-collapse').classList.remove('closed');
   document.getElementById('conn-toggle').classList.add('open');
+}
+function closeConn() {
+  document.getElementById('conn-collapse').classList.remove('open');
+  document.getElementById('conn-collapse').classList.add('closed');
+  document.getElementById('conn-toggle').classList.remove('open');
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2452,6 +2544,7 @@ function connectMqtt() {
     window._relayConnectSkip = true; // skip first relay status message after connect
     setStatusDots();
     document.getElementById('connect-btn').textContent = 'Disconnect';
+    closeConn();   // auto-colapsar el accordion de conexión una vez conectado
     document.getElementById('dot-esp').className = 'dot connecting';
     document.getElementById('lbl-esp').textContent = t('pillKilnConnecting') || 'Kiln…';
     log(t('log_brokerConnected'), 'ok');
@@ -2471,6 +2564,12 @@ function connectMqtt() {
           mqttClient.publish(relayDeviceId + '/command', 'status_update');
       }, 1500);
     }
+    // Detección de presencia: arranca gris hasta que el relé responda.
+    // Solo afecta visualmente si el tipo es electric (applyRelayPresenceLayout lo respeta).
+    _relayPresent = false;
+    applyRelayPresenceLayout();   // atenúa la zona de power (electric) mientras busca
+    _relayAwaitingPoll = true;    // el status_update de arriba es el primer sondeo
+    startRelayPolling();
   });
   mqttClient.on('message', onMqttMessage);
   mqttClient.on('error', (e) => { log(t('log_mqttError').replace('{msg}', e.message), 'err'); });
@@ -2479,6 +2578,9 @@ function connectMqtt() {
     connected = false; espOnline = false;
     setStatusDots();
     document.getElementById('connect-btn').textContent = 'Connect';
+    // Caso a: se pierde el MQTT → sin relé, zona gris + parar sondeo
+    stopRelayPolling();
+    relayMarkAbsent(_userDisconnected ? null : t('log_relayConnLost'));
     // Only show alert if connection dropped unexpectedly (not from user pressing Disconnect)
     if (wasConnected && !_userDisconnected) {
       showWifiErrorModal();
@@ -2494,6 +2596,8 @@ function disconnectMqtt() {
   connected = false; espOnline = false;
   setStatusDots();
   document.getElementById('connect-btn').textContent = 'Connect';
+  stopRelayPolling();
+  relayMarkAbsent(null);   // desconexión manual: sin log de error
 }
 
 // ── Auto-refresh ESP datapoints every 5 minutes ───────────────────
@@ -2664,6 +2768,8 @@ function newFiring(skipConfirm) {
   }
   clearDatapoints();
   localStorage.removeItem('paramo.note.' + activeKilnId);
+  localStorage.removeItem(_coneKey());
+  loadCone();
   espDpCount = 0;
   if (typeof resetPowerSamples === 'function') resetPowerSamples();
   if (connected) {
@@ -2764,6 +2870,7 @@ function exportData() {
       duration_min,
       maxTemp_c,
       kilnType:     getKilnType(),
+      targetCone:   getCone(),
       mode:         currentMode || '',
       modeLabel:    (currentMode && MODES[currentMode]) ? MODES[currentMode].label : '',
       kilnName:     kiln.name || '',
@@ -2816,7 +2923,7 @@ function hddExportCloud() {
   const maxTemp_c = tcs.length ? Math.round(Math.max(...tcs) * 10) / 10 : 0;
   const kiln = kilns.find(k => k.id === activeKilnId) || {};
   const note = localStorage.getItem('paramo.note.' + activeKilnId) || '';
-  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, kilnType:getKilnType(), mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note, energy:buildEnergyMeta() }, datapoints };
+  const payload = { meta: { version:'1.0', exportedAt:now.getTime(), startedAt, duration_min, maxTemp_c, kilnType:getKilnType(), targetCone:getCone(), mode:currentMode||'', modeLabel:(currentMode&&MODES[currentMode])?MODES[currentMode].label:'', kilnName:kiln.name||'', note, energy:buildEnergyMeta() }, datapoints };
   const dateStr = now.toISOString().slice(0,10);
   const durStr  = duration_min < 60 ? Math.round(duration_min)+'m' : Math.floor(duration_min/60)+'h'+(duration_min%60?(duration_min%60)+'m':'');
   const filename = 'Paramo_' + dateStr + '_' + Math.round(maxTemp_c) + 'C_' + durStr + '.json';
@@ -2849,6 +2956,40 @@ function saveNoteModal() {
   closeNoteModal();
 }
 
+// ── Target cone (orientativo, por sesión — patrón idéntico a la nota) ──
+function _coneKey() { return 'paramo.cone.' + (activeKilnId || 'default'); }
+function getCone() { return localStorage.getItem(_coneKey()) || ''; }
+function _coneMarkActive(v) {
+  // Quitar active de todos los items, marcar el que corresponda
+  document.querySelectorAll('#hdd-cone-menu .cur-item').forEach(b => b.classList.remove('active'));
+  const id = v ? ('hdd-cone-' + v) : 'hdd-cone-_none';
+  const btn = document.getElementById(id);
+  if (btn) btn.classList.add('active');
+}
+function loadCone() {
+  const v = getCone();
+  const lbl = document.getElementById('hdd-cone-label');
+  if (lbl) lbl.textContent = v || '—';
+  const inp = document.getElementById('cone-custom-input');
+  if (inp) inp.value = '';
+  _coneMarkActive(v);
+}
+function setCone(v) {
+  localStorage.setItem(_coneKey(), v);
+  const lbl = document.getElementById('hdd-cone-label');
+  if (lbl) lbl.textContent = v || '—';
+  _coneMarkActive(v);
+  hddCloseAll();
+}
+function setConeCustom(v) {
+  const clean = (v || '').trim().slice(0, 5);
+  localStorage.setItem(_coneKey(), clean);
+  const lbl = document.getElementById('hdd-cone-label');
+  if (lbl) lbl.textContent = clean || '—';
+  // texto libre no coincide con ningún botón → ninguno active
+  document.querySelectorAll('#hdd-cone-menu .cur-item').forEach(b => b.classList.remove('active'));
+}
+
 function resetConfig() {
   if (!confirm(t('confirm_resetAll') || 'Reset all configuration? This will remove all kilns and datapoints from this browser.')) return;
   if (!confirm(t('confirm_resetAll2') || 'Are you absolutely sure? This cannot be undone.')) return;
@@ -2871,6 +3012,77 @@ function relayTopic(suffix) {
 }
 function saveRelayCfg() { /* no-op — device ID is auto-detected from incoming messages */ }
 
+// ── RELAY PRESENCE DETECTION (solo electric) ──────────────────────
+// La zona de power arranca atenuada ("buscando relé") y se ACTIVA solo
+// cuando el relé responde a status_update (handleRelayConfirm). El relé
+// puede tardar de 5 a 60 s, así que no usamos timeout de gracia: gris
+// hasta la primera confirmación. Luego sondeamos cada 2 min; tras 3
+// fallos seguidos lo damos por no presente y volvemos a gris.
+let _relayPresent = false;          // ¿confirmado vivo?
+let _relayPollTimer = null;         // intervalo de sondeo (2 min)
+let _relayPollMisses = 0;           // sondeos sin respuesta consecutivos
+let _relayAwaitingPoll = false;     // hay un sondeo en vuelo esperando respuesta
+const RELAY_POLL_MS = 120000;       // 2 minutos
+const RELAY_MAX_MISSES = 3;         // 3 fallos => muerto
+
+// Marca el relé como presente y activa la zona (si el tipo es electric)
+function relayMarkPresent() {
+  _relayPollMisses = 0;
+  _relayAwaitingPoll = false;
+  if (_relayPresent) return;        // ya estaba activo, nada que hacer
+  _relayPresent = true;
+  if (getKilnType() === 'electric') applyRelayPresenceLayout();
+}
+// Atenúa la zona de power por ausencia/pérdida del relé
+function relayMarkAbsent(reason) {
+  const wasPresent = _relayPresent;
+  _relayPresent = false;
+  _relayAwaitingPoll = false;
+  if (getKilnType() === 'electric') applyRelayPresenceLayout();
+  if (reason && wasPresent) log(reason, 'warn');
+}
+// Aplica el atenuado SOLO por presencia de relé, respetando que el layout
+// de kiln type manda: si no es electric, no tocamos nada (gas/wood/other
+// ya gestionan su propio atenuado).
+function applyRelayPresenceLayout() {
+  if (getKilnType() !== 'electric') return;
+  const control = document.getElementById('power-control-zone');
+  const energy  = document.getElementById('energy-block');
+  if (!control || !energy) return;
+  if (_relayPresent) {
+    control.classList.remove('power-dimmed');
+    energy.classList.remove('power-dimmed');
+  } else {
+    control.classList.add('power-dimmed');
+    energy.classList.add('power-dimmed');
+  }
+}
+// Inicia el sondeo periódico de estado (status_update cada 2 min)
+function startRelayPolling() {
+  stopRelayPolling();
+  _relayPollTimer = setInterval(() => {
+    if (!connected || !mqttClient || !mqttClient.connected) return;
+    // Si el sondeo anterior sigue sin respuesta, es un fallo.
+    if (_relayAwaitingPoll) {
+      _relayPollMisses++;
+      if (_relayPollMisses >= RELAY_MAX_MISSES) {
+        relayMarkAbsent(t('log_relayNoResponse'));  // 3 sondeos sin respuesta → muerto
+        // seguimos sondeando por si revive; no reseteamos el contador hasta que responda
+      }
+    }
+    // Lanzar nuevo sondeo de estado
+    _relayAwaitingPoll = true;
+    if (relayDeviceId && mqttClient && mqttClient.connected)
+      mqttClient.publish(relayDeviceId + '/command', 'status_update');
+  }, RELAY_POLL_MS);
+}
+function stopRelayPolling() {
+  if (_relayPollTimer) { clearInterval(_relayPollTimer); _relayPollTimer = null; }
+  _relayPollMisses = 0;
+  _relayAwaitingPoll = false;
+}
+
+
 function relayToggle() {
   if (!connected) { log(t('log_connectFirst'), 'warn'); return; }
   const turningOn = (relayState !== 'on');
@@ -2890,6 +3102,7 @@ function relayToggle() {
     if (relayState === optimisticState && optimisticTs > (window._lastRelayConfirmTs || 0)) {
       setRelayUI('unknown');
       log(t('log_relayTimeout'), 'warn');
+      relayMarkAbsent(null);  // comando sin confirmar → relé no responde → gris (el log de timeout ya avisa)
     }
   }, 8000);
 }
@@ -2934,6 +3147,7 @@ function handleRelayConfirm(payload) {
     else if (msg.result && typeof msg.result.output === 'boolean') output = msg.result.output;
     if (output !== null) {
       window._lastRelayConfirmTs = Date.now();
+      relayMarkPresent();   // el relé respondió → presente y activo
       const newState = output ? 'on' : 'off';
       const changed = (newState !== relayState);
       setRelayUI(newState);
@@ -2975,20 +3189,61 @@ function toggleKilnPower() {
 
 // ── KILN TYPE ────────────────────────────────────────────────────
 function _kilnTypeKey() { return 'paramo.kilnType.' + (activeKilnId || 'default'); }
-function loadKilnType() {
-  const v = localStorage.getItem(_kilnTypeKey()) || 'electric';
-  const sel = document.getElementById('kiln-type-select');
-  if (sel) sel.value = v;
-  return v;
-}
-function saveKilnType() {
-  const sel = document.getElementById('kiln-type-select');
-  if (sel) localStorage.setItem(_kilnTypeKey(), sel.value);
-}
 function getKilnType() {
   return localStorage.getItem(_kilnTypeKey()) || 'electric';
 }
+const _KTYPE_LABELS = { electric:'Electric', gas:'Gas', wood:'Wood', other:'Other' };
+// Aplica el layout de la card Kiln Power según el tipo:
+//  electric → todo activo
+//  gas      → energía oculta, control atenuado, aviso "unavailable" visible
+//  wood/other → todo (control + energía) atenuado e inerte; menú como referencia
+function applyKilnTypeLayout(v) {
+  const control = document.getElementById('power-control-zone');
+  const energy  = document.getElementById('energy-block');
+  const gasNote = document.getElementById('power-gas-note');
+  if (!control || !energy || !gasNote) return;
+  // reset
+  control.classList.remove('power-dimmed');
+  energy.classList.remove('power-dimmed');
+  energy.style.display = '';
+  gasNote.style.display = 'none';
+  if (v === 'gas') {
+    energy.style.display = 'none';        // sin watts/precio
+    control.classList.add('power-dimmed'); // turn on + status en gris
+    gasNote.style.display = '';            // aviso encima del gris
+  } else if (v === 'wood' || v === 'other') {
+    control.classList.add('power-dimmed');
+    energy.classList.add('power-dimmed');  // todo atenuado
+  }
+  // electric: activo solo si el relé está presente; si no, atenuado hasta detectarlo
+  if (v === 'electric' && !_relayPresent) {
+    control.classList.add('power-dimmed');
+    energy.classList.add('power-dimmed');
+  }
+}
+function _ktypeMarkActive(v) {
+  document.querySelectorAll('#hdd-ktype-menu .cur-item').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('hdd-ktype-' + v);
+  if (btn) btn.classList.add('active');
+}
+function loadKilnType() {
+  const v = getKilnType();
+  const lbl = document.getElementById('hdd-ktype-label');
+  if (lbl) lbl.textContent = _KTYPE_LABELS[v] || 'Electric';
+  _ktypeMarkActive(v);
+  applyKilnTypeLayout(v);
+  return v;
+}
+function setKilnType(v) {
+  localStorage.setItem(_kilnTypeKey(), v);
+  const lbl = document.getElementById('hdd-ktype-label');
+  if (lbl) lbl.textContent = _KTYPE_LABELS[v] || 'Electric';
+  _ktypeMarkActive(v);
+  applyKilnTypeLayout(v);   // cambio inmediato
+  hddCloseAll();
+}
 (function(){ loadKilnType(); })();
+(function(){ loadCone(); })();
 
 // ── ENERGY & CONSUMPTION ─────────────────────────────────────────
 // Fed by shellies/{id}/power/snapshot (script on the Shelly).
@@ -3080,6 +3335,7 @@ function handlePowerSnapshot(payload) {
   try {
     const d = JSON.parse(payload);
     lastPowerSnapshot = d;
+    relayMarkPresent();   // snapshot recibido → relé presente y activo
 
     // Update live UI
     const w = document.getElementById('energy-watts');
@@ -3922,6 +4178,8 @@ function clearChartOnly() {
     : 'Clear chart?\n\n· Local cache will be cleared.\n· ESP32 datapoints will reload automatically if connected.')) return;
   clearDatapoints();
   localStorage.removeItem('paramo.note.' + activeKilnId);
+  localStorage.removeItem(_coneKey());
+  loadCone();
   espDpCount = 0;
   log(t('log_cleared'), 'warn');
   updateMeta();
@@ -3944,14 +4202,13 @@ function firingAction() {
 function updateFiringButton() {
   const btn = document.getElementById('firing-action-btn');
   if (!btn) return;
-  const s = STRINGS[currentLang] || STRINGS.en;
   if (connected && espOnline) {
-    btn.textContent = s.newFiring;
-    btn.title = s.newFiring;
+    btn.textContent = t('newFiring');
+    btn.title = t('newFiring');
     btn.style.borderColor = '';
   } else {
-    btn.textContent = s.clearChart;
-    btn.title = s.clearChart;
+    btn.textContent = t('clearChart');
+    btn.title = t('clearChart');
     btn.style.borderColor = 'rgba(192,120,0,0.4)';
   }
 }
@@ -3969,12 +4226,19 @@ function checkStartupState() {
 
 function showStartupModal(count, ageHours) {
   _startupModalShown = true;  // Modal A tiene prioridad sobre el modal "kiln idle"
-  document.getElementById('modal-count').textContent = count;
-  let ageStr;
-  if (ageHours < 48) ageStr = 'about a day ago';
-  else if (ageHours < 168) ageStr = 'about ' + Math.round(ageHours/24) + ' days ago';
-  else ageStr = Math.round(ageHours/24) + ' days ago';
-  document.getElementById('modal-sub').textContent = 'Last activity ' + ageStr;
+  // Subtitle — "Last activity ..." via i18n keys with {n} placeholder
+  let subStr;
+  if (ageHours < 48) subStr = t('modal_sub_day');
+  else {
+    const days = Math.round(ageHours / 24);
+    subStr = t('modal_sub_days').replace('{n}', days);
+  }
+  document.getElementById('modal-sub').textContent = subStr;
+  // Body — "You have {n} stored datapoints…" with the count in bold via {n}
+  const storedEl = document.getElementById('str-modal-stored');
+  if (storedEl) storedEl.innerHTML = t('modal_stored').replace('{n}', '<b id="modal-count">' + count + '</b>');
+  const qEl = document.getElementById('str-modal-question');
+  if (qEl) qEl.textContent = t('modal_question');
   document.getElementById('startup-modal').classList.add('open');
 }
 
@@ -4192,6 +4456,8 @@ const STRINGS = {
     log_relayTimeout: 'Relay confirmation timeout — check connection',
     log_relayOn: 'Relay confirmed: ON ◉',
     log_relayOff: 'Relay confirmed: OFF ◌',
+    log_relayNoResponse: 'Relay not responding — check connections',
+    log_relayConnLost: 'Relay connection lost',
     log_connectFirst: 'Connect to MQTT first',
     log_modeSaved: 'Mode "{name}" saved',
     confirm_resetAll2: 'Are you absolutely sure? This cannot be undone.',
@@ -4216,111 +4482,32 @@ const STRINGS = {
     noteSub:        'Add your personal notes — load, atmosphere, observations. Saved with the firing JSON.',
     notePlaceholder:'Your notes here…',
     noteCancel:     'Cancel',
-    noteSave:       'Save'
-  },
-  es: {
-    thermo: 'Termopar',
-    coldJunction: 'Junta Fría',
-    rate: 'Δ Δt',
-    sessionHigh: 'Máximo',
-    sessionLow:  'Mínimo',
-    duration: 'Duración',
-    datapoints: 'Puntos',
-    kiln: 'Horno',
-    connection: 'Conexión',
-    alarmThreshold: 'Alarma de Temperatura',
-    firingMode: 'Modo de Cocción',
-    kilnPower: 'Encendido Horno',
-    session: 'Sesión',
-    eventLog: 'Registro de Eventos',
-    connect: 'Conectar',
-    disconnect: 'Desconectar',
-    exportBtn: 'Exportar',
-    newFiring: 'Nueva horneada',
-    clearChart: 'Limpiar gráfica',
-    resetCfg: 'Reset configuración',
-    turnOn: '◌ Encender',
-    turnOff: '◉ Apagar',
-    futurePh: 'futuro · placeholder',
-    set: 'Aplicar',
-    waitingData: 'Esperando datos…',
-    title: 'Monitor de Horno',
-    rateUnit: '/min',
-    sentToEsp: 'Enviado a la ESP32 — la alarma se dispara una vez al alcanzarse.',
-    relayOn: 'Encendido',
-    relayOff: 'Apagado',
-    confirm_relayOn: '¿Encender el horno? El relé se cerrará y alimentará el horno.',
-    confirm_relayOff: '¿Apagar el horno? El relé se abrirá y cortará la alimentación.',
-    confirm_resetAll: '¿Reset de toda la configuración? Se eliminarán todos los hornos y puntos de datos del navegador.',
-    confirm_deleteKiln: 'Esta acción no se puede deshacer.',
-    noEvents: 'Sin eventos',
-    connection: 'Conexión',
-    customise: 'Personalizar',
-    relayConfig: 'Config. relé',
-    relayDeviceIdLabel: 'ID del dispositivo Ogemray',
-    relayConfigNote: 'ID del dispositivo = Client ID MQTT configurado en los ajustes MQTT del Ogemray.',
-    kilnTypeLabel: 'Tipo de horno',
-    ktElectric: 'Eléctrico', ktGas: 'Gas', ktWood: 'Leña', ktOther: 'Otro',
-    energyVolts: 'Voltios',
-    energyRelayTemp: 'Temp. relé',
-    priceKwhLabel: 'Precio medio por kWh',
-    energyNote: 'Se guarda con cada horneada — usado en Journal para estimar el coste.',
-    cfgLabel: 'Configuración',
-    cfgExport: '↑ Exportar config',
-    cfgImport: '↓ Importar config',
-    cfgReset: '⚠ Reset total',
-    exportChart: 'Exportar gráfica',
-    faultTitle: 'Error de termopar',
-    faultDismiss: 'Cerrar',
-    log_espDatapoints: 'Recibidos {n} puntos de la ESP32',
-    log_espNoNew: 'Historial ESP: no hay puntos nuevos',
-    log_hostRequired: 'Host y usuario requeridos',
-    log_connecting: 'Conectando a {host}…',
-    log_brokerConnected: 'Broker conectado — esperando termopar…',
-    log_mqttError: 'Error MQTT: {msg}',
-    log_espOffline: 'ESP32 desconectada',
-    log_espOnline: 'ESP32 conectada',
-    log_fault: 'FALLO: {msg}',
-    log_faultCleared: 'Fallo de sensor resuelto',
-    log_alert: 'ALERTA: {msg}',
-    log_thresholdSet: 'Alarma fijada a {v}',
-    log_alarmOff: 'Alarma desactivada',
-    log_alarmOffDisconnected: 'Alarma desactivada (sin conexión — configura en la ESP al conectar)',
-    log_newFiringEsp: 'Nueva horneada iniciada — historial de la ESP32 limpiado',
-    log_newFiringLocal: 'Nueva horneada iniciada (solo local — ESP32 no conectada)',
-    log_exported: 'Datos de horneada exportados ({n} puntos)',
-    log_configExported: 'Config exportada ({n} horno)',
-    log_configExportedPlural: 'Config exportada ({n} hornos)',
-    log_invalidConfig: 'Archivo de configuración inválido',
-    log_relayCmd: 'Comando enviado al relé — esperando confirmación…',
-    log_relayTimeout: 'Tiempo de espera del relé agotado — revisa la conexión',
-    log_relayOn: 'Relé confirmado: ENCENDIDO ◉',
-    log_relayOff: 'Relé confirmado: APAGADO ◌',
-    log_connectFirst: 'Conecta al MQTT primero',
-    log_modeSaved: 'Modo "{name}" guardado',
-    confirm_resetAll2: '¿Estás completamente seguro? Esta acción no se puede deshacer.',
-    me_name: 'Nombre',
-    me_duration: 'Duración est. (h)',
-    me_maxtemp: 'Temp. máxima (°C)',
-    me_rate: 'Tasa media (°C/h)',
-    me_peakhold: 'Espera en pico (min)',
-    me_holdtemp: 'Temp. de espera (°C) — espera previa al apagado (opcional)',
-    me_note: 'Nota personal',
-    me_save: 'Guardar',
-    pillServer: 'Servidor',
-    pillKiln: 'Horno',
-    pillKilnOnline: 'Horno conectado',
-    pillKilnConnecting: 'Horno…',
-    journal: 'Diario',
-    exportFiring:   'Exportar horneada',
-    exportDownload: '↓ Descargar',
-    exportCloud:    '☁ Subir a la nube',
-    addNote:        'Añadir nota',
-    noteTitle:      'Nota de horneada',
-    noteSub:        'Añade tus notas personales — carga, atmósfera, observaciones. Se guarda con el JSON.',
-    notePlaceholder:'Tus notas aquí…',
-    noteCancel:     'Cancelar',
-    noteSave:       'Guardar'
+    noteSave:       'Save',
+    // ── i18n audit pass — newly mapped strings ──
+    lbl_host:          'HiveMQ Host',
+    lbl_user:          'Username',
+    lbl_pass:          'Password',
+    mode_bisque:       'Bisque',
+    mode_glaze:        'Glaze',
+    mode_crystalline:  'Crystalline',
+    mode_raku:         'Raku',
+    cooldown_title:    'Cooldown Alarm Threshold',
+    coneLabel:         'Target cone',
+    coneNote:          'Reference only — used to tag and search firings in the Journal.',
+    coneNone:          '— None —',
+    coneCustom:        'Custom',
+    me_name_ph:        'Mode name',
+    me_holdtemp_ph:    '0 = none',
+    me_note_ph:        'Your notes (any language)',
+    cooldown_note:     'Notifies once when the kiln cools past this point (150–550°C).',
+    relay_status_lbl:  'Status',
+    alarm_modal_title: 'Alarm threshold reached',
+    alarm_modal_ok:    'OK',
+    wifi_modal_title:  'WiFi error',
+    wifi_modal_msg:    'Connection lost',
+    wifi_modal_sub:    'The kiln controller or the computer lost WiFi suddenly.<br>Please check your connection and reconnect.',
+    wifi_modal_ok:     'OK',
+    fault_modal_sub:   'Check thermocouple connection and wiring.<br>The kiln should not be operated until this is resolved.'
   }
 };
 
@@ -4348,43 +4535,39 @@ function _applyStrings(s) {
   // Merge into active strings — t() uses this from anywhere in JS
   _activeStrings = Object.assign({}, STRINGS['en'], s);
 
+  // Helper: set textContent by element id (robust, order-independent)
+  const _setTxt = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+
   // Header title
   const ht = document.getElementById('header-title');
   if (ht) ht.textContent = s.title || 'Kiln Monitor';
 
-  // Temp labels
-  const tcLbl = document.querySelector('.temp-main-lbl');
-  if (tcLbl) tcLbl.textContent = s.thermo;
-  const miniLbls = document.querySelectorAll('.temp-mini-lbl');
-  if (miniLbls[0]) miniLbls[0].textContent = s.coldJunction;
-  if (miniLbls[1]) miniLbls[1].textContent = s.rate;
+  // Temp labels — by id (robust)
+  _setTxt('str-temp-main', s.thermo);
+  _setTxt('str-temp-cj', s.coldJunction);
+  _setTxt('str-temp-rate', s.rate);
 
-  // Chart meta labels
-  const stats = document.querySelectorAll('.chart-stat-lbl');
-  if (stats[0]) stats[0].textContent = s.sessionHigh;
-  if (stats[1]) stats[1].textContent = s.sessionLow;
-  if (stats[2]) stats[2].textContent = s.duration;
-  if (stats[3]) stats[3].textContent = s.datapoints;
+  // Chart meta labels — by id (robust)
+  _setTxt('str-stat-high', s.sessionHigh);
+  _setTxt('str-stat-low', s.sessionLow);
+  _setTxt('str-stat-dur', s.duration);
+  _setTxt('str-stat-dp', s.datapoints);
 
-  // Card titles in sidebar
-  const titles = document.querySelectorAll('.card-title');
-  // Order: Kiln, Alarm Threshold, Kiln Power, Session, Firing Mode, Event Log
-  const order = [s.kiln, s.alarmThreshold, s.session, s.kilnPower, s.firingMode, s.eventLog];
-  titles.forEach((el, i) => { if (order[i]) el.textContent = order[i]; });
+  // Card titles in sidebar — by explicit id (robust, order-independent)
+  _setTxt('str-card-kiln', s.kiln);
+  _setTxt('str-card-alarm', s.alarmThreshold);
+  _setTxt('str-card-session', s.session);
+  _setTxt('str-kiln-power-title', s.kilnPower);
+  _setTxt('str-card-mode', s.firingMode);
+  _setTxt('str-log-panel-title', s.eventLog);
 
   // Connect button (toggle text by state)
   const cbtn = document.getElementById('connect-btn');
   if (cbtn) cbtn.textContent = connected ? s.disconnect : s.connect;
 
-  // Mode tiles (preserve case via innerHTML keep)
-  // Set buttons text in sidebar
-  const buttons = document.querySelectorAll('.btn-sm');
-  buttons.forEach(b => {
-    const t = b.textContent.trim();
-    if (t === 'Export' || t === 'Exportar') b.textContent = s.exportBtn;
-    else if (t === 'New firing' || t === 'Nueva horneada') b.textContent = s.newFiring;
-    else if (t === 'Clear chart' || t === 'Limpiar gráfica') b.textContent = s.clearChart;
-  });
+  // Firing action button (New firing / Clear chart by state) — handled by its own
+  // state-aware function instead of fragile text matching.
+  if (typeof updateFiringButton === 'function') updateFiringButton();
 
   // Reset config danger button
   const resetBtn = document.querySelector('.btn.danger');
@@ -4490,9 +4673,19 @@ function _applyStrings(s) {
   if (strKilnPowerTitle) strKilnPowerTitle.textContent = s.kilnPower || 'Kiln Power';
   const strKilnTypeLbl = document.getElementById('str-kiln-type-label');
   if (strKilnTypeLbl) strKilnTypeLbl.textContent = s.kilnTypeLabel || 'Kiln type';
-  const ktMap = {electric:'str-kt-electric',gas:'str-kt-gas',wood:'str-kt-wood',other:'str-kt-other'};
   const ktStr = {electric:s.ktElectric||'Electric',gas:s.ktGas||'Gas',wood:s.ktWood||'Wood',other:s.ktOther||'Other'};
-  Object.entries(ktMap).forEach(([v,id])=>{ const el=document.getElementById(id); if(el) el.textContent=ktStr[v]; });
+  // Botones del dropdown de kiln type
+  Object.entries(ktStr).forEach(([v,txt])=>{ const el=document.getElementById('hdd-ktype-'+v); if(el) el.textContent=txt; });
+  // Etiquetas para el trigger (se reflejan al seleccionar y al cargar)
+  if (typeof _KTYPE_LABELS === 'object') { _KTYPE_LABELS.electric=ktStr.electric; _KTYPE_LABELS.gas=ktStr.gas; _KTYPE_LABELS.wood=ktStr.wood; _KTYPE_LABELS.other=ktStr.other; }
+  // Refrescar el label del trigger con el tipo actual ya traducido
+  const ktLbl = document.getElementById('hdd-ktype-label');
+  if (ktLbl && typeof getKilnType === 'function') ktLbl.textContent = ktStr[getKilnType()] || ktStr.electric;
+  // Aviso de gas
+  const gasUnav = document.getElementById('str-gas-unavailable');
+  if (gasUnav) gasUnav.textContent = s.gasUnavailable || 'Unavailable at the moment.';
+  const gasRead = document.getElementById('str-gas-read');
+  if (gasRead) gasRead.textContent = s.gasRead || 'Read: Kiln Power Guide';
   const strEnergyTc = document.getElementById('str-energy-tc');
   if (strEnergyTc) strEnergyTc.textContent = s.energyRelayTemp || 'Relay temp';
   const strPriceLbl = document.getElementById('str-price-kwh-label');
@@ -4522,6 +4715,50 @@ function _applyStrings(s) {
     const el = document.getElementById(id);
     if (el) el.textContent = txt;
   });
+
+  // ── i18n: newly mapped strings (audit pass) ─────────────────────
+  // Simple id→key assignments via _setTxt (symbol-free, single line)
+  _setTxt('str-lbl-host', s.lbl_host);
+  _setTxt('str-lbl-user', s.lbl_user);
+  _setTxt('str-lbl-pass', s.lbl_pass);
+  _setTxt('str-mode-bisque', s.mode_bisque);
+  _setTxt('str-mode-glaze', s.mode_glaze);
+  _setTxt('str-mode-crystalline', s.mode_crystalline);
+  _setTxt('str-mode-raku', s.mode_raku);
+  _setTxt('str-cooldown-title', s.cooldown_title);
+  _setTxt('str-cone-label', s.coneLabel);
+  _setTxt('str-cone-note', s.coneNote);
+  _setTxt('str-cone-none', s.coneNone);
+  // Placeholders (no textContent) — set via .placeholder
+  const _setPh = (id, val) => { const el = document.getElementById(id); if (el && val) el.placeholder = val; };
+  _setPh('cone-custom-input', s.coneCustom);
+  _setPh('me-label', s.me_name_ph);
+  _setPh('me-holdtemp', s.me_holdtemp_ph);
+  _setPh('me-note', s.me_note_ph);
+  _setTxt('str-cooldown-note', s.cooldown_note);
+  _setTxt('str-relay-status-lbl', s.relay_status_lbl);
+  _setTxt('str-alarm-modal-title', s.alarm_modal_title);
+  _setTxt('str-alarm-modal-ok', s.alarm_modal_ok);
+  _setTxt('str-wifi-modal-title', s.wifi_modal_title);
+  _setTxt('str-wifi-modal-msg', s.wifi_modal_msg);
+  _setTxt('str-wifi-modal-ok', s.wifi_modal_ok);
+  _setTxt('str-fault-modal-sub', null); // set via innerHTML below (has <br>)
+  _setTxt('str-modal-title-prev', s.modal_title_prev);
+  _setTxt('str-modal-question', s.modal_question);
+  _setTxt('str-modal-export', s.modal_export);
+  _setTxt('str-modal-continue', s.modal_continue);
+  _setTxt('str-modal-new', s.modal_new);
+
+  // Footer pills — keep the leading symbol, translate the word
+  const _setPill = (id, sym, val) => { const el = document.getElementById(id); if (el && val) el.textContent = sym + ' ' + val; };
+  _setPill('str-footer-contact', '✉', s.footer_contact);
+  _setPill('str-footer-guide', '◎', s.footer_guide);
+  _setPill('str-footer-licence', '⊙', s.footer_licence);
+
+  // Modal subs with embedded <br> — set via innerHTML, two sentences joined
+  const _setHtml = (id, val) => { const el = document.getElementById(id); if (el && val) el.innerHTML = val; };
+  _setHtml('str-wifi-modal-sub', s.wifi_modal_sub);
+  _setHtml('str-fault-modal-sub', s.fault_modal_sub);
 
   // Status pills — re-render with new lang
   if (typeof setStatusDots === 'function') setStatusDots();
