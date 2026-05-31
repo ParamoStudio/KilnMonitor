@@ -89,7 +89,7 @@ The Ogemray runs a small script that publishes power snapshots to the broker eve
 1. Open the Ogemray's local web interface.
 2. Go to **Scripts → Add script**.
 3. Name it `paramo-power`.
-4. Paste the contents of [`paramo-shelly-script.js`](https://github.com/ParamoStudio/KilnMonitor/blob/main/paramo-shelly-script.js).
+4. Paste the contents of [`paramo-shelly-script.js`](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/paramo-shelly-script.js).
 5. Click **Save**, then **Start**.
 6. Enable **Run on startup**.
 
@@ -245,7 +245,7 @@ El Ogemray ejecuta un pequeño script que publica snapshots de consumo al broker
 1. Abre la interfaz web local del Ogemray.
 2. Ve a **Scripts → Añadir script**.
 3. Ponle el nombre `paramo-power`.
-4. Pega el contenido de [`paramo-shelly-script.js`](https://github.com/ParamoStudio/KilnMonitor/blob/main/paramo-shelly-script.js).
+4. Pega el contenido de [`paramo-shelly-script.js`](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/paramo-shelly-script.js).
 5. Haz clic en **Guardar** y luego en **Iniciar**.
 6. Activa **Ejecutar al arrancar**.
 
