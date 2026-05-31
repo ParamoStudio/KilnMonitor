@@ -6,7 +6,7 @@
 
 > **This is a living document.** Páramo is an evolving, one-person project, and some failure modes will only surface (and get properly documented) after extensive real-world firing. If you hit something not listed here, it's genuinely useful feedback — please open an issue on GitHub.
 
-This guide is aimed at the **everyday user** of a Páramo monitor that's already built or bought: what you might see, and what to do about it, in plain terms. Anything that involves wiring, code, the serial console, or flashing firmware lives in the separate **Build & Flashing guide**, not here.
+This guide is aimed at the **everyday user** of a Páramo monitor that's already built or bought: what you might see, and what to do about it, in plain terms. Anything that involves wiring, code, the serial console, or flashing firmware lives in the separate **[Build Your Own](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Build.md)**, not here.
 
 A general rule before anything else: **if something behaves strangely, the first thing to try is turning the monitor off and on again.** A surprising number of transient glitches clear with a clean restart.
 
