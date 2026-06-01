@@ -319,5 +319,6 @@
   "firingCountFiltered": " (filtered from {total})",
   "firingNoMatch": "{total} loaded — 0 match",
   "filterAllDates": "All dates",
-  "driveDisconnect": "✓ Disconnect Drive"
+  "driveDisconnect": "✓ Disconnect Drive",
+  "addLanguage": "Add a language"
 }
