@@ -319,5 +319,6 @@
   "firingCountFiltered": " (filtradas de {total})",
   "firingNoMatch": "{total} cargadas — 0 coinciden",
   "filterAllDates": "Todas las fechas",
-  "driveDisconnect": "✓ Desconectar Drive"
+  "driveDisconnect": "✓ Desconectar Drive",
+  "addLanguage": "Añadir un idioma"
 }
