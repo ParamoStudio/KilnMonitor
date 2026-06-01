@@ -312,5 +312,12 @@
   "coneCustom": "Custom",
   "me_name_ph": "Mode name",
   "me_holdtemp_ph": "0 = none",
-  "me_note_ph": "Your notes (any language)"
+  "me_note_ph": "Your notes (any language)",
+  "_section_fixes3": "── NEW: test-pass 3 (journal count, date/type filters, overlay) ──",
+  "firingCountOne": "{n} firing",
+  "firingCountMany": "{n} firings",
+  "firingCountFiltered": " (filtered from {total})",
+  "firingNoMatch": "{total} loaded — 0 match",
+  "filterAllDates": "All dates",
+  "driveDisconnect": "✓ Disconnect Drive"
 }
