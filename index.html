@@ -1917,7 +1917,7 @@ body.dark .log-fab {
             <!-- GAS NOTICE — solo visible en modo gas -->
             <div class="power-gas-note" id="power-gas-note" style="display:none;">
               <span id="str-gas-unavailable">Unavailable at the moment.</span>
-              <a href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power.md" target="_blank" rel="noopener" id="str-gas-read">Read: Kiln Power Guide</a>
+              <a href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power" target="_blank" rel="noopener" id="str-gas-read">Read: Kiln Power Guide</a>
             </div>
 
             <!-- CONTROL ZONE (turn on + status) -->
@@ -4335,8 +4335,19 @@ function buildLangSelector() {
   menu.innerHTML = '';
   LANG_MANIFEST.forEach(code => {
     const btn = document.createElement('button');
-    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
     btn.id = 'hdd-lang-' + code;
+    // "add" is not a language — it links to the Add a Language guide
+    if (code === 'add') {
+      btn.className = 'hdd-item';
+      btn.textContent = '+ ' + (t('addLanguage') || 'Add a language');
+      btn.onclick = () => {
+        window.open('https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Add%20a%20Language.md', '_blank', 'noopener');
+        hddCloseAll();
+      };
+      menu.appendChild(btn);
+      return;
+    }
+    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
     btn.textContent = code.toUpperCase();
     btn.onclick = () => {
       LANG_MANIFEST.forEach(c => {
@@ -4416,6 +4427,7 @@ const STRINGS = {
     noEvents: 'No events yet',
     connection: 'Connection',
     customise: 'Customise',
+    addLanguage: 'Add a language',
     relayConfig: 'Relay config',
     relayDeviceIdLabel: 'Ogemray Device ID',
     relayConfigNote: 'Device ID = MQTT Client ID set in the Ogemray\'s MQTT settings.',
@@ -4759,6 +4771,10 @@ function _applyStrings(s) {
   const _setHtml = (id, val) => { const el = document.getElementById(id); if (el && val) el.innerHTML = val; };
   _setHtml('str-wifi-modal-sub', s.wifi_modal_sub);
   _setHtml('str-fault-modal-sub', s.fault_modal_sub);
+
+  // "Add a language" menu entry — refresh its label on language change
+  const _addLangBtn = document.getElementById('hdd-lang-add');
+  if (_addLangBtn) _addLangBtn.textContent = '+ ' + (s.addLanguage || 'Add a language');
 
   // Status pills — re-render with new lang
   if (typeof setStatusDots === 'function') setStatusDots();
