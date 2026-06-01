@@ -312,5 +312,12 @@
   "coneCustom": "Propio",
   "me_name_ph": "Nombre del modo",
   "me_holdtemp_ph": "0 = ninguno",
-  "me_note_ph": "Tus notas (en cualquier idioma)"
+  "me_note_ph": "Tus notas (en cualquier idioma)",
+  "_section_fixes3": "── NEW: test-pass 3 (journal count, date/type filters, overlay) ──",
+  "firingCountOne": "{n} horneada",
+  "firingCountMany": "{n} horneadas",
+  "firingCountFiltered": " (filtradas de {total})",
+  "firingNoMatch": "{total} cargadas — 0 coinciden",
+  "filterAllDates": "Todas las fechas",
+  "driveDisconnect": "✓ Desconectar Drive"
 }
