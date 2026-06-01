@@ -391,8 +391,12 @@ const STRINGS = {
     loadFiles:'↓ Load files', connectCloud:'☁ Connect cloud',
     dateRange:'Date range', maxTemp:'Max temp (°C)', duration:'Duration (h)', type:'Type', allTypes:'All types', clear:'Clear',
     filterKilnType:'Kiln', filterCone:'Cone',
+    firingCountOne:'{n} firing', firingCountMany:'{n} firings', firingCountFiltered:' (filtered from {total})',
+    firingNoMatch:'{total} loaded — 0 match', filterAllDates:'All dates', driveDisconnect:'✓ Disconnect Drive',
+    statKilnType:'Kiln type', statCone:'Target cone', shareEcoNote:'* Rendered in greyscale to minimise ink, resources and ecological footprint. Care for the planet.',
+    calThisMonth:'This month', calThisWeek:'This week',
     importLabel:'↑ Import', localHint:'Local', loadFilesMenu:'↓ Load files', cloudHint:'Cloud', connectDrive:'☁ Connect Google Drive',
-    backBtn:'← Kiln monitor', noCloud:'No cloud',
+    backBtn:'← Kiln monitor', noCloud:'No cloud', addLanguage:'Add a language',
     statMaxTemp:'Max temp', statDuration:'Duration', statPoints:'Datapoints', statMode:'Firing type',
     statEnergy:'Energy', statCost:'Cost',
     notesLabel:'Notes', sharePng:'↓ Share chart (PNG)', noDatapoints:'No datapoints',
@@ -431,12 +435,24 @@ function _applyStrings(s) {
   set('str-stat-dur',   t('statDuration'));
   set('str-stat-pts',   t('statPoints'));
   set('str-stat-mode',  t('statMode'));
+  set('str-stat-ktype', t('statKilnType'));
+  set('str-stat-cone',  t('statCone'));
   set('str-stat-energy',t('statEnergy'));
   set('str-stat-cost',  t('statCost'));
   set('str-notes-label',t('notesLabel'));
   set('str-share-png',  t('sharePng'));
   const sel = document.getElementById('f-mode');
   if (sel && sel.options[0]) sel.options[0].text = t('allTypes');
+  // Date filter placeholder + first option of ktype/cone selects (shown before data loads)
+  const fdate = document.getElementById('f-date-display');
+  if (fdate) fdate.placeholder = t('filterAllDates');
+  const selKtype = document.getElementById('f-ktype');
+  if (selKtype && selKtype.options[0]) selKtype.options[0].text = t('allTypes');
+  const selCone = document.getElementById('f-cone');
+  if (selCone && selCone.options[0]) selCone.options[0].text = t('allTypes');
+  // "Add a language" menu entry — refresh its label on language change
+  const _addLangBtn = document.getElementById('hdd-lang-add');
+  if (_addLangBtn) _addLangBtn.textContent = '+ ' + (t('addLanguage') || 'Add a language');
   if (!allFirings.length) set('panel-count', t('noFirings'));
   renderList();
 }
@@ -477,8 +493,21 @@ function buildLangSelector() {
   menu.innerHTML = '';
   LANG_MANIFEST.forEach(code => {
     const btn = document.createElement('button');
-    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
     btn.id = 'hdd-lang-' + code;
+    // "add" is not a language — it links to the Add a Language guide
+    if (code === 'add') {
+      btn.className = 'hdd-item';
+      btn.textContent = '+ ' + (t('addLanguage') || 'Add a language');
+      btn.onclick = () => {
+        window.open('https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Add%20a%20Language.md', '_blank', 'noopener');
+        document.getElementById('hdd-lang-menu').classList.remove('open');
+        document.getElementById('hdd-lang-btn').classList.remove('active');
+        _langOpen = false;
+      };
+      menu.appendChild(btn);
+      return;
+    }
+    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
     btn.textContent = code.toUpperCase();
     btn.onclick = () => {
       LANG_MANIFEST.forEach(c => { const el = document.getElementById('hdd-lang-'+c); if(el) el.classList.remove('active'); });
@@ -833,7 +862,7 @@ function renderList() {
     document.getElementById('str-empty-sub').textContent   = t('noFiringsMsg');
     document.querySelector('.empty-actions').style.display = '';
     const cloudBtn = document.getElementById('str-empty-cloud');
-    if (cloudBtn) cloudBtn.textContent = driveConnected ? '✓ Disconnect Drive' : t('connectCloud');
+    if (cloudBtn) cloudBtn.textContent = driveConnected ? t('driveDisconnect') : t('connectCloud');
     return;
   }
   const show = filtered;
@@ -842,11 +871,13 @@ function renderList() {
     document.getElementById('str-empty-title').textContent = t('noMatches');
     document.getElementById('str-empty-sub').textContent   = t('noMatchesMsg');
     document.querySelector('.empty-actions').style.display = 'none';
-    count.textContent = allFirings.length + ' loaded — 0 match';
+    count.textContent = t('firingNoMatch').replace('{total}', allFirings.length);
     return;
   }
   list.style.display='flex'; empty.style.display='none';
-  count.textContent = show.length + (show.length!==1?' firings':' firing') + (show.length<allFirings.length?' (filtered from '+allFirings.length+')':'');
+  const _cntBase = (show.length !== 1 ? t('firingCountMany') : t('firingCountOne')).replace('{n}', show.length);
+  const _cntFiltered = show.length < allFirings.length ? t('firingCountFiltered').replace('{total}', allFirings.length) : '';
+  count.textContent = _cntBase + _cntFiltered;
   list.innerHTML='';
   show.forEach((f,i) => {
     const m=f.meta;
