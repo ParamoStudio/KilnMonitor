@@ -16,14 +16,27 @@ Browser-based monitoring dashboard for the Páramo Kiln Monitor. Connects to you
 ├── favicon.ico
 └── lang/
     ├── manifest.json   # Available languages
-    ├── en.json         # English strings
-    └── es.json         # Spanish strings
+    ├── en.json         # English strings (source of truth)
+    ├── es.json         # Spanish
+    ├── cat.json        # Catalan
+    ├── de.json         # German
+    ├── fr.json         # French
+    ├── ru.json         # Russian
+    ├── zh.json         # Chinese (Simplified)
+    └── jap.json        # Japanese
 ```
-You can add any language you need if your preffered one is not already implemented!
-1. Copy the en.json and translate the texts to any language you preffer.
-2. Call it X.json (Example: JAP for Japanese)
-3. Add Jap.json to the Manifest.json.
-4. Reload the website. Delete cache and reload again if it is not working.
+
+English also lives inline in each HTML as an offline fallback; every other language is loaded only from its JSON file.
+
+You can add any language you need if yours is not already there:
+
+1. Copy `en.json` and translate the **values** (not the keys). Keep `{placeholders}`, `<br>` and `\n` intact, and leave proper nouns (Páramo, HiveMQ, etc.) untranslated.
+2. Name it `xx.json` (e.g. `jap.json` for Japanese) and update its `_meta` block.
+3. Add the code `"xx"` to `manifest.json`.
+4. Reload the site. Clear the cache and reload again if it doesn't show up.
+
+Full guide: [Add a Language](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Add%20a%20Language.md).
+
 ---
 
 ## Features
@@ -35,10 +48,13 @@ Connects to your kiln's ESP32 via HiveMQ Cloud (MQTT over WebSocket). Temperatur
 Select a firing type (Bisque, Glaze, Crystalline, Raku) to overlay a reference ramp curve on the chart and tag the session for later search.
 
 **Alarm threshold**
-Set a target temperature — the ESP32 fires an alert once when it's reached, independently of the browser.
+Set a target temperature — the ESP32 fires an alert once when it's reached, independently of the browser. A separate cooldown alarm can warn you once the kiln has cooled past a safe point.
 
 **Kiln power**
 Optional MQTT relay bridge to cut kiln power remotely in case of emergency. See the [Kiln Power Guide](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power).
+
+**Kiln type**
+Tag each kiln as electric, gas, wood or other — controls which power options appear and lets you filter by type in the journal.
 
 **Notes**
 Add free-text observations during or after a firing before exporting. Saved with the session JSON.
@@ -47,10 +63,10 @@ Add free-text observations during or after a firing before exporting. Saved with
 Export your full configuration and firing data as JSON. Re-import on any device. Useful for backups and moving between setups.
 
 **Firing journal**
-Searchable database of all your exported sessions. Load files locally or connect Google Drive for automatic sync. Filter by date, temperature, duration, and firing type.
+Searchable database of all your exported sessions. Load files locally or connect Google Drive for automatic sync. Filter by date, temperature, duration, firing type, kiln type and target cone. Export any firing as a printable greyscale PNG to share or keep on paper.
 
 **Internationalisation**
-UI language switches between English and Spanish via a dropdown. Language preference persists across sessions. Adding a new language is a matter of adding a JSON file to `/lang/` and its code to `manifest.json`.
+UI available in eight languages, switchable from a dropdown: English, Spanish, Catalan, German, French, Russian, Chinese and Japanese. Your choice persists across sessions and pages. Adding a new language is a matter of dropping a JSON file into `/lang/` and its code into `manifest.json`.
 
 **Dark / light theme**
 Synced with the dashboard via `localStorage`. Persists across pages.
