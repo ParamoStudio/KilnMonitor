@@ -114,7 +114,20 @@ static const int    N_LANGS = 6;   // ← was 5
 - Keep the order of every `STRINGS_X[]` array identical to the `StringID` enum. When you add a new string to the enum, add it to every language file (or leave `nullptr`).
 
 ---
+
+> **Note — adding a whole new language to the web app (not a feature)**
+>
+> The guide above covers the **device firmware** (OLED). The **web app** uses a separate, simpler system: a JSON dictionary per language. To add a full language to the web:
+>
+> 1. Copy `lang/es.json` to `lang/xx.json` (xx = the language code).
+> 2. Translate the **values** (not the keys, not the `_meta`/`_section` entries, not proper nouns). Keep `{placeholders}`, `<br>` and `\n` intact.
+> 3. Update the new file's `_meta` (`code`, `name`).
+> 4. Add the code `"xx"` to the array in `lang/manifest.json`.
+> 5. The device OLED screen is a separate system — see the top of this guide. This step is web only.
+
 ---
+---
+
 
 <a name="anadir-idiomas-espanol"></a>
 
@@ -230,3 +243,16 @@ static const int    N_LANGS = 6;   // ← antes era 5
 - El carrusel muestra 5 idiomas a la vez (centro + 2 a cada lado). Con 6+ funciona bien; el resto se ven al rotar. Con **menos de 5** los laterales se repiten y se ve raro — mantén al menos 5.
 - El fallback a inglés en `T()` hace seguras las traducciones parciales: las entradas sin traducir salen en inglés en vez de romperse.
 - Mantén el orden de cada array `STRINGS_X[]` idéntico al enum `StringID`. Cuando añadas una cadena nueva al enum, añádela a cada archivo de idioma (o deja `nullptr`).
+
+> **Nota — añadir un idioma entero a la app web (no una función)**
+>
+> La guía de arriba cubre el **firmware del dispositivo** (OLED). La **app web** usa un sistema aparte, más sencillo: un diccionario JSON por idioma. Para añadir un idioma completo a la web:
+>
+> 1. Copia `lang/es.json` a `lang/xx.json` (xx = el código del idioma).
+> 2. Traduce los **valores** (no las claves, no las entradas `_meta`/`_section`, no los nombres propios). Conserva `{placeholders}`, `<br>` y `\n` intactos.
+> 3. Actualiza el `_meta` del nuevo archivo (`code`, `name`).
+> 4. Añade el código `"xx"` al array de `lang/manifest.json`.
+> 5. La pantalla OLED del dispositivo es un sistema aparte — mira la parte de arriba de esta guía. Este paso es solo de la web.
+---
+---
+
