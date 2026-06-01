@@ -51,7 +51,7 @@ Select a firing type (Bisque, Glaze, Crystalline, Raku) to overlay a reference r
 Set a target temperature — the ESP32 fires an alert once when it's reached, independently of the browser. A separate cooldown alarm can warn you once the kiln has cooled past a safe point.
 
 **Kiln power**
-Optional MQTT relay bridge to cut kiln power remotely in case of emergency. See the [Kiln Power Guide](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power).
+Optional MQTT relay bridge to cut kiln power remotely in case of emergency. See the [Kiln Power Guide](https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power.md).
 
 **Kiln type**
 Tag each kiln as electric, gas, wood or other — controls which power options appear and lets you filter by type in the journal.
