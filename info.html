@@ -3,473 +3,1150 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Páramo — Kiln Journal</title>
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<title>Páramo — Info</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js" async defer></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Roboto+Mono:wght@100;200;300&display=swap" rel="stylesheet">
 <style>
+/* ── THEME — identical tokens to dashboard ── */
 :root {
-  --bg:#f4f1ed; --surface:rgba(255,255,255,0.55); --surface2:rgba(255,255,255,0.78);
-  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
-  --text:#0f0d08; --text-soft:#2a2620; --muted:#635b50; --dimmer:#9a9286;
-  --accent:#d8421a; --mono:'DM Mono',monospace; --serif:'Fraunces',serif;
-  --input-bg:rgba(255,255,255,0.65); --r-pill:999px; --r-card:14px;
+  --bg:        #f4f1ed;
+  --surface:   rgba(255,255,255,0.55);
+  --surface2:  rgba(255,255,255,0.78);
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.14);
+  --text:      #0f0d08;
+  --text-soft: #2a2620;
+  --muted:     #635b50;
+  --dimmer:    #9a9286;
+  --c-orange:  #ff4800;
+  --c-magenta: #de00ff;
+  --c-indigo:  #3d3dff;
+  --c-azure:   #007cf0;
+  --accent:    #d8421a;
+  --mono:      'DM Mono', monospace;
+  --serif:     'Fraunces', serif;
+  --input-bg:  rgba(255,255,255,0.65);
 }
 body.dark {
-  --bg:#14110d; --surface:rgba(48,42,32,0.65); --surface2:rgba(58,50,38,0.85);
-  --border:rgba(255,255,255,0.10); --border2:rgba(255,255,255,0.20);
-  --text:#fff8e8; --text-soft:#e8e0d0; --muted:#b8b0a0; --dimmer:#807868;
-  --accent:#ff7040; --input-bg:rgba(255,255,255,0.06);
+  --bg:        #14110d;
+  --surface:   rgba(48,42,32,0.65);
+  --surface2:  rgba(58,50,38,0.85);
+  --border:    rgba(255,255,255,0.10);
+  --border2:   rgba(255,255,255,0.20);
+  --text:      #fff8e8;
+  --text-soft: #e8e0d0;
+  --muted:     #b8b0a0;
+  --dimmer:    #807868;
+  --c-orange:  #ff7040;
+  --c-magenta: #ff60ff;
+  --c-indigo:  #8080ff;
+  --c-azure:   #5cb8ff;
+  --accent:    #ff7040;
+  --input-bg:  rgba(255,255,255,0.06);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);-webkit-font-smoothing:antialiased;overflow:hidden;}
-#blob-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
-body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:0.025;pointer-events:none;z-index:1;}
 
-.stage{position:relative;z-index:2;width:100%;height:100vh;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;box-sizing:border-box;}
-.panel{width:100%;max-width:860px;height:100%;display:flex;flex-direction:column;background:var(--surface2);border:1px solid var(--border2);border-radius:28px;backdrop-filter:blur(40px) saturate(1.6);-webkit-backdrop-filter:blur(40px) saturate(1.6);box-shadow:0 8px 48px rgba(0,0,0,.10),0 2px 12px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.55);opacity:0;transform:scale(0.96) translateY(12px);animation:panelIn 0.45s cubic-bezier(.16,1,.3,1) 0.05s forwards;}
-body.dark .panel{box-shadow:0 8px 48px rgba(0,0,0,.35),0 2px 12px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);}
-@keyframes panelIn{to{opacity:1;transform:none;}}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HEADER */
-.panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px 0;flex-shrink:0;gap:8px;}
-.header-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.panel-wordmark{font-family:var(--serif);font-weight:300;font-size:1.05rem;color:var(--muted);flex-shrink:0;}
-.header-right{display:flex;align-items:center;gap:5px;}
-
-/* PILLS */
-.pill-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r-pill);border:1px solid var(--border2);background:var(--input-bg);font-family:var(--mono);font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:color .15s;white-space:nowrap;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
-.pill-btn:hover{color:var(--text);}
-.pill-btn.active{color:var(--text);border-color:var(--accent);}
-.panel-back{padding:5px 10px;border-radius:var(--r-pill);border:1px solid var(--border2);background:var(--input-bg);font-family:var(--mono);font-size:0.68rem;color:var(--dimmer);cursor:pointer;transition:color .15s;white-space:nowrap;backdrop-filter:blur(12px);}
-.panel-back:hover{color:var(--text);}
-.hdd-chevron{font-size:0.55rem;opacity:0.6;}
-
-/* LANG DROPDOWN */
-.hdd-wrap{position:relative;}
-.hdd-menu{position:absolute;top:calc(100% + 6px);right:0;left:auto;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:6px;min-width:90px;backdrop-filter:blur(32px) saturate(1.4);-webkit-backdrop-filter:blur(32px) saturate(1.4);box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:500;display:none;animation:menuIn .2s cubic-bezier(.16,1,.3,1);}
-.hdd-menu.open{display:block;}
-.hdd-wrap{position:relative;}
-@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.97);}to{opacity:1;transform:none;}}
-.hdd-item{display:block;width:100%;padding:7px 12px;border-radius:8px;border:none;background:none;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-soft);cursor:pointer;text-align:left;transition:background .12s;}
-.hdd-item:hover{background:var(--input-bg);}
-.hdd-item.active{color:var(--accent);}
-
-/* IMPORT MENU */
-.import-wrap{position:relative;}
-.import-menu{position:absolute;top:calc(100% + 6px);right:0;left:auto;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:6px;min-width:190px;backdrop-filter:blur(32px) saturate(1.4);-webkit-backdrop-filter:blur(32px) saturate(1.4);box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:500;display:none;animation:menuIn .2s cubic-bezier(.16,1,.3,1);}
-.import-menu.open{display:block;}
-.import-item{display:block;width:100%;padding:8px 12px;border-radius:8px;border:none;background:none;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-soft);cursor:pointer;text-align:left;transition:background .12s;}
-.import-item:hover{background:var(--input-bg);}
-.import-item.muted{color:var(--dimmer);}
-.import-sep{height:1px;background:var(--border);margin:4px 0;}
-.import-hint{padding:5px 12px 3px;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--dimmer);}
-
-/* CLOUD PILL */
-.cloud-pill{display:flex;align-items:center;gap:5px;font-size:0.58rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--dimmer);padding:3px 8px;border-radius:var(--r-pill);border:1px solid var(--border);}
-.cloud-dot{width:5px;height:5px;border-radius:50%;background:var(--dimmer);}
-.cloud-dot.on{background:#4caf50;}
-
-/* DIVIDER */
-.panel-divider{height:1px;background:var(--border);margin:16px 24px 0;flex-shrink:0;}
-
-/* TITLE */
-.panel-title-row{padding:20px 28px 0;flex-shrink:0;}
-.panel-title{font-family:var(--serif);font-weight:300;font-size:1.9rem;color:var(--text);}
-.panel-count{font-size:0.62rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--accent);margin-top:4px;}
-
-/* FILTERS */
-.filters{padding:16px 28px 0;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
-.filter-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px;}
-.filter-label{font-size:0.56rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--dimmer);}
-.filter-row{display:flex;gap:4px;}
-.filter-input{flex:1;min-width:0;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:var(--mono);font-size:0.72rem;color:var(--text);outline:none;transition:border-color .15s;}
-.filter-input:focus{border-color:var(--border2);}
-.filter-input::placeholder{color:var(--dimmer);}
-/* ── DATE RANGE CALENDAR ── */
-.cal-popover{position:absolute;top:calc(100% + 6px);left:0;z-index:600;background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:12px;min-width:280px;backdrop-filter:blur(32px) saturate(1.4);-webkit-backdrop-filter:blur(32px) saturate(1.4);box-shadow:0 8px 32px rgba(0,0,0,.16);animation:menuIn .2s cubic-bezier(.16,1,.3,1);}
-.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;}
-.cal-nav{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text);font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:border-color .15s;}
-.cal-nav:hover{border-color:var(--accent);color:var(--accent);}
-.cal-title{font-family:var(--mono);font-size:0.74rem;letter-spacing:0.08em;color:var(--text);text-transform:capitalize;text-align:center;flex:1;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-dow{font-family:var(--mono);font-size:0.54rem;letter-spacing:0.04em;color:var(--dimmer);text-align:center;padding:4px 0;text-transform:uppercase;}
-.cal-day{font-family:var(--mono);font-size:0.7rem;text-align:center;padding:7px 0;border-radius:7px;cursor:pointer;color:var(--text);border:1px solid transparent;transition:background .12s,color .12s;}
-.cal-day:hover{border-color:var(--accent);}
-.cal-day.empty{cursor:default;}
-.cal-day.in-range{background:var(--input-bg);}
-.cal-day.range-end{background:var(--accent);color:#fff;font-weight:600;}
-.cal-day.today{text-decoration:underline;}
-.cal-actions{display:flex;justify-content:space-between;gap:6px;margin-top:10px;}
-.cal-preset{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;padding:5px 4px;font-family:var(--mono);font-size:0.58rem;letter-spacing:0.04em;color:var(--muted);cursor:pointer;text-transform:uppercase;transition:color .12s,border-color .12s;}
-.cal-preset:hover{color:var(--accent);border-color:var(--accent);}
-.filter-select{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:var(--mono);font-size:0.72rem;color:var(--text);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
-.filter-select option{background:var(--bg);}
-.filter-clear{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:none;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--dimmer);cursor:pointer;white-space:nowrap;align-self:flex-end;transition:color .15s;}
-.filter-clear:hover{color:var(--text);}
-
-/* LIST */
-.panel-body{flex:1;min-height:0;overflow-y:auto;padding:16px 28px 24px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
-.panel-body::-webkit-scrollbar{width:4px;}
-.panel-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-.firing-list{display:flex;flex-direction:column;gap:8px;}
-.firing-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:14px 18px;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--r-card);cursor:pointer;transition:border-color .18s,background .18s,transform .18s;backdrop-filter:blur(8px);animation:cardIn .3s cubic-bezier(.16,1,.3,1) both;}
-.firing-card:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px);}
-@keyframes cardIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-.firing-date{font-size:.7rem;color:var(--dimmer);white-space:nowrap;min-width:80px;}
-.firing-info{display:flex;flex-direction:column;gap:3px;min-width:0;}
-.firing-name{font-size:.82rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.firing-meta{display:flex;gap:10px;font-size:.65rem;color:var(--muted);}
-.firing-note-preview{font-size:.65rem;color:var(--dimmer);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.firing-temp{font-family:var(--serif);font-size:1.3rem;font-weight:300;color:var(--accent);white-space:nowrap;}
-
-/* EMPTY */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 20px;text-align:center;}
-.empty-icon{font-size:2.5rem;opacity:.25;}
-.empty-title{font-family:var(--serif);font-weight:300;font-size:1.4rem;color:var(--text-soft);}
-.empty-sub{font-size:.72rem;color:var(--dimmer);line-height:1.6;max-width:36ch;}
-.empty-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center;}
-.btn-primary{padding:8px 18px;border-radius:var(--r-pill);border:none;background:var(--accent);color:#fff;font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .15s;}
-.btn-primary:hover{opacity:.85;}
-.btn-outline{padding:8px 18px;border-radius:var(--r-pill);border:1px solid var(--border2);background:none;color:var(--muted);font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:color .15s;}
-.btn-outline:hover{color:var(--text);}
-
-/* FOOTER */
-.panel-footer{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 24px 16px;border-top:1px solid var(--border);}
-.footer-pill{display:flex;align-items:center;gap:5px;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--border2);border-radius:var(--r-pill);padding:4px 12px;font-family:var(--mono);cursor:pointer;transition:color .15s,border-color .15s;text-decoration:none;white-space:nowrap;}
-.footer-pill:hover{color:var(--text);border-color:var(--accent);}
-.footer-sep{width:3px;height:3px;border-radius:50%;background:var(--muted);opacity:.4;flex-shrink:0;}
-
-/* OVERLAY */
-.overlay-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s;}
-.overlay-backdrop.visible{opacity:1;pointer-events:all;}
-.overlay-card{background:var(--surface2);border:1px solid var(--border2);border-radius:24px;width:100%;max-width:720px;max-height:90vh;display:flex;flex-direction:column;backdrop-filter:blur(40px) saturate(1.4);-webkit-backdrop-filter:blur(40px) saturate(1.4);box-shadow:0 24px 80px rgba(0,0,0,.18);transform:scale(.94) translateY(16px);transition:transform .35s cubic-bezier(.16,1,.3,1);overflow:hidden;}
-.overlay-backdrop.visible .overlay-card{transform:scale(1) translateY(0);}
-.overlay-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
-.overlay-title{font-family:var(--serif);font-size:1.3rem;font-weight:300;color:var(--text);line-height:1.2;flex:1;}
-.overlay-close{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:.85rem;cursor:pointer;padding:4px 10px;font-family:var(--mono);transition:color .15s;}
-.overlay-close:hover{color:var(--text);}
-.overlay-body{flex:1;min-height:0;overflow-y:auto;padding:20px 22px 22px;display:flex;flex-direction:column;gap:18px;scrollbar-width:thin;}
-.overlay-chart{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;height:220px;position:relative;overflow:hidden;flex-shrink:0;}
-.overlay-chart canvas{width:100%;height:100%;}
-.overlay-chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--dimmer);letter-spacing:.14em;text-transform:uppercase;}
-.overlay-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.stat-block{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
-.stat-label{font-size:.58rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dimmer);margin-bottom:4px;}
-.stat-value{font-size:.92rem;color:var(--text);font-weight:500;}
-.overlay-note{background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
-.overlay-note-label{font-size:.58rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dimmer);margin-bottom:8px;}
-.overlay-note-text{font-size:.82rem;color:var(--text-soft);line-height:1.65;white-space:pre-wrap;}
-.overlay-actions{display:flex;justify-content:flex-end;gap:8px;}
-
-/* RESPONSIVE */
-@media(max-width:1024px) and (min-width:601px){.stage{padding:24px 20px;}}
-@media(max-width:600px){
-  .stage{padding:12px;}
-  .panel{border-radius:20px;}
-  .panel-header{padding:12px 14px 0;flex-wrap:wrap;gap:6px;}
-  .header-left{width:100%;}
-  .header-right{width:100%;flex-wrap:wrap;gap:4px;}
-  .panel-title-row{padding:12px 16px 0;}
-  .panel-title{font-size:1.4rem;}
-  .filters{padding:10px 16px 0;gap:6px;}
-  .filter-group{min-width:100px;}
-  .panel-body{padding:10px 16px 16px;}
-  .firing-card{grid-template-columns:1fr auto;gap:8px;}
-  .firing-date{display:none;}
-  .overlay-stats{grid-template-columns:repeat(2,1fr);}
-  .pill-btn{padding:4px 8px;font-size:.58rem;letter-spacing:.1em;}
-  html,body{overflow-y:auto;height:auto;}
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
-@media(max-width:380px){.cloud-pill{display:none;}}
+
+/* ── LAYOUT ── */
+.stage {
+  position: relative; z-index: 2;
+  width: 100%;
+  height: 100vh;
+  height: 100svh; /* safe viewport — respects browser chrome on iOS/iPad */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+
+/* ── BACKGROUND CANVAS ── */
+#blob-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── NOISE OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025; pointer-events: none; z-index: 1;
+}
+
+/* ── GLASS PANEL ── */
+.panel {
+  width: 100%;
+  max-width: 780px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 28px;
+  backdrop-filter: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.10),
+    0 2px 12px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.55);
+
+  /* Entry animation */
+  opacity: 0;
+  transform: scale(0.96) translateY(12px);
+  animation: panelIn 0.45s cubic-bezier(.16,1,.3,1) 0.05s forwards;
+}
+body.dark .panel {
+  box-shadow:
+    0 8px 48px rgba(0,0,0,0.35),
+    0 2px 12px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+@keyframes panelIn {
+  to { opacity: 1; transform: none; }
+}
+
+/* ── PANEL HEADER ── */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 26px 0;
+  flex-shrink: 0;
+}
+
+.panel-wordmark {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 1.1rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.panel-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-decoration: none;
+  transition: color 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  padding: 0;
+}
+.panel-back:hover { color: var(--text); }
+.panel-back::before { content: '←'; font-size: 0.8rem; }
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 20px 26px 0;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: var(--r-pill, 999px);
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(.16,1,.3,1);
+  white-space: nowrap;
+}
+.tab-btn:hover {
+  color: var(--text-soft);
+  background: var(--input-bg);
+  border-color: var(--border);
+}
+.tab-btn.active {
+  color: var(--text);
+  background: var(--surface2);
+  border-color: var(--border2);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+body.dark .tab-btn.active {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+.tab-icon { font-size: 0.85rem; }
+
+/* ── DIVIDER ── */
+.panel-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 26px 0;
+  flex-shrink: 0;
+}
+
+/* ── CONTENT AREA ── */
+.panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 32px 36px 36px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.panel-body::-webkit-scrollbar { width: 4px; }
+.panel-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── TAB PANE ── */
+.tab-pane {
+  display: none;
+  animation: paneIn 0.3s cubic-bezier(.16,1,.3,1);
+}
+.tab-pane.active { display: block; }
+
+@keyframes paneIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── TYPOGRAPHY inside panes ── */
+.pane-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 2.4rem;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.pane-sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+}
+
+.pane-lead {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-soft);
+  margin-bottom: 28px;
+  max-width: 56ch;
+}
+
+/* ── PLACEHOLDER BLOCKS ── */
+.placeholder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.placeholder-grid.single { grid-template-columns: 1fr; }
+.placeholder-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+.ph-block {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ph-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.ph-value {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.ph-line {
+  height: 10px;
+  background: var(--border2);
+  border-radius: 5px;
+  margin-bottom: 7px;
+  opacity: 0.5;
+}
+.ph-line.short { width: 60%; }
+.ph-line.med   { width: 80%; }
+.ph-line:last-child { margin-bottom: 0; }
+
+/* ── GRADIENT RULE ── */
+.grad-rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2) 20%, var(--border2) 80%, transparent);
+  margin: 28px 0;
+}
+
+/* ── LICENCE MONO BLOCK ── */
+.licence-block {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.75;
+  color: var(--muted);
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  white-space: pre-wrap;
+}
+
+/* ── GUIDE STEPS ── */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  padding-top: 1px;
+  flex-shrink: 0;
+  width: 36px;
+  line-height: 1.2;
+}
+
+.step-body { flex: 1; }
+.step-title {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+}
+.step-desc {
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Sub-steps */
+.substep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.substep {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.substep-num {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  padding-top: 1px;
+  flex-shrink: 0;
+  width: 28px;
+  line-height: 1.2;
+}
+.substep-body { flex: 1; }
+.substep-title {
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  margin-bottom: 3px;
+  letter-spacing: 0.03em;
+}
+.substep-desc {
+  font-size: 0.79rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Guide section header */
+.guide-section-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 24px 0 12px;
+}
+
+/* Links inside guide */
+.guide-link {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.guide-link:hover { border-color: var(--accent); }
+
+/* Tip block */
+.guide-tip {
+  font-size: 0.75rem;
+  color: var(--dimmer);
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  margin-top: 8px;
+}
+
+/* ── CONTACT FIELDS ── */
+.contact-field {
+  margin-bottom: 12px;
+}
+.contact-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+  display: block;
+}
+.contact-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.contact-input::placeholder { color: var(--dimmer); }
+.contact-input:focus { border-color: var(--accent); }
+textarea.contact-input { resize: none; height: 120px; }
+
+.contact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.contact-addr {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.contact-addr-icon { color: var(--dimmer); font-size: 0.8rem; }
+.contact-addr a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.contact-addr a:hover { color: var(--accent); }
+
+.contact-btn {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, var(--c-orange), var(--c-magenta), var(--c-azure));
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s, background-position 0.4s;
+  white-space: nowrap;
+}
+.contact-btn:hover { opacity: 0.88; background-position: 100% 0%; }
+
+/* ── THEME + LANG CONTROLS ── */
+.top-controls {
+  position: fixed;
+  top: 20px; right: 22px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 1rem;
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  line-height: 1;
+  transition: background 0.15s;
+}
+.theme-btn:hover { background: var(--input-bg); }
+
+/* ── LANG DROPDOWN ── */
+.hdd-wrap { position: relative; }
+.hdd-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  line-height: 1;
+  transition: background 0.15s;
+}
+.hdd-btn:hover { background: var(--input-bg); }
+.hdd-btn.active { border-color: var(--border2); }
+.hdd-chevron { font-size: 0.5rem; opacity: 0.6; }
+.hdd-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 6px;
+  min-width: 80px;
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+  z-index: 500;
+  display: none;
+  animation: menuIn .2s cubic-bezier(.16,1,.3,1);
+}
+.hdd-menu.open { display: block; }
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+.hdd-item {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s;
+}
+.hdd-item:hover { background: var(--input-bg); }
+.hdd-item.active { color: var(--accent); }
+
+/* ── MOBILE ── */
+@media (max-width: 1024px) and (min-width: 601px) {
+  .stage { padding: 24px 20px; }
+}
+
+@media (max-width: 600px) {
+  .stage { padding: 16px 12px; justify-content: flex-start; padding-top: 60px; }
+  .panel { border-radius: 20px; max-height: none; }
+  .panel-body { padding: 24px 20px 28px; }
+  .panel-header { padding: 16px 20px 0; }
+  .tab-bar { padding: 16px 20px 0; gap: 3px; overflow-x: auto; }
+  .tab-btn { padding: 6px 12px; font-size: 0.66rem; }
+  .panel-divider { margin: 12px 20px 0; }
+  .pane-title { font-size: 1.8rem; }
+  .placeholder-grid { grid-template-columns: 1fr; }
+  .placeholder-grid.triple { grid-template-columns: 1fr; }
+  html, body { overflow-y: auto; height: auto; }
+}
 </style>
 </head>
 <body>
+
 <canvas id="blob-canvas"></canvas>
 
-<div class="stage"><div class="panel">
-
-  <!-- HEADER -->
-  <div class="panel-header">
-    <div class="header-left">
-      <span class="panel-wordmark">Páramo</span>
-      <div class="cloud-pill"><div class="cloud-dot" id="cloud-dot"></div><span id="cloud-status-label">No cloud</span></div>
-    </div>
-    <div class="header-right">
-      <button class="pill-btn" id="theme-btn" onclick="toggleTheme()">☽</button>
-
-      <!-- Lang dropdown — same as index.html -->
-      <div class="hdd-wrap" id="hdd-lang-wrap">
-        <button class="pill-btn" id="hdd-lang-btn" onclick="hddLangToggle()">
-          <span id="hdd-lang-label">EN</span><span class="hdd-chevron">▾</span>
-        </button>
-        <div class="hdd-menu" id="hdd-lang-menu" role="menu"></div>
-      </div>
-
-      <!-- Import dropdown -->
-      <div class="import-wrap" id="import-wrap">
-        <button class="pill-btn" id="import-btn" onclick="toggleImportMenu()">
-          <span id="str-import-label">↑ Import</span><span class="hdd-chevron">▾</span>
-        </button>
-        <div class="import-menu" id="import-menu">
-          <div class="import-hint" id="str-local-hint">Local</div>
-          <button class="import-item" id="str-load-files-btn" onclick="importFiles()">↓ Load files</button>
-          <div class="import-sep"></div>
-          <div class="import-hint" id="str-cloud-hint">Cloud</div>
-          <button class="import-item muted" onclick="connectGoogleDrive()" id="str-connect-drive">☁ Connect Google Drive</button>
-        </div>
-      </div>
-
-      <button class="panel-back" onclick="window.close()" id="str-back-btn">← Kiln monitor</button>
-    </div>
-  </div>
-
-  <div class="panel-divider"></div>
-
-  <!-- TITLE -->
-  <div class="panel-title-row">
-    <div class="panel-title" id="str-journal-title">Kiln Journal</div>
-    <div class="panel-count" id="panel-count">No firings loaded</div>
-  </div>
-
-  <!-- FILTERS -->
-  <div class="filters">
-    <div class="filter-group">
-      <div class="filter-label" id="lbl-date">Date range</div>
-      <div class="filter-row" style="position:relative;">
-        <input class="filter-input" id="f-date-display" type="text" readonly placeholder="All dates" onclick="toggleCalendar(event)" style="cursor:pointer;width:100%;">
-        <div id="cal-popover" class="cal-popover" style="display:none;"></div>
-        <!-- valores reales del rango (hidden), para applyFilters -->
-        <input type="hidden" id="f-date-from">
-        <input type="hidden" id="f-date-to">
-      </div>
-    </div>
-    <div class="filter-group" style="max-width:180px;">
-      <div class="filter-label" id="lbl-temp">Max temp (°C)</div>
-      <div class="filter-row">
-        <input class="filter-input" id="f-temp-min" type="number" placeholder="Min" min="0" max="1400" onchange="applyFilters()">
-        <input class="filter-input" id="f-temp-max" type="number" placeholder="Max" min="0" max="1400" onchange="applyFilters()">
-      </div>
-    </div>
-    <div class="filter-group" style="max-width:160px;">
-      <div class="filter-label" id="lbl-dur">Duration (h)</div>
-      <div class="filter-row">
-        <input class="filter-input" id="f-dur-min" type="number" placeholder="Min" min="0" step="0.5" onchange="applyFilters()">
-        <input class="filter-input" id="f-dur-max" type="number" placeholder="Max" min="0" step="0.5" onchange="applyFilters()">
-      </div>
-    </div>
-    <div class="filter-group" style="max-width:140px;">
-      <div class="filter-label" id="lbl-type">Type</div>
-      <div class="filter-row">
-        <select class="filter-select" id="f-mode" onchange="applyFilters()">
-          <option value="">All types</option>
-        </select>
-      </div>
-    </div>
-    <div class="filter-group" style="max-width:140px;">
-      <div class="filter-label" id="lbl-ktype">Kiln</div>
-      <div class="filter-row">
-        <select class="filter-select" id="f-ktype" onchange="applyFilters()">
-          <option value="">All</option>
-        </select>
-      </div>
-    </div>
-    <div class="filter-group" style="max-width:120px;">
-      <div class="filter-label" id="lbl-cone">Cone</div>
-      <div class="filter-row">
-        <select class="filter-select" id="f-cone" onchange="applyFilters()">
-          <option value="">All</option>
-        </select>
-      </div>
-    </div>
-    <button class="filter-clear" id="str-filter-clear" onclick="clearFilters()">Clear</button>
-  </div>
-
-  <!-- LIST -->
-  <div class="panel-body">
-    <div class="empty-state" id="empty-state">
-      <div class="empty-icon">◎</div>
-      <div class="empty-title" id="str-empty-title">No firings yet</div>
-      <div class="empty-sub"   id="str-empty-sub">Load your exported JSON files to browse your firing history.</div>
-      <div class="empty-actions">
-        <button class="btn-primary" id="str-empty-load"  onclick="importFiles()">↓ Load files</button>
-        <button class="btn-outline"  id="str-empty-cloud" onclick="connectGoogleDrive()">☁ Connect cloud</button>
-      </div>
-    </div>
-    <div class="firing-list" id="firing-list" style="display:none;"></div>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="panel-footer">
-    <a class="footer-pill" href="info.html?tab=contact" target="_blank">✉ <span id="str-footer-contact">Contact</span></a>
-    <div class="footer-sep"></div>
-    <a class="footer-pill" href="info.html?tab=guide" target="_blank">◎ <span id="str-footer-guide">Guide</span></a>
-    <div class="footer-sep"></div>
-    <a class="footer-pill" href="info.html?tab=licence" target="_blank">⊙ <span id="str-footer-licence">Licence</span></a>
-  </div>
-
-</div></div>
-
-<!-- OVERLAY -->
-<div class="overlay-backdrop" id="overlay-backdrop" onclick="closeOverlay(event)">
-  <div class="overlay-card">
-    <div class="overlay-header">
-      <div class="overlay-title" id="overlay-title">—</div>
-      <button class="overlay-close" onclick="closeOverlayDirect()">✕</button>
-    </div>
-    <div class="overlay-body">
-      <div class="overlay-chart">
-        <canvas id="overlay-canvas"></canvas>
-        <div class="overlay-chart-empty" id="overlay-chart-empty" style="display:none;">No datapoints</div>
-      </div>
-      <div class="overlay-stats">
-        <div class="stat-block"><div class="stat-label" id="str-stat-temp">Max temp</div><div class="stat-value" id="stat-maxtemp">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-dur">Duration</div><div class="stat-value" id="stat-duration">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-pts">Datapoints</div><div class="stat-value" id="stat-points">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-mode">Firing type</div><div class="stat-value" id="stat-mode">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-ktype">Kiln type</div><div class="stat-value" id="stat-ktype">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-cone">Target cone</div><div class="stat-value" id="stat-cone">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-energy">Energy</div><div class="stat-value" id="stat-energy">—</div></div>
-        <div class="stat-block"><div class="stat-label" id="str-stat-cost">Cost</div><div class="stat-value" id="stat-cost">—</div></div>
-      </div>
-      <div class="overlay-note">
-        <div class="overlay-note-label" id="str-notes-label">Notes</div>
-        <div class="overlay-note-text" id="overlay-note-text">—</div>
-      </div>
-      <div class="overlay-actions">
-        <button class="btn-outline" id="str-share-png" onclick="exportOverlayPng()">↓ Share chart (PNG)</button>
-      </div>
-    </div>
+<div class="top-controls">
+  <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☽</button>
+  <div class="hdd-wrap" id="hdd-lang-wrap">
+    <button class="hdd-btn" id="hdd-lang-btn" onclick="hddLangToggle()">
+      <span id="hdd-lang-label">EN</span><span class="hdd-chevron">▾</span>
+    </button>
+    <div class="hdd-menu" id="hdd-lang-menu" role="menu"></div>
   </div>
 </div>
 
-<input type="file" id="file-input" multiple accept=".json" style="display:none" onchange="handleFiles(this.files)">
+<div class="stage">
+  <div class="panel" id="panel">
+
+    <!-- HEADER -->
+    <div class="panel-header">
+      <span class="panel-wordmark" id="str-wordmark">Páramo</span>
+      <a class="panel-back" href="javascript:window.close()" title="Back to monitor" id="str-back">Kiln monitor</a>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn" data-tab="contact" onclick="switchTab('contact')">
+        <span class="tab-icon">✉</span> <span id="str-tab-contact">Contact</span>
+      </button>
+      <button class="tab-btn" data-tab="guide" onclick="switchTab('guide')">
+        <span class="tab-icon">◎</span> <span id="str-tab-guide">Guide</span>
+      </button>
+      <button class="tab-btn" data-tab="licence" onclick="switchTab('licence')">
+        <span class="tab-icon">⊙</span> <span id="str-tab-licence">Licence</span>
+      </button>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- BODY -->
+    <div class="panel-body">
+
+      <!-- ── CONTACT ── -->
+      <div class="tab-pane" id="pane-contact">
+        <div class="pane-title" id="str-contact-title">Contact</div>
+        <div class="pane-sub" id="str-contact-sub">Get in touch</div>
+        <p class="pane-lead" id="str-contact-lead">
+          Have a question about Páramo, want to collaborate, or found a bug?
+          Reach out — this space is reserved for the right words.
+        </p>
+
+        <div class="contact-field">
+          <label class="contact-label" id="str-contact-subject">Subject</label>
+          <input class="contact-input" id="input-subject" type="text" placeholder="What's this about?"/>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label" id="str-contact-message">Message</label>
+          <textarea class="contact-input" id="input-message" placeholder="Your message…"></textarea>
+        </div>
+
+        <div class="grad-rule"></div>
+
+        <div class="contact-footer">
+          <span class="contact-addr" id="str-contact-addr">
+            <span class="contact-addr-icon">✉</span>
+            <a href="mailto:paramoyermo@disroot.org" id="contact-mailto-link">paramoyermo@disroot.org</a>
+          </span>
+          <button class="contact-btn" id="btn-contact-send" onclick="sendContact()">
+            <span id="str-contact-send">Open in mail client</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── GUIDE ── -->
+      <div class="tab-pane" id="pane-guide">
+        <div class="pane-title" id="str-guide-title">Guide</div>
+        <div class="pane-sub" id="str-guide-sub">Setup and usage</div>
+        <p class="pane-lead">
+          <span id="str-guide-lead">Páramo connects to your kiln monitor via an MQTT server. Here you'll find setup instructions, connection details, and usage notes. Full documentation for makers and technical users is on the</span>
+          <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor" target="_blank" id="str-guide-lead-gh">GitHub page</a>.
+          <span id="str-guide-lead-contact">If you have any doubts, feel free to use the</span>
+          <a class="guide-link" href="?tab=contact" id="str-guide-lead-contact-link">contact page</a>.
+        </p>
+
+        <div class="guide-section-title" id="str-guide-section">How to get started</div>
+
+        <div class="step-list">
+
+          <!-- 01 -->
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <div class="step-title" id="str-g-s1-title">Connect your thermocouple</div>
+              <div class="step-desc">
+                <span id="str-g-s1-desc">Páramo uses a Type S thermocouple for accurate high-temperature readings. See the</span>
+                <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Thermocouples.md" target="_blank" id="str-g-s1-link">Thermocouples Guide</a>
+                <span id="str-g-s1-desc2">for recommended models and wiring instructions.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 02 -->
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <div class="step-title" id="str-g-s2-title">Prepare your server and notifications</div>
+              <div class="substep-list">
+
+                <div class="substep">
+                  <div class="substep-num">2.1</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s2-1-title">HiveMQ account</div>
+                    <div class="substep-desc">
+                      <span id="str-g-s2-1-a">We chose this free MQTT server because it provides more than enough capacity without extra costs for the end user. Alternative self-hosted servers are possible for more technical users — see the</span>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Server.md" target="_blank" id="str-g-s2-1-link">Servers Guide</a>.<br><br>
+                      <span id="str-g-s2-1-b">Go to</span>
+                      <a class="guide-link" href="https://www.hivemq.com/" target="_blank">hivemq.com</a>,
+                      <span id="str-g-s2-1-c">create a free account, and set a username and password. You will also be given a cluster token. Save all three for the next step.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">2.2</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s2-2-title">Set up notifications</div>
+                    <div class="substep-desc">
+                      <span id="str-g-s2-2-a">We chose</span>
+                      <a class="guide-link" href="https://ntfy.sh" target="_blank">NTFY</a>
+                      <span id="str-g-s2-2-b">as the notification provider for its simplicity and free pricing.</span><br><br>
+                      <span id="str-g-s2-2-c">Download the app on any device, then create a new topic. Give it a name that is not easily guessable — just for you.</span>
+                      <div class="guide-tip" id="str-g-s2-2-tip1">Example topic name: StudioKiln-HXsbi93DHF</div>
+                      <span id="str-g-s2-2-d">In the topic settings you will find the Topic URL. Save it for the next step.</span>
+                      <div class="guide-tip" id="str-g-s2-2-tip2">Example URL: ntfy.sh/StudioKiln-HXsbi93DHF</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- 03 -->
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <div class="step-title" id="str-g-s3-title">Turn on your Páramo Kiln Monitor</div>
+              <div class="step-desc">
+                <span id="str-g-s3-desc-a">On first boot, the device creates a</span>
+                <strong id="str-g-s3-portal">Kiln Setup</strong>
+                <span id="str-g-s3-desc-b">Wi-Fi portal. Connect to it from any phone or laptop to configure your credentials.</span>
+              </div>
+              <div class="substep-list">
+                <div class="substep">
+                  <div class="substep-num">3.1</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s3-1">Choose your preferred Wi-Fi network and enter the password. We recommend the most stable network near where the device will live — close to the kiln.</div>
+                  </div>
+                </div>
+                <div class="substep">
+                  <div class="substep-num">3.2</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s3-2">Enter the HiveMQ credentials you set up in step 2.1.</div>
+                  </div>
+                </div>
+                <div class="substep">
+                  <div class="substep-num">3.3</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s3-3">Paste the NTFY topic URL you created in step 2.2.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04 -->
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <div class="step-title" id="str-g-s4-title">You're done ◉</div>
+              <div class="step-desc" id="str-g-s4-desc">Your Páramo Kiln Monitor now has everything it needs to communicate with you over the internet. You will receive temperature alerts and fault notifications directly on your device.</div>
+            </div>
+          </div>
+
+          <!-- 05 -->
+          <div class="step">
+            <div class="step-num">05</div>
+            <div class="step-body">
+              <div class="step-title" id="str-g-s5-title">Web app setup and usage</div>
+              <div class="substep-list">
+
+                <div class="substep">
+                  <div class="substep-num">5.1</div>
+                  <div class="substep-body">
+                    <div class="substep-desc">
+                      <span id="str-g-s5-1-a">Open</span>
+                      <a class="guide-link" href="https://paramostudio.github.io/KilnMonitor/" target="_blank">paramostudio.github.io/KilnMonitor</a>.
+                      <span id="str-g-s5-1-b">On mobile, we suggest adding it to your home screen and using it as a web app.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">5.2</div>
+                  <div class="substep-body">
+                    <div class="substep-desc" id="str-g-s5-2">This app relies on local cache. If you clear it, some configurations will be lost. Export them first using the toolbar — they can be re-imported on any device.</div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">5.3</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s5-3-title">Add a kiln</div>
+                    <div class="substep-desc" id="str-g-s5-3-desc">On first open there is a blank "Studio Kiln" entry. Open the Connection panel under it and enter your HiveMQ credentials to link the device with the web app. You can rename or delete kilns using the buttons to the right, and add as many as you want — each one needs its own Páramo monitor.</div>
+                  </div>
+                </div>
+
+                <div class="substep">
+                  <div class="substep-num">5.4</div>
+                  <div class="substep-body">
+                    <div class="substep-title" id="str-g-s5-4-title">Other tools</div>
+                    <div class="substep-desc">
+                      <strong>Kiln Power</strong> — <span id="str-g-s5-4-power">bridges an MQTT relay to cut kiln power remotely in case of emergency. See the</span>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Kiln%20Power.md" target="_blank" id="str-g-s5-4-power-link">Kiln Power Guide</a>.
+                      <span id="str-g-s5-4-power2">A solution for gas kilns is being studied.</span><br><br>
+                      <strong>Firing Mode</strong> — <span id="str-g-s5-4-mode">shows a reference ramp curve alongside your actual firing for easy comparison, and tags the session for later search in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-cooldown-name">Cooldown Alarm</strong> — <span id="str-g-s5-4-cooldown">an alarm that triggers on the way down, once a firing has been detected and the kiln cools past a temperature you set. Useful to know when it is safe to start unloading. Adjustable from the Alarm Threshold card (150–550 °C).</span><br><br>
+                      <strong id="str-g-s5-4-cone-name">Target Cone</strong> — <span id="str-g-s5-4-cone">note the Orton cone you are aiming for at the top of the Session card. It is purely a reference — it travels with the firing record and lets you search and group firings by cone in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-ktype-name">Kiln Type</strong> — <span id="str-g-s5-4-ktype">choose your kiln type (electric, gas, wood or other) to control which power options are shown, or simply to tag the firing so you can filter by kiln type in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-notes-name">Add Notes</strong> — <span id="str-g-s5-4-notes">write observations during or after a firing before exporting. Saved with the session in the Journal.</span><br><br>
+                      <strong id="str-g-s5-4-export-name">Export / Import / Reset</strong> — <span id="str-g-s5-4-export">copy your configuration to other devices or reset all stored data.</span><br><br>
+                      <strong id="str-g-s5-4-journal-name">Journal</strong> — <span id="str-g-s5-4-journal">a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you'd rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.</span><br><br>
+                      <strong id="str-g-s5-4-share-name">Share as PNG</strong> — <span id="str-g-s5-4-share">export any firing from the Journal as a printable greyscale image — chart, key data and notes laid out on an A4 sheet — to share with fellow potters or keep on paper.</span><br><br>
+                      <strong id="str-g-s5-4-energy-name">Energy &amp; Cost</strong> — <span id="str-g-s5-4-energy">set your price per kWh and currency to get a rough cost estimate per firing. This is an approximation only and should not be taken as a single source of truth — it cannot account for the complexity of a real electricity bill (tariff bands, standing charges, taxes, time-of-use rates).</span><br><br>
+                      <strong id="str-g-s5-4-lang-name">Language</strong> — <span id="str-g-s5-4-lang">the app is available in several languages, selectable from the toolbar. Missing yours, or spotted a translation that could be better? You can contribute one — see the</span>
+                      <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Add%20a%20Language.md" target="_blank" id="str-g-s5-4-lang-link">Add a Language Guide</a>.
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /.step-list -->
+
+        <div class="grad-rule"></div>
+
+        <p class="step-desc" style="text-align:center;">
+          <span id="str-g-footer">Having trouble?</span>
+          <a class="guide-link" href="?tab=contact" id="str-g-footer-contact">Contact us</a>
+          <span id="str-g-footer-or">or check the</span>
+          <a class="guide-link" href="https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Troubleshooting.md" target="_blank" id="str-g-footer-ts">Troubleshooting guide</a>.
+        </p>
+
+      </div>
+
+      <!-- ── LICENCE ── -->
+      <div class="tab-pane" id="pane-licence">
+        <div class="pane-title" id="str-licence-title">Licence</div>
+        <div class="pane-sub" id="str-licence-sub">Open source</div>
+        <p class="pane-lead" id="str-licence-lead">
+          Páramo is released under copyleft licenses chosen to keep this project
+          permanently open. Full details and license texts are on GitHub.
+        </p>
+
+        <div class="licence-block" id="str-licence-block">Firmware &amp; Web Application
+GNU Affero General Public License v3.0
+
+Hardware (PCB · Schematics · BOM · 3D / STL)
+CERN Open Hardware Licence Strongly Reciprocal v2.0
+
+Documentation &amp; Tutorials
+Creative Commons Attribution-ShareAlike 4.0
+
+These licenses are complementary. AGPL covers all software layers and any
+derived online services — if you run a modified version as a service, you
+must publish the source. CERN-OHL-S covers physical designs — if you
+distribute derived hardware, the schematics stay open.
+
+No permissive licenses (MIT, Apache, BSD) were used. Deliberately.
+Full license texts → github.com/ParamoStudio/KilnMonitor</div>
+
+        <div class="grad-rule"></div>
+
+        <!-- ETHOS -->
+        <div class="pane-sub" id="str-licence-ethos-label">Why copyleft</div>
+        <p class="pane-lead" id="str-licence-ethos">
+          A kiln should not be firstly perceived as a consumer product. It is a tool built
+          to last decades, passed between studios, repaired by hand, adapted to the specific
+          needs of the person using it. The electronics and software we build around kilns
+          should be no different. Any action towards encouraging the right to repair,
+          understand, recycle and upgrade is a step towards what we deserve as communities.
+          In any context given.
+        </p>
+        <p class="pane-lead" style="margin-top:16px;" id="str-licence-ethos2">
+          Páramo was built on open resources, community knowledge, and freely shared prior
+          work. It will remain open in return. Copyleft licenses were chosen deliberately —
+          not by default — to prevent proprietary capture of derivatives, whether as closed
+          software forks, closed web services, or proprietary hardware products.
+        </p>
+
+        <div class="grad-rule"></div>
+
+        <!-- CREDITS -->
+        <div class="pane-sub" id="str-credits-label">Credits</div>
+        <p class="pane-lead" id="str-credits">
+          For every single generous artist, coder, engineer, and maker that has taught,
+          helped, or gifted — me or any other. Filling the well of abundant community
+          knowledge without profit and selfishness as a main drive: Thanks. We are much.
+          We are present. Open source is the way.
+        </p>
+      </div>
+
+    </div><!-- /.panel-body -->
+  </div><!-- /.panel -->
+</div><!-- /.stage -->
 
 <script>
-'use strict';
-
-let allFirings = [], filtered = [], activeFiring = null;
-
-// DRIVE STATE — declared early so renderList and _applyStrings can reference them
-const DRIVE_CLIENT_ID  = '80138126060-kg4ljcn15rcnf3t9s8ck44bqreo28in9.apps.googleusercontent.com';
-const DRIVE_SCOPE      = 'https://www.googleapis.com/auth/drive.file';
-const DRIVE_FOLDER_KEY = 'paramo.drive.folderId';
-const DRIVE_TOKEN_KEY  = 'paramo.drive.token';
-const FOLDER_NAME      = 'Páramo — Kiln Monitor';
-let driveToken     = localStorage.getItem(DRIVE_TOKEN_KEY) || null;
-let driveFolderId  = localStorage.getItem(DRIVE_FOLDER_KEY) || null;
-let driveConnected = false;
-
-// THEME
+// ── CONFIG ──────────────────────────────────────────────────────────
+const LANG_BASE_URL = './lang/';  // lang files live in /lang/ subfolder
 const THEME_KEY = 'paramo.theme';
-function applyTheme(dark) {
-  document.body.classList.toggle('dark', dark);
-  document.getElementById('theme-btn').textContent = dark ? '○' : '☽';
-}
-function toggleTheme() {
-  const dark = !document.body.classList.contains('dark');
-  localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
-  applyTheme(dark);
-}
-applyTheme(localStorage.getItem(THEME_KEY) === 'dark');
+const LANG_KEY  = 'paramo.lang';
 
-// LANGUAGE SYSTEM
-const LANG_BASE_URL = 'lang/';
-let LANG_MANIFEST = ['en', 'es'];
-let currentLang = localStorage.getItem('paramo.lang') || 'en';
-const _langCache = {};
-let _activeStrings = {};
-
-const STRINGS = {
-  en: {
-    journalTitle:'Kiln Journal', noFirings:'No firings loaded', noFiringsYet:'No firings yet',
-    noFiringsMsg:'Load your exported JSON files to browse your firing history.',
-    noMatches:'No matches', noMatchesMsg:'Try adjusting or clearing the filters.',
-    loadFiles:'↓ Load files', connectCloud:'☁ Connect cloud',
-    dateRange:'Date range', maxTemp:'Max temp (°C)', duration:'Duration (h)', type:'Type', allTypes:'All types', clear:'Clear',
-    filterKilnType:'Kiln', filterCone:'Cone',
-    firingCountOne:'{n} firing', firingCountMany:'{n} firings', firingCountFiltered:' (filtered from {total})',
-    firingNoMatch:'{total} loaded — 0 match', filterAllDates:'All dates', driveDisconnect:'✓ Disconnect Drive',
-    statKilnType:'Kiln type', statCone:'Target cone', shareEcoNote:'* Rendered in greyscale to minimise ink, resources and ecological footprint. Care for the planet.',
-    calThisMonth:'This month', calThisWeek:'This week',
-    importLabel:'↑ Import', localHint:'Local', loadFilesMenu:'↓ Load files', cloudHint:'Cloud', connectDrive:'☁ Connect Google Drive',
-    backBtn:'← Kiln monitor', noCloud:'No cloud',
-    statMaxTemp:'Max temp', statDuration:'Duration', statPoints:'Datapoints', statMode:'Firing type',
-    statEnergy:'Energy', statCost:'Cost',
-    notesLabel:'Notes', sharePng:'↓ Share chart (PNG)', noDatapoints:'No datapoints',
-    contact:'Contact', guide:'Guide', licence:'Licence',
-  }
+// ── FALLBACK STRINGS (en) — used if fetch fails ──────────────────────
+const FALLBACK = {
+  info_wordmark: 'Páramo',
+  addLanguage: 'Add a language',
+  info_back: 'Kiln monitor',
+  info_tab_contact: 'Contact',
+  info_tab_guide:   'Guide',
+  info_tab_licence: 'Licence',
+  // contact
+  contact_title: 'Contact',
+  contact_sub:   'Get in touch',
+  contact_lead:  'Have a question about Páramo, want to collaborate, or found a bug? Reach out — this space is reserved for the right words.',
+  contact_subject:    'Subject',
+  contact_subject_ph: "What's this about?",
+  contact_message:    'Message',
+  contact_message_ph: 'Your message…',
+  contact_send:  'Open in mail client',
+  contact_addr:  'paramoyermo@disroot.org',
+  // guide
+  guide_title: 'Guide',
+  guide_sub:   'Setup and usage',
+  guide_lead:  'Páramo connects to your kiln monitor via an MQTT server. Here you\'ll find setup instructions, connection details, and usage notes. Full documentation for makers and technical users is on the',
+  guide_lead_gh: 'GitHub page',
+  guide_lead_contact: 'If you have any doubts, feel free to use the',
+  guide_lead_contact_link: 'contact page',
+  guide_section: 'How to get started',
+  g_s1_title: 'Connect your thermocouple',
+  g_s1_desc:  'Páramo uses a Type S thermocouple for accurate high-temperature readings. See the',
+  g_s1_link:  'Thermocouples Guide',
+  g_s1_desc2: 'for recommended models and wiring instructions.',
+  g_s2_title: 'Prepare your server and notifications',
+  g_s2_1_title: 'HiveMQ account',
+  g_s2_1_a: 'We chose this free MQTT server because it provides more than enough capacity without extra costs for the end user. Alternative self-hosted servers are possible for more technical users — see the',
+  g_s2_1_link: 'Servers Guide',
+  g_s2_1_b: 'Go to',
+  g_s2_1_c: 'create a free account, and set a username and password. You will also be given a cluster token. Save all three for the next step.',
+  g_s2_2_title: 'Set up notifications',
+  g_s2_2_a: 'We chose',
+  g_s2_2_b: 'as the notification provider for its simplicity and free pricing.',
+  g_s2_2_c: 'Download the app on any device, then create a new topic. Give it a name that is not easily guessable — just for you.',
+  g_s2_2_tip1: 'Example topic name: StudioKiln-HXsbi93DHF',
+  g_s2_2_d: 'In the topic settings you will find the Topic URL. Save it for the next step.',
+  g_s2_2_tip2: 'Example URL: ntfy.sh/StudioKiln-HXsbi93DHF',
+  g_s3_title: 'Turn on your Páramo Kiln Monitor',
+  g_s3_desc_a: 'On first boot, the device creates a',
+  g_s3_portal: 'Kiln Setup',
+  g_s3_desc_b: 'Wi-Fi portal. Connect to it from any phone or laptop to configure your credentials.',
+  g_s3_1: 'Choose your preferred Wi-Fi network and enter the password. We recommend the most stable network near where the device will live — close to the kiln.',
+  g_s3_2: 'Enter the HiveMQ credentials you set up in step 2.1.',
+  g_s3_3: 'Paste the NTFY topic URL you created in step 2.2.',
+  g_s4_title: 'You\'re done ◉',
+  g_s4_desc: 'Your Páramo Kiln Monitor now has everything it needs to communicate with you over the internet. You will receive temperature alerts and fault notifications directly on your device.',
+  g_s5_title: 'Web app setup and usage',
+  g_s5_1_a: 'Open',
+  g_s5_1_b: 'On mobile, we suggest adding it to your home screen and using it as a web app.',
+  g_s5_2: 'This app relies on local cache. If you clear it, some configurations will be lost. Export them first using the toolbar — they can be re-imported on any device.',
+  g_s5_3_title: 'Add a kiln',
+  g_s5_3_desc: 'On first open there is a blank "Studio Kiln" entry. Open the Connection panel under it and enter your HiveMQ credentials to link the device with the web app. You can rename or delete kilns using the buttons to the right, and add as many as you want — each one needs its own Páramo monitor.',
+  g_s5_4_title: 'Other tools',
+  g_s5_4_power: 'bridges an MQTT relay to cut kiln power remotely in case of emergency. See the',
+  g_s5_4_power_link: 'Kiln Power Guide',
+  g_s5_4_power2: 'A solution for gas kilns is being studied.',
+  g_s5_4_mode: 'shows a reference ramp curve alongside your actual firing for easy comparison, and tags the session for later search in the Journal.',
+  g_s5_4_notes: 'write observations during or after a firing before exporting. Saved with the session in the Journal.',
+  g_s5_4_export: 'copy your configuration to other devices or reset all stored data.',
+  g_s5_4_journal: 'a searchable database of all your firings, local or cloud. The cloud function uses Google Drive for convenience. If you\'d rather keep things off Google, just export your sessions to a folder and load them manually in the Journal. A self-hosted solution is being explored, balancing user friction against the limited resources of an individual project.',
+  g_s5_4_cooldown: 'an alarm that triggers on the way down, once a firing has been detected and the kiln cools past a temperature you set. Useful to know when it is safe to start unloading. Adjustable from the Alarm Threshold card (150–550 °C).',
+  g_s5_4_cone: 'note the Orton cone you are aiming for at the top of the Session card. It is purely a reference — it travels with the firing record and lets you search and group firings by cone in the Journal.',
+  g_s5_4_ktype: 'choose your kiln type (electric, gas, wood or other) to control which power options are shown, or simply to tag the firing so you can filter by kiln type in the Journal.',
+  g_s5_4_share: 'export any firing from the Journal as a printable greyscale image — chart, key data and notes laid out on an A4 sheet — to share with fellow potters or keep on paper.',
+  g_s5_4_energy: 'set your price per kWh and currency to get a rough cost estimate per firing. This is an approximation only and should not be taken as a single source of truth — it cannot account for the complexity of a real electricity bill (tariff bands, standing charges, taxes, time-of-use rates).',
+  g_s5_4_lang: 'the app is available in several languages, selectable from the toolbar. Missing yours, or spotted a translation that could be better? You can contribute one — see the',
+  g_s5_4_lang_link: 'Add a Language Guide',
+  g_s5_4_cooldown_name: 'Cooldown Alarm',
+  g_s5_4_cone_name: 'Target Cone',
+  g_s5_4_ktype_name: 'Kiln Type',
+  g_s5_4_notes_name: 'Add Notes',
+  g_s5_4_export_name: 'Export / Import / Reset',
+  g_s5_4_journal_name: 'Journal',
+  g_s5_4_share_name: 'Share as PNG',
+  g_s5_4_energy_name: 'Energy & Cost',
+  g_s5_4_lang_name: 'Language',
+  g_footer: 'Having trouble?',
+  g_footer_contact: 'Contact us',
+  g_footer_or: 'or check the',
+  g_footer_ts: 'Troubleshooting guide',
+  // licence
+  licence_title: 'Licence',
+  licence_sub:   'Open source',
+  licence_lead:  'Páramo is released under copyleft licenses chosen to keep this project permanently open. Full details and license texts are on GitHub.',
+  licence_block: 'Firmware & Web Application\nGNU Affero General Public License v3.0\n\nHardware (PCB · Schematics · BOM · 3D / STL)\nCERN Open Hardware Licence Strongly Reciprocal v2.0\n\nDocumentation & Tutorials\nCreative Commons Attribution-ShareAlike 4.0\n\nThese licenses are complementary. AGPL covers all software layers and any derived online services — if you run a modified version as a service, you must publish the source. CERN-OHL-S covers physical designs — if you distribute derived hardware, the schematics stay open.\n\nNo permissive licenses (MIT, Apache, BSD) were used. Deliberately.\nFull license texts → github.com/ParamoStudio/KilnMonitor',
+  licence_ethos_label: 'Why copyleft',
+  licence_ethos: 'A kiln should not be firstly perceived as a consumer product. It is a tool built to last decades, passed between studios, repaired by hand, adapted to the specific needs of the person using it. The electronics and software we build around kilns should be no different. Any action towards encouraging the right to repair, understand, recycle and upgrade is a step towards what we deserve as communities. In any context given.',
+  licence_ethos2: 'Páramo was built on open resources, community knowledge, and freely shared prior work. It will remain open in return. Copyleft licenses were chosen deliberately — not by default — to prevent proprietary capture of derivatives, whether as closed software forks, closed web services, or proprietary hardware products.',
+  credits_label: 'Credits',
+  credits: 'For every single generous artist, coder, engineer, and maker that has taught, helped, or gifted — me or any other. Filling the well of abundant community knowledge without profit and selfishness as a main drive: Thanks. We are much. We are present. Open source is the way.',
 };
 
-function t(key) { return _activeStrings[key] || STRINGS.en[key] || key; }
+// ── I18N APPLY ───────────────────────────────────────────────────────
+let _strings = Object.assign({}, FALLBACK);
+function s(key) { return _strings[key] || FALLBACK[key] || key; }
 
-function _applyStrings(s) {
-  _activeStrings = Object.assign({}, STRINGS.en, s);
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('str-journal-title', t('journalTitle'));
-  set('str-import-label',  t('importLabel'));
-  set('str-local-hint',    t('localHint'));
-  set('str-load-files-btn',t('loadFilesMenu'));
-  set('str-cloud-hint',    t('cloudHint'));
-  set('str-connect-drive', t('connectDrive'));
-  set('str-back-btn',      t('backBtn'));
-  set('cloud-status-label',t('noCloud'));
-  set('lbl-date',  t('dateRange'));
-  set('lbl-temp',  t('maxTemp'));
-  set('lbl-dur',   t('duration'));
-  set('lbl-type',  t('type'));
-  set('lbl-ktype', t('filterKilnType'));
-  set('lbl-cone',  t('filterCone'));
-  set('str-filter-clear', t('clear'));
-  set('str-empty-title',  t('noFiringsYet'));
-  set('str-empty-sub',    t('noFiringsMsg'));
-  set('str-empty-load',   t('loadFiles'));
-  set('str-empty-cloud',  t('connectCloud'));
-  set('str-footer-contact', t('contact'));
-  set('str-footer-guide',   t('guide'));
-  set('str-footer-licence', t('licence'));
-  set('str-stat-temp',  t('statMaxTemp'));
-  set('str-stat-dur',   t('statDuration'));
-  set('str-stat-pts',   t('statPoints'));
-  set('str-stat-mode',  t('statMode'));
-  set('str-stat-ktype', t('statKilnType'));
-  set('str-stat-cone',  t('statCone'));
-  set('str-stat-energy',t('statEnergy'));
-  set('str-stat-cost',  t('statCost'));
-  set('str-notes-label',t('notesLabel'));
-  set('str-share-png',  t('sharePng'));
-  const sel = document.getElementById('f-mode');
-  if (sel && sel.options[0]) sel.options[0].text = t('allTypes');
-  // Date filter placeholder + first option of ktype/cone selects (shown before data loads)
-  const fdate = document.getElementById('f-date-display');
-  if (fdate) fdate.placeholder = t('filterAllDates');
-  const selKtype = document.getElementById('f-ktype');
-  if (selKtype && selKtype.options[0]) selKtype.options[0].text = t('allTypes');
-  const selCone = document.getElementById('f-cone');
-  if (selCone && selCone.options[0]) selCone.options[0].text = t('allTypes');
-  if (!allFirings.length) set('panel-count', t('noFirings'));
-  renderList();
+function applyStrings() {
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.textContent = v; };
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
+  const setAttr = (id, attr, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.setAttribute(attr, v); };
+
+  // Header
+  set('str-wordmark', s('info_wordmark'));
+  set('str-back',     s('info_back'));
+  // Tabs
+  set('str-tab-contact', s('info_tab_contact'));
+  set('str-tab-guide',   s('info_tab_guide'));
+  set('str-tab-licence', s('info_tab_licence'));
+  // Contact
+  set('str-contact-title',   s('contact_title'));
+  set('str-contact-sub',     s('contact_sub'));
+  set('str-contact-lead',    s('contact_lead'));
+  set('str-contact-subject', s('contact_subject'));
+  set('str-contact-message', s('contact_message'));
+  set('str-contact-send',    s('contact_send'));
+  set('str-contact-addr',    s('contact_addr'));
+  const subjectEl = document.getElementById('input-subject');
+  const messageEl = document.getElementById('input-message');
+  if (subjectEl) subjectEl.placeholder = s('contact_subject_ph');
+  if (messageEl) messageEl.placeholder = s('contact_message_ph');
+  // Guide
+  set('str-guide-title',       s('guide_title'));
+  set('str-guide-sub',         s('guide_sub'));
+  set('str-guide-lead',        s('guide_lead'));
+  set('str-guide-lead-gh',     s('guide_lead_gh'));
+  set('str-guide-lead-contact',s('guide_lead_contact'));
+  set('str-guide-lead-contact-link', s('guide_lead_contact_link'));
+  set('str-guide-section',     s('guide_section'));
+  set('str-g-s1-title',        s('g_s1_title'));
+  set('str-g-s1-desc',         s('g_s1_desc'));
+  set('str-g-s1-desc2',        s('g_s1_desc2'));
+  set('str-g-s1-link',         s('g_s1_link'));
+  set('str-g-s2-title',        s('g_s2_title'));
+  set('str-g-s2-1-title',      s('g_s2_1_title'));
+  set('str-g-s2-1-a',          s('g_s2_1_a'));
+  set('str-g-s2-1-link',       s('g_s2_1_link'));
+  set('str-g-s2-1-b',          s('g_s2_1_b'));
+  set('str-g-s2-1-c',          s('g_s2_1_c'));
+  set('str-g-s2-2-title',      s('g_s2_2_title'));
+  set('str-g-s2-2-a',          s('g_s2_2_a'));
+  set('str-g-s2-2-b',          s('g_s2_2_b'));
+  set('str-g-s2-2-c',          s('g_s2_2_c'));
+  set('str-g-s2-2-tip1',       s('g_s2_2_tip1'));
+  set('str-g-s2-2-d',          s('g_s2_2_d'));
+  set('str-g-s2-2-tip2',       s('g_s2_2_tip2'));
+  set('str-g-s3-title',        s('g_s3_title'));
+  set('str-g-s3-desc-a',       s('g_s3_desc_a'));
+  set('str-g-s3-portal',       s('g_s3_portal'));
+  set('str-g-s3-desc-b',       s('g_s3_desc_b'));
+  set('str-g-s3-1',            s('g_s3_1'));
+  set('str-g-s3-2',            s('g_s3_2'));
+  set('str-g-s3-3',            s('g_s3_3'));
+  set('str-g-s4-title',        s('g_s4_title'));
+  set('str-g-s4-desc',         s('g_s4_desc'));
+  set('str-g-s5-title',        s('g_s5_title'));
+  set('str-g-s5-1-a',          s('g_s5_1_a'));
+  set('str-g-s5-1-b',          s('g_s5_1_b'));
+  set('str-g-s5-2',            s('g_s5_2'));
+  set('str-g-s5-3-title',      s('g_s5_3_title'));
+  set('str-g-s5-3-desc',       s('g_s5_3_desc'));
+  set('str-g-s5-4-title',      s('g_s5_4_title'));
+  set('str-g-s5-4-power',      s('g_s5_4_power'));
+  set('str-g-s5-4-power-link', s('g_s5_4_power_link'));
+  set('str-g-s5-4-power2',     s('g_s5_4_power2'));
+  set('str-g-s5-4-mode',       s('g_s5_4_mode'));
+  set('str-g-s5-4-cooldown',   s('g_s5_4_cooldown'));
+  set('str-g-s5-4-cone',       s('g_s5_4_cone'));
+  set('str-g-s5-4-ktype',      s('g_s5_4_ktype'));
+  set('str-g-s5-4-notes',      s('g_s5_4_notes'));
+  set('str-g-s5-4-export',     s('g_s5_4_export'));
+  set('str-g-s5-4-journal',    s('g_s5_4_journal'));
+  set('str-g-s5-4-share',      s('g_s5_4_share'));
+  set('str-g-s5-4-energy',     s('g_s5_4_energy'));
+  set('str-g-s5-4-lang',       s('g_s5_4_lang'));
+  set('str-g-s5-4-lang-link',  s('g_s5_4_lang_link'));
+  // Other tools — bold names (the descriptions above are already mapped)
+  set('str-g-s5-4-cooldown-name', s('g_s5_4_cooldown_name'));
+  set('str-g-s5-4-cone-name',     s('g_s5_4_cone_name'));
+  set('str-g-s5-4-ktype-name',    s('g_s5_4_ktype_name'));
+  set('str-g-s5-4-notes-name',    s('g_s5_4_notes_name'));
+  set('str-g-s5-4-export-name',   s('g_s5_4_export_name'));
+  set('str-g-s5-4-journal-name',  s('g_s5_4_journal_name'));
+  set('str-g-s5-4-share-name',    s('g_s5_4_share_name'));
+  set('str-g-s5-4-energy-name',   s('g_s5_4_energy_name'));
+  set('str-g-s5-4-lang-name',     s('g_s5_4_lang_name'));
+  set('str-g-footer',          s('g_footer'));
+  set('str-g-footer-contact',  s('g_footer_contact'));
+  set('str-g-footer-or',       s('g_footer_or'));
+  set('str-g-footer-ts',       s('g_footer_ts'));
+  // Licence
+  set('str-licence-title',        s('licence_title'));
+  set('str-licence-sub',          s('licence_sub'));
+  set('str-licence-lead',         s('licence_lead'));
+  set('str-licence-block',        s('licence_block'));
+  set('str-licence-ethos-label',  s('licence_ethos_label'));
+  set('str-licence-ethos',        s('licence_ethos'));
+  set('str-licence-ethos2',       s('licence_ethos2'));
+  set('str-credits-label',        s('credits_label'));
+  set('str-credits',              s('credits'));
+  // "Add a language" menu entry — refresh its label on language change
+  const _addLangBtn = document.getElementById('hdd-lang-add');
+  if (_addLangBtn) _addLangBtn.textContent = '+ ' + (s('addLanguage') || 'Add a language');
 }
 
-async function loadLangFile(code) {
-  if (_langCache[code]) { _applyStrings(_langCache[code]); return; }
-  try {
-    const res = await fetch(LANG_BASE_URL + code + '.json');
-    if (!res.ok) throw new Error('');
-    const data = await res.json();
-    _langCache[code] = data; _applyStrings(data);
-  } catch(e) { _applyStrings(STRINGS[code] || STRINGS.en); }
-}
+// ── LANG SYSTEM ──────────────────────────────────────────────────────
+let LANG_MANIFEST = ['en', 'es'];
+let currentLang   = localStorage.getItem(LANG_KEY) || 'en';
+const _langCache  = {};
+let _langOpen     = false;
 
-// Lang dropdown
-let _langOpen = false;
 function hddLangToggle() {
   const menu = document.getElementById('hdd-lang-menu');
   const btn  = document.getElementById('hdd-lang-btn');
-  _langOpen = !_langOpen;
+  _langOpen  = !_langOpen;
   menu.classList.toggle('open', _langOpen);
   btn.classList.toggle('active', _langOpen);
   if (_langOpen) {
@@ -490,811 +1167,146 @@ function buildLangSelector() {
   menu.innerHTML = '';
   LANG_MANIFEST.forEach(code => {
     const btn = document.createElement('button');
-    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
     btn.id = 'hdd-lang-' + code;
+    // "add" is not a language — it links to the Add a Language guide
+    if (code === 'add') {
+      btn.className = 'hdd-item';
+      btn.textContent = '+ ' + (s('addLanguage') || 'Add a language');
+      btn.onclick = () => {
+        window.open('https://github.com/ParamoStudio/KilnMonitor/blob/main/Guides/Add%20a%20Language.md', '_blank', 'noopener');
+        document.getElementById('hdd-lang-menu').classList.remove('open');
+        document.getElementById('hdd-lang-btn').classList.remove('active');
+        _langOpen = false;
+      };
+      menu.appendChild(btn);
+      return;
+    }
+    btn.className = 'hdd-item' + (code === currentLang ? ' active' : '');
     btn.textContent = code.toUpperCase();
     btn.onclick = () => {
-      LANG_MANIFEST.forEach(c => { const el = document.getElementById('hdd-lang-'+c); if(el) el.classList.remove('active'); });
+      LANG_MANIFEST.forEach(c => { const el = document.getElementById('hdd-lang-'+c); if (el) el.classList.remove('active'); });
       btn.classList.add('active');
       lbl.textContent = code.toUpperCase();
       currentLang = code;
-      localStorage.setItem('paramo.lang', code);
+      localStorage.setItem(LANG_KEY, code);
       document.getElementById('hdd-lang-menu').classList.remove('open');
       document.getElementById('hdd-lang-btn').classList.remove('active');
       _langOpen = false;
       delete _langCache[code];
-      loadLangFile(code);
+      loadLang(code);
     };
     menu.appendChild(btn);
   });
   if (lbl) lbl.textContent = currentLang.toUpperCase();
 }
 
-async function _diaryInit() {
+async function loadLang(code) {
+  if (_langCache[code]) { _strings = Object.assign({}, FALLBACK, _langCache[code]); applyStrings(); return; }
+  try {
+    const res = await fetch(LANG_BASE_URL + code + '.json');
+    if (!res.ok) throw new Error('');
+    const data = await res.json();
+    _langCache[code] = data;
+    _strings = Object.assign({}, FALLBACK, data);
+  } catch(e) {
+    _strings = Object.assign({}, FALLBACK);
+  }
+  applyStrings();
+}
+
+async function initLang() {
   try {
     const res = await fetch(LANG_BASE_URL + 'manifest.json');
-    if (!res.ok) throw new Error('');
-    const d = await res.json();
-    if (Array.isArray(d) && d.length) LANG_MANIFEST = d;
+    if (res.ok) {
+      const d = await res.json();
+      if (Array.isArray(d)) LANG_MANIFEST = d;
+    }
   } catch(e) {}
   buildLangSelector();
-  delete _langCache[currentLang];
-  await loadLangFile(currentLang);
-  renderList();
-  await tryAutoReconnect();
+  await loadLang(currentLang);
 }
 
-// IMPORT MENU
-function toggleImportMenu() {
-  const menu = document.getElementById('import-menu');
-  const btn  = document.getElementById('import-btn');
-  const open = menu.classList.toggle('open');
-  btn.classList.toggle('active', open);
-  if (open) {
-    setTimeout(() => document.addEventListener('click', closeImportOut, { once: true }), 0);
-  }
+// ── THEME ────────────────────────────────────────────────────────────
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  document.querySelector('.theme-btn').textContent = dark ? '○' : '☽';
 }
-function closeImportOut(e) {
-  const wrap = document.getElementById('import-wrap');
-  if (!wrap.contains(e.target)) {
-    document.getElementById('import-menu').classList.remove('open');
-    document.getElementById('import-btn').classList.remove('active');
-  }
+function toggleTheme() {
+  const dark = !document.body.classList.contains('dark');
+  localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+  applyTheme(dark);
 }
-function importFiles() {
-  document.getElementById('import-menu').classList.remove('open');
-  document.getElementById('import-btn').classList.remove('active');
-  if (window.showOpenFilePicker) {
-    window.showOpenFilePicker({ multiple:true, types:[{ description:'Páramo JSON', accept:{'application/json':['.json']} }] })
-      .then(h => Promise.all(h.map(f => f.getFile())).then(readFiles))
-      .catch(()=>{});
-  } else {
-    document.getElementById('file-input').click();
-  }
-}
-function handleFiles(files) { if (files && files.length) readFiles(Array.from(files)); }
-function readFiles(files) {
-  Promise.all(files.map(file => new Promise(res => {
-    const r = new FileReader();
-    r.onload = e => { try { const d = JSON.parse(e.target.result); res((d&&d.meta&&d.datapoints)?{...d,_filename:file.name}:null); } catch{ res(null); } };
-    r.readAsText(file);
-  }))).then(results => {
-    results.filter(Boolean).forEach(f => { if (!allFirings.some(x => x.meta.exportedAt === f.meta.exportedAt)) allFirings.push(f); });
-    allFirings.sort((a,b) => (b.meta.exportedAt || b.meta.startedAt) - (a.meta.exportedAt || a.meta.startedAt));
-    rebuildTypeFilter();
-    applyFilters();
-  });
-}
-function setDriveStatus(connected, label) {
-  driveConnected = connected;
-  const dot = document.getElementById('cloud-dot');
-  const lbl = document.getElementById('cloud-status-label');
-  if (dot) dot.classList.toggle('on', connected);
-  if (lbl) lbl.textContent = label || (connected ? 'Drive' : t('noCloud'));
-  const btn = document.getElementById('str-connect-drive');
-  if (btn) { btn.textContent = connected ? '✓ Google Drive' : t('connectDrive'); btn.classList.toggle('muted', !connected); }
-}
+applyTheme(localStorage.getItem(THEME_KEY) === 'dark');
 
-function connectGoogleDrive() {
-  document.getElementById('import-menu').classList.remove('open');
-  document.getElementById('import-btn').classList.remove('active');
-  if (driveConnected) {
-    if (confirm('Disconnect Google Drive?')) {
-      driveToken = null; driveFolderId = null;
-      localStorage.removeItem(DRIVE_TOKEN_KEY);
-      localStorage.removeItem(DRIVE_FOLDER_KEY);
-      setDriveStatus(false);
-      renderList();
-    }
-    return;
-  }
-  gapi.load('client', async () => {
-    await gapi.client.init({});
-    const tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: DRIVE_CLIENT_ID,
-      scope: DRIVE_SCOPE,
-      callback: async (resp) => {
-        if (resp.error) { console.error('Drive auth:', resp.error); return; }
-        driveToken = resp.access_token;
-        localStorage.setItem(DRIVE_TOKEN_KEY, driveToken);
-        setDriveStatus(true, 'Connecting…');
-        driveFolderId = await getOrCreateFolder();
-        if (driveFolderId) {
-          localStorage.setItem(DRIVE_FOLDER_KEY, driveFolderId);
-          setDriveStatus(true, 'Drive');
-          await loadFromDrive();
-        }
-      }
-    });
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  });
-}
-
-async function getOrCreateFolder() {
-  const q = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-  const res = await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
-  if (!res) return null;
-  if (res.files && res.files.length > 0) return res.files[0].id;
-  const created = await driveRequest('https://www.googleapis.com/drive/v3/files', 'POST', { name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' });
-  return created ? created.id : null;
-}
-
-async function loadFromDrive() {
-  if (!driveFolderId || !driveToken) return;
-  const q = encodeURIComponent(`'${driveFolderId}' in parents and mimeType='application/json' and trashed=false`);
-  const res = await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&orderBy=name`);
-  if (!res || !res.files || !res.files.length) return;
-  const fetches = res.files.map(f =>
-    driveRequest(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`)
-      .then(data => data && data.meta && data.datapoints ? { ...data, _filename: f.name, _driveId: f.id } : null)
-      .catch(() => null)
-  );
-  const results = (await Promise.all(fetches)).filter(Boolean);
-  results.forEach(f => { if (!allFirings.some(x => x.meta.exportedAt === f.meta.exportedAt)) allFirings.push(f); });
-  allFirings.sort((a, b) => (b.meta.exportedAt || b.meta.startedAt) - (a.meta.exportedAt || a.meta.startedAt));
-  rebuildTypeFilter();
-  applyFilters();
-}
-
-async function driveRequest(url, method = 'GET', body = null) {
-  if (!driveToken) return null;
-  const opts = { method, headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json' } };
-  if (body) opts.body = JSON.stringify(body);
-  try {
-    const res = await fetch(url, opts);
-    if (res.status === 401) { driveToken = null; localStorage.removeItem(DRIVE_TOKEN_KEY); setDriveStatus(false); return null; }
-    if (!res.ok) return null;
-    const ct = res.headers.get('content-type') || '';
-    return ct.includes('application/json') ? res.json() : res.json().catch(() => res.text());
-  } catch(e) { return null; }
-}
-
-async function tryAutoReconnect() {
-  if (!driveToken) return;
-  const res = await driveRequest('https://www.googleapis.com/drive/v3/about?fields=user');
-  if (res) {
-    setDriveStatus(true, 'Drive');
-    if (!driveFolderId) { driveFolderId = await getOrCreateFolder(); if (driveFolderId) localStorage.setItem(DRIVE_FOLDER_KEY, driveFolderId); }
-    if (driveFolderId) await loadFromDrive();
-  } else {
-    driveToken = null; localStorage.removeItem(DRIVE_TOKEN_KEY); setDriveStatus(false);
-  }
-}
-
-// DYNAMIC TYPE FILTER — uses modeLabel (user-customized name) for both display and filtering
-// Rellena un <select> con los valores únicos presentes en los JSON cargados.
-// Patrón dinámico: las opciones son los tags realmente existentes en los datos.
-function _populateFilter(selId, getter, allLabel, labelFn) {
-  const sel = document.getElementById(selId);
-  if (!sel) return;
-  const cur = sel.value;
-  const vals = [...new Set(allFirings.map(getter).filter(Boolean))].sort();
-  sel.innerHTML = `<option value="">${allLabel}</option>`;
-  vals.forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = labelFn ? labelFn(v) : v;
-    sel.appendChild(opt);
-  });
-  if (vals.includes(cur)) sel.value = cur;
-}
-function rebuildTypeFilter() {
-  // Tipo de horneada (modeLabel) — el nombre que el usuario dio a su tipo
-  _populateFilter('f-mode',  f => f.meta.modeLabel || f.meta.mode, t('allTypes'));
-  // Tipo de horno (kilnType) — traducido para mostrar, valor crudo para filtrar
-  _populateFilter('f-ktype', f => f.meta.kilnType, t('allTypes') || 'All', _kilnTypeLabel);
-  // Cono objetivo (targetCone)
-  _populateFilter('f-cone',  f => f.meta.targetCone, t('allTypes') || 'All');
-}
-
-// ── DATE RANGE CALENDAR ──────────────────────────────────────────
-// Picker propio (sin librerías): navegación de mes, selección de rango
-// con dos clics, presets. Escribe en #f-date-from / #f-date-to (hidden,
-// formato YYYY-MM-DD) y dispara applyFilters().
-let _calView = new Date();           // mes visible
-let _calStart = null, _calEnd = null; // rango seleccionado (Date|null)
-
-function toggleCalendar(ev){
-  if (ev) ev.stopPropagation();
-  const pop = document.getElementById('cal-popover');
-  if (pop.style.display === 'none' || !pop.style.display) {
-    _calView = _calEnd || _calStart || new Date();
-    renderCalendar();
-    pop.style.display = 'block';
-    setTimeout(() => document.addEventListener('click', _calOutside), 0);
-  } else {
-    _closeCalendar();
-  }
-}
-function _calOutside(e){
-  const pop = document.getElementById('cal-popover');
-  const disp = document.getElementById('f-date-display');
-  if (pop && !pop.contains(e.target) && e.target !== disp) _closeCalendar();
-}
-function _closeCalendar(){
-  const pop = document.getElementById('cal-popover');
-  if (pop) pop.style.display = 'none';
-  document.removeEventListener('click', _calOutside);
-}
-function calNav(delta){ _calView = new Date(_calView.getFullYear(), _calView.getMonth()+delta, 1); renderCalendar(); }
-function _ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function _sameDay(a,b){ return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
-
-function renderCalendar(){
-  const pop = document.getElementById('cal-popover');
-  const y = _calView.getFullYear(), mo = _calView.getMonth();
-  const monthName = _calView.toLocaleDateString(_locale(), {month:'long', year:'numeric'});
-  const dow = [];
-  // nombres de días cortos según locale, empezando en lunes
-  const ref = new Date(2024,0,1); // lunes
-  for (let i=0;i<7;i++){ const d=new Date(ref); d.setDate(ref.getDate()+i); dow.push(d.toLocaleDateString(_locale(),{weekday:'narrow'})); }
-  const first = new Date(y,mo,1);
-  let startDow = (first.getDay()+6)%7; // lunes=0
-  const daysInMonth = new Date(y,mo+1,0).getDate();
-  const today = new Date();
-
-  let html = `<div class="cal-head">
-    <button class="cal-nav" onclick="calNav(-1)" aria-label="prev">‹</button>
-    <div class="cal-title">${monthName}</div>
-    <button class="cal-nav" onclick="calNav(1)" aria-label="next">›</button>
-  </div><div class="cal-grid">`;
-  dow.forEach(d => html += `<div class="cal-dow">${d}</div>`);
-  for (let i=0;i<startDow;i++) html += `<div class="cal-day empty"></div>`;
-  for (let dnum=1; dnum<=daysInMonth; dnum++){
-    const dd = new Date(y,mo,dnum);
-    let cls = 'cal-day';
-    if (_sameDay(dd,today)) cls += ' today';
-    if (_calStart && _calEnd && dd >= _stripTime(_calStart) && dd <= _stripTime(_calEnd)) cls += ' in-range';
-    if (_sameDay(dd,_calStart) || _sameDay(dd,_calEnd)) cls += ' range-end';
-    html += `<div class="${cls}" onclick="calPick(${y},${mo},${dnum})">${dnum}</div>`;
-  }
-  html += `</div><div class="cal-actions">
-    <button class="cal-preset" onclick="calPreset('month')">${_tSafe('calThisMonth','This month')}</button>
-    <button class="cal-preset" onclick="calPreset('week')">${_tSafe('calThisWeek','This week')}</button>
-    <button class="cal-preset" onclick="calPreset('clear')">${_tSafe('clear','Clear')}</button>
-  </div>`;
-  pop.innerHTML = html;
-}
-function _stripTime(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
-
-function calPick(y,mo,dnum){
-  const picked = new Date(y,mo,dnum);
-  if (!_calStart || (_calStart && _calEnd)) {
-    // empezar nuevo rango
-    _calStart = picked; _calEnd = null;
-  } else {
-    // cerrar rango (ordenar)
-    if (picked < _calStart) { _calEnd = _calStart; _calStart = picked; }
-    else _calEnd = picked;
-  }
-  renderCalendar();
-  _commitRange();
-}
-function calPreset(kind){
-  const now = new Date();
-  if (kind === 'clear'){ _calStart=_calEnd=null; }
-  else if (kind === 'month'){ _calStart=new Date(now.getFullYear(),now.getMonth(),1); _calEnd=new Date(now.getFullYear(),now.getMonth()+1,0); }
-  else if (kind === 'week'){ const dow=(now.getDay()+6)%7; const mon=new Date(now); mon.setDate(now.getDate()-dow); _calStart=_stripTime(mon); const sun=new Date(mon); sun.setDate(mon.getDate()+6); _calEnd=_stripTime(sun); }
-  if (_calStart) _calView = new Date(_calStart);
-  renderCalendar();
-  _commitRange();
-  if (kind === 'clear') _closeCalendar();
-}
-function _commitRange(){
-  const from = document.getElementById('f-date-from');
-  const to   = document.getElementById('f-date-to');
-  const disp = document.getElementById('f-date-display');
-  if (_calStart && _calEnd){
-    from.value = _ymd(_calStart); to.value = _ymd(_calEnd);
-    disp.value = _calStart.toLocaleDateString(_locale(),{day:'numeric',month:'short'}) + ' – ' + _calEnd.toLocaleDateString(_locale(),{day:'numeric',month:'short',year:'numeric'});
-  } else if (_calStart && !_calEnd){
-    from.value = _ymd(_calStart); to.value = _ymd(_calStart);
-    disp.value = _calStart.toLocaleDateString(_locale(),{day:'numeric',month:'short',year:'numeric'}) + ' …';
-  } else {
-    from.value = ''; to.value = '';
-    disp.value = '';
-  }
-  applyFilters();
-}
-
-// FILTERS
-function applyFilters() {
-  const dateFrom = document.getElementById('f-date-from').value;
-  const dateTo   = document.getElementById('f-date-to').value;
-  const tempMin  = parseFloat(document.getElementById('f-temp-min').value);
-  const tempMax  = parseFloat(document.getElementById('f-temp-max').value);
-  const durMin   = parseFloat(document.getElementById('f-dur-min').value);
-  const durMax   = parseFloat(document.getElementById('f-dur-max').value);
-  const mode     = document.getElementById('f-mode').value;
-  const ktype    = document.getElementById('f-ktype').value;
-  const cone     = document.getElementById('f-cone').value;
-  filtered = allFirings.filter(f => {
-    const m = f.meta, date = m.startedAt ? new Date(m.startedAt) : null;
-    if (dateFrom && date && date < new Date(dateFrom)) return false;
-    if (dateTo   && date && date > new Date(dateTo+'T23:59:59')) return false;
-    if (!isNaN(tempMin) && m.maxTemp_c < tempMin) return false;
-    if (!isNaN(tempMax) && m.maxTemp_c > tempMax) return false;
-    const durH = (m.duration_min||0)/60;
-    if (!isNaN(durMin) && durH < durMin) return false;
-    if (!isNaN(durMax) && durH > durMax) return false;
-    if (mode && (f.meta.modeLabel || f.meta.mode) !== mode) return false;
-    if (ktype && f.meta.kilnType !== ktype) return false;
-    if (cone && f.meta.targetCone !== cone) return false;
-    return true;
-  });
-  renderList();
-}
-function clearFilters() {
-  ['f-date-from','f-date-to','f-temp-min','f-temp-max','f-dur-min','f-dur-max'].forEach(id => { document.getElementById(id).value=''; });
-  _calStart = _calEnd = null;
-  const disp = document.getElementById('f-date-display'); if (disp) disp.value = '';
-  document.getElementById('f-mode').value = '';
-  document.getElementById('f-ktype').value = '';
-  document.getElementById('f-cone').value = '';
-  applyFilters();
-}
-
-// RENDER
-function renderList() {
-  const list = document.getElementById('firing-list');
-  const empty = document.getElementById('empty-state');
-  const count = document.getElementById('panel-count');
-  if (!allFirings.length) {
-    list.style.display='none'; empty.style.display='';
-    count.textContent = t('noFirings');
-    document.getElementById('str-empty-title').textContent = t('noFiringsYet');
-    document.getElementById('str-empty-sub').textContent   = t('noFiringsMsg');
-    document.querySelector('.empty-actions').style.display = '';
-    const cloudBtn = document.getElementById('str-empty-cloud');
-    if (cloudBtn) cloudBtn.textContent = driveConnected ? t('driveDisconnect') : t('connectCloud');
-    return;
-  }
-  const show = filtered;
-  if (!show.length) {
-    list.style.display='none'; empty.style.display='';
-    document.getElementById('str-empty-title').textContent = t('noMatches');
-    document.getElementById('str-empty-sub').textContent   = t('noMatchesMsg');
-    document.querySelector('.empty-actions').style.display = 'none';
-    count.textContent = t('firingNoMatch').replace('{total}', allFirings.length);
-    return;
-  }
-  list.style.display='flex'; empty.style.display='none';
-  const _cntBase = (show.length !== 1 ? t('firingCountMany') : t('firingCountOne')).replace('{n}', show.length);
-  const _cntFiltered = show.length < allFirings.length ? t('firingCountFiltered').replace('{total}', allFirings.length) : '';
-  count.textContent = _cntBase + _cntFiltered;
-  list.innerHTML='';
-  show.forEach((f,i) => {
-    const m=f.meta;
-    const date = m.startedAt ? new Date(m.startedAt).toLocaleDateString(_locale(),{year:'numeric',month:'short',day:'numeric'}) : '—';
-    const endTime = m.exportedAt ? new Date(m.exportedAt).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit'}) : '';
-    const dateLabel = endTime ? (date + ' · ' + endTime) : date;
-    const dur  = m.duration_min ? (m.duration_min<60?Math.round(m.duration_min)+'m':Math.floor(m.duration_min/60)+'h'+(m.duration_min%60?(m.duration_min%60)+'m':'')) : '—';
-    const ktypeLabel = _kilnTypeLabel(m.kilnType);
-    const card = document.createElement('div');
-    card.className='firing-card'; card.style.animationDelay=(i*.04)+'s';
-    card.innerHTML=`
-      <div class="firing-date">${esc(dateLabel)}</div>
-      <div class="firing-info">
-        <div class="firing-name">${esc(m.kilnName||'Unnamed kiln')}</div>
-        <div class="firing-meta"><span>${esc(m.modeLabel||m.mode||'—')}</span>${ktypeLabel?`<span>${esc(ktypeLabel)}</span>`:''}${m.targetCone?`<span>△ ${esc(m.targetCone)}</span>`:''}<span>${dur}</span><span>${(f.datapoints||[]).length} pts</span></div>
-        ${m.note?`<div class="firing-note-preview">${esc(m.note)}</div>`:''}
-      </div>
-      <div class="firing-temp">${m.maxTemp_c!=null?Math.round(m.maxTemp_c)+'°':'—'}</div>`;
-    card.onclick=()=>openOverlay(f);
-    list.appendChild(card);
-  });
-}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-// Etiqueta legible del tipo de horno. Usa i18n si la key existe de verdad
-// (comprobando que t() no devuelva la propia key como hace con las ausentes),
-// si no cae a una etiqueta inglesa por defecto.
-// Traducción con fallback seguro: si la key no existe aún en el i18n
-// (t() devuelve la propia key), usa el texto inglés por defecto.
-function _tSafe(key, fallback){
-  const tr = t(key);
-  return (tr && tr !== key) ? tr : fallback;
-}
-function _kilnTypeLabel(v){
-  if(!v) return '';
-  const fallback={electric:'Electric',gas:'Gas',wood:'Wood',other:'Other'};
-  const keys={electric:'ktElectric',gas:'ktGas',wood:'ktWood',other:'ktOther'};
-  const base=fallback[v]||v;
-  if(!keys[v]) return base;
-  const tr=t(keys[v]);
-  // t() devuelve la propia key cuando no existe traducción → usar fallback
-  return (tr && tr!==keys[v]) ? tr : base;
-}
-
-// OVERLAY
-function openOverlay(firing) {
-  activeFiring=firing; const m=firing.meta;
-  const date=m.startedAt?new Date(m.startedAt).toLocaleDateString(_locale(),{year:'numeric',month:'long',day:'numeric'}):'—';
-  let titleSuffix = '';
-  if (m.exportedAt) {
-    const endTime = new Date(m.exportedAt).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit'});
-    titleSuffix = ' · ' + endTime;
-  }
-  document.getElementById('overlay-title').textContent=(m.kilnName||'Unnamed kiln')+' · '+date+titleSuffix;
-  const dur=m.duration_min?(m.duration_min<60?Math.round(m.duration_min)+' min':(m.duration_min/60).toFixed(1)+' h'):'—';
-  document.getElementById('stat-maxtemp').textContent=m.maxTemp_c!=null?Math.round(m.maxTemp_c)+' °C':'—';
-  document.getElementById('stat-duration').textContent=dur;
-  document.getElementById('stat-points').textContent=(firing.datapoints||[]).length;
-  document.getElementById('stat-mode').textContent=m.modeLabel||m.mode||'—';
-  document.getElementById('stat-ktype').textContent=_kilnTypeLabel(m.kilnType)||'—';
-  document.getElementById('stat-cone').textContent=m.targetCone||'—';
-
-  // Energy & cost — only shown if the firing JSON includes an energy block
-  const e = m.energy;
-  const eEl = document.getElementById('stat-energy');
-  const cEl = document.getElementById('stat-cost');
-  if (e && typeof e.energyTotal_wh === 'number' && e.energyTotal_wh > 0) {
-    const kWh = e.energyTotal_wh / 1000;
-    eEl.textContent = kWh < 1
-      ? (e.energyTotal_wh.toFixed(2) + ' Wh')
-      : (kWh.toFixed(2) + ' kWh');
-    if (typeof e.pricePerKwh === 'number' && e.pricePerKwh > 0) {
-      const cost = kWh * e.pricePerKwh;
-      const cur = e.currency || 'EUR';
-      try {
-        cEl.textContent = new Intl.NumberFormat(undefined, {
-          style: 'currency', currency: cur,
-          minimumFractionDigits: 2, maximumFractionDigits: 2
-        }).format(cost);
-      } catch(_) {
-        cEl.textContent = cost.toFixed(2) + ' ' + cur;
-      }
+// ── TABS ─────────────────────────────────────────────────────────────
+const TABS = ['contact', 'guide', 'licence'];
+function switchTab(id, animate = true) {
+  if (!TABS.includes(id)) id = 'contact';
+  TABS.forEach(t => {
+    document.querySelector(`[data-tab="${t}"]`).classList.toggle('active', t === id);
+    const pane = document.getElementById('pane-' + t);
+    if (t === id) {
+      pane.classList.add('active');
+      if (animate) { pane.style.animation = 'none'; requestAnimationFrame(() => { pane.style.animation = ''; }); }
     } else {
-      cEl.textContent = '—';
+      pane.classList.remove('active');
     }
-  } else {
-    eEl.textContent = '—';
-    cEl.textContent = '—';
-  }
-
-  document.getElementById('overlay-note-text').textContent=m.note||'—';
-  document.querySelector('.overlay-note').style.opacity=m.note?'1':'0.4';
-  const wattSamples = (m.kilnType === 'electric' && m.energy && m.energy.samples) ? m.energy.samples : null;
-  drawOverlayChart(_chartDatapoints(firing.datapoints||[]), wattSamples);
-  document.getElementById('overlay-backdrop').classList.add('visible');
-  document.body.style.overflow='hidden';
+  });
+  const url = new URL(window.location);
+  url.searchParams.set('tab', id);
+  history.replaceState(null, '', url);
 }
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  switchTab(params.get('tab') || 'contact', false);
+})();
 
-// Datapoints para la gráfica reconstruida: SOLO los ESP (los live son ruido
-// de lectura en tiempo real). Fallback: si no hay NINGÚN punto ESP (p.ej. la
-// máquina se reinició y perdió su historial, pero el cache del navegador aún
-// guardaba los live), se usan los live para no quedarse sin gráfica.
-function _chartDatapoints(dp) {
-  if (!Array.isArray(dp) || !dp.length) return dp || [];
-  const esp = dp.filter(d => d.src === 'esp');
-  if (esp.length >= 2) return esp;
-  // sin ESP suficientes → rescate con live (o lo que haya, p.ej. JSON antiguos sin src)
-  return dp;
-}
-function closeOverlay(e){if(e.target===document.getElementById('overlay-backdrop'))closeOverlayDirect();}
-function closeOverlayDirect(){document.getElementById('overlay-backdrop').classList.remove('visible');document.body.style.overflow='';activeFiring=null;}
-
-// CHART
-function drawOverlayChart(dp, wattSamples) {
-  const canvas=document.getElementById('overlay-canvas');
-  const empty=document.getElementById('overlay-chart-empty');
-  const ctx=canvas.getContext('2d'), wrap=canvas.parentElement;
-  const DPR=Math.min(window.devicePixelRatio||1,2);
-  const W=wrap.offsetWidth*DPR, H=wrap.offsetHeight*DPR;
-  canvas.width=W; canvas.height=H;
-  canvas.style.width=wrap.offsetWidth+'px'; canvas.style.height=wrap.offsetHeight+'px';
-  if(!dp||dp.length<2){empty.style.display='flex';return;}
-  empty.style.display='none';
-  const isDark=document.body.classList.contains('dark');
-  // watt overlay — only if we have samples
-  const hasWatts = wattSamples && wattSamples.length >= 2;
-  // right padding wider if showing watts axis
-  const pL=46*DPR, pR=(hasWatts?52:16)*DPR, pT=14*DPR, pB=28*DPR, cw=W-pL-pR, ch=H-pT-pB;
-  const temps=dp.map(d=>d.tc).filter(v=>!isNaN(v)), tMax=Math.max(...temps,100);
-  const t0=dp[0].ts, t1=dp[dp.length-1].ts, tSpan=(t1-t0)/60000||1;
-  const xC=ts=>pL+((ts-t0)/60000/tSpan)*cw, yC=tc=>pT+(1-tc/tMax)*ch;
-  ctx.fillStyle=isDark?'rgba(30,24,16,0.6)':'rgba(255,255,255,0.4)'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle=isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)'; ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pT+(ch*i)/4;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();}
-  // temperature fill + line
-  const grad=ctx.createLinearGradient(0,pT,0,pT+ch);
-  grad.addColorStop(0,isDark?'rgba(255,112,64,0.35)':'rgba(216,66,26,0.25)');grad.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.beginPath();dp.forEach((d,i)=>{i===0?ctx.moveTo(xC(d.ts),yC(d.tc)):ctx.lineTo(xC(d.ts),yC(d.tc));});
-  ctx.lineTo(xC(t1),pT+ch);ctx.lineTo(xC(t0),pT+ch);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-  ctx.beginPath();dp.forEach((d,i)=>{i===0?ctx.moveTo(xC(d.ts),yC(d.tc)):ctx.lineTo(xC(d.ts),yC(d.tc));});
-  ctx.strokeStyle=isDark?'#ff7040':'#d8421a';ctx.lineWidth=2*DPR;ctx.lineJoin='round';ctx.stroke();
-  // left axis labels (temp)
-  ctx.fillStyle=isDark?'#807868':'#9a9286';ctx.font=(10*DPR)+'px DM Mono,monospace';
-  ctx.textAlign='right';
-  for(let i=0;i<=4;i++){ctx.fillText(Math.round(tMax*(1-i/4))+'°',pL-6*DPR,pT+(ch*i)/4+4*DPR);}
-  ctx.textAlign='center';
-  for(let i=0;i<=4;i++){const t=(tSpan*i)/4;const lbl=t<60?Math.round(t)+'m':(t/60).toFixed(t%60?1:0)+'h';ctx.fillText(lbl,pL+(cw*i)/4,H-8*DPR);}
-
-  // ── WATTS OVERLAY ────────────────────────────────────────────────
-  if (hasWatts) {
-    // timestamps in wattSamples are Unix seconds; dp timestamps are ms
-    const ws = wattSamples.filter(s => typeof s.watts === 'number');
-    if (ws.length >= 2) {
-      const wMax = Math.max(...ws.map(s=>s.watts), 1);
-      // xW maps a unix-second ts to canvas x using the same t0 (ms) reference
-      const xW = ts => pL + (((ts*1000) - t0) / 60000 / tSpan) * cw;
-      const yW = w  => pT + (1 - w / wMax) * ch;
-      // watts fill
-      const wGrad = ctx.createLinearGradient(0,pT,0,pT+ch);
-      wGrad.addColorStop(0, isDark?'rgba(100,180,255,0.28)':'rgba(30,120,255,0.18)');
-      wGrad.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.beginPath();
-      ws.forEach((s,i)=>{ i===0?ctx.moveTo(xW(s.ts),yW(s.watts)):ctx.lineTo(xW(s.ts),yW(s.watts)); });
-      ctx.lineTo(xW(ws[ws.length-1].ts),pT+ch);
-      ctx.lineTo(xW(ws[0].ts),pT+ch);
-      ctx.closePath(); ctx.fillStyle=wGrad; ctx.fill();
-      // watts line
-      ctx.beginPath();
-      ws.forEach((s,i)=>{ i===0?ctx.moveTo(xW(s.ts),yW(s.watts)):ctx.lineTo(xW(s.ts),yW(s.watts)); });
-      ctx.strokeStyle=isDark?'#60b4ff':'#1e78ff';
-      ctx.lineWidth=1.5*DPR; ctx.lineJoin='round'; ctx.stroke();
-      // right axis labels (watts)
-      ctx.fillStyle=isDark?'#5a8aaa':'#4a7aaa';
-      ctx.font=(10*DPR)+'px DM Mono,monospace';
-      ctx.textAlign='left';
-      for(let i=0;i<=4;i++){
-        const w=Math.round(wMax*(1-i/4));
-        ctx.fillText(w+'W', W-pR+6*DPR, pT+(ch*i)/4+4*DPR);
-      }
-    }
-  }
-}
-// ── SHARE PNG — composición A4 apaisada, escala de grises, imprimible ──
-// Gráfica a la izquierda, columnas de datos a la derecha, nota en recuadro
-// inferior derecho. Todo en el idioma activo (salvo la nota del usuario).
-
-// Mapea el idioma activo de la web a un locale BCP-47 para fechas.
-// Antes se usaba undefined (locale del SO), lo que hacía salir fechas en
-// español aunque la web estuviera en inglés.
-function _locale() {
-  const map = { en:'en-US', es:'es-ES', fr:'fr-FR', cat:'ca-ES', jap:'ja-JP', de:'de-DE', zh:'zh-CN', ru:'ru-RU' };
-  return map[currentLang] || 'en-US';
-}
-function _fmtDateLong(ts) {
-  if (!ts) return '';
-  try { return new Date(ts).toLocaleDateString(_locale(), {year:'numeric', month:'long', day:'numeric'}); }
-  catch(_) { return new Date(ts).toLocaleDateString(_locale()); }
-}
-
-const PARAMO_TEXT_PNG = 'data:image/png;base64,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iIiIiIiIdITBijs3JDy2ijsiIiIiIiIiIomtC/QmimnAkPyaIiIiIiIiIiLSebqwdXdSFXhWy68pIiIiIiIiIiLlM9i0rF7gpoTHXzfha4uIiIiIiIiIlN5gxR2AfyU8voo7IiIiIiIiIiJtaKS4c33C42+W8LVFRERERERERKTPk6RZc2ciWlRZRERERERERKRljYzcAfh7ouOPRVOzRERERERERERa1mhx528Jc9g+4WuLiIiIiIiIiAgwGphJmqlZ1+TYDhERERERERGRjnUDaYo7M4Ax+TVDRERERERERKQ8Gp2WBXB1ohxGALsnem0REREREREREemzJmlG7vQCv82xHSIiIiIiIiIiHesR0hR3pgHj8muGiIiIiIiIiEg5NDMtC+DPSbKAkcBBiV5bRERERERERET6bE26qVm359gOEREREREREZGONAR4jXQFng3ya4qIiIiIiIiISPE1Oy1rLummZgF8PuFri4iIiIiIiIgIsBvpRu7MApbPrykiIiIiIiIiIp1nKGmnZv0wv6aIiIiIiIiIiHSm80hX3JkGLJtfU0REREREREREOs+upCvu9AJn59cUEREREREREZHOk3pq1hxgrdxaIyIiIiIiIiLSgc4m7eidK/JrioiIiIiIiIhI59matMWdXmCf3FojIiIiIiIiItJhuoAnSVvceQ4YnVeDRERERERERESKpruN/7YXuCirROpYDvhW4mOIiIiIiIiIiHSsVYEe0o7emQu8O68GiYiIiIiIiIh0mttJv/bOy8ASeTVIRERERERERKSTfJL0xZ1e4G/YOj8iIiIiIiIiIpKhMcAU8inwnJhPk0REREREREREOsuvyae40wN8KKc2iYiIiIiIiIh0jG3Ip7jTC0wHtsynWSIiIiIiIiIineMh8ivwvAqsnU+zREREREREREQ6w+fJr7jTC7wErJ5Ly0REREREREREOsDCwFTyLfC8AKySR+NERERERERERDrBL8m3uFMZwbNRHo0TERERERERESm7Dcm/uNMLvA3snr55IiIiIiIiIiLldxs+BZ6ZaJt0EREREREREZG2fQif4k4lzgGGJW+liIiIiIiIiEhJjQBexrfAcwOwZOJ2ioiIiIiIiIiU1tfwLe70Yjtp7ZK6oSIiIiIiIiIiZbQIMAX/Ak8PNk1rVNrmioiIiIiIiIiUz8/wL+5U4kFgs7TNFREREREREREpl9WAufgXdioxFxvFMyZlo0VEREREREREyuRK/Is6/eMFYP+UjRYRERERERERKYut8S/m1It/ARula7qIiIiIiIiISDncgH8hZ6CpWr8ElknVeBERERERERGRons3/kWcwWImth7PUon6QERERERERESk0O7Av4DTSLwNfAtYNE03iIiIiIiIiIgU0z74F26aiRnABdiOXyIiIiIiIiIiHa8LuB//ok2zMRu4GNgw8x4RERERERERESmY/fEv1rQTtwB7YYUqEREREREREZGO0wXcg3+Rpt34D7BHxn0jIiIiIiIiIlIIe+JfnMkqbgbWyLZ7RERERERERETi+zf+hZmsYhpwVLbdIyIiIiIiIiIS2674F2WyjvOA4Vl2koiIiIiIiIhIZDfgX5DJOq4AhmXYRyIiIiIiIiIiYW0O9OBfkMk6LkG7aYmIiIiIiIhIh7gU/2JMivhalp0kIiIiIiIiIhLVqsAs/IsxWcdcYOcM+0lEREREREREJKyf4F+MSRHPAAtl100iIiIiIiIiIjEtAUzCvxiTIr6bYT+JiIiIiIiIiIR1PP6FmBQxHVg2w34SEREREREREQlpBPA4/sWYFHFmhv0kIiIiIiIiIhLWPvgXYlLE28DoDPtJRERERERERCSs6/AvxqSIj2fZSSIiIiIiIiIiUa1FObdGvzbLThIRERERERERiezH+Bdjso4ZaFt0EREREREREekQY4AX8C/IZB27ZdlJIiIiIiIiIiIV3d4J9DMZOM47iQQ29k5ARERERERERMopWnEH4FLgb95JZGx97wREREREREREpJwiFncAjsLWqimLZb0TEBEREREREZFyilrceRI41TuJDC3tnYCIiIiIiIiISN6GAnfjvxhyFvFixn0jIiIiIiIiIgLEHbkDMAc4HJjtnYiIiIiIiIiISFSRizsA9wE/9k4iA2VaP0hEREREREREpCkjgIfwn1rVTtyUea+IiIiIiIiIiBB/5A7ATOCTQI93Im143jsBERERERERESmnIhR3wEa+nO6dRBvu8U5ARERERERERMTbAsAD+E+xaiW2TdAfIiIiIiIiIiKFsxE2Tcu7WNNMvAkMT9EZIiIiIiIiIiJFmZZVcS9wincSTbocmOWdhIiIiIiIiIhIFEOB2/EfkdNobJmmG0REREREREREimt5YAL+hZvB4sZUHSAiIiIiIiIiUnQH4l+8GSh6gO2TtV5EREREREREpAR+gn8Rp178KmG7RURERERERERKYShwHf6FnP7xJLBwwnaLiIiIiIiIiJTGGOAB/As6lZgGbJy0xSIiIiIiIiIiJbMC8BT+hZ3pwO6J2yoiIiIiIiIiUkrLY9OhvAo7U1BhR0RERERERESkLcsB95B/YedpYMP0zRMRERERERERKb8FgF+QX2HnImDRXFomIiIiIiIiItJBPgy8QrqizoPAHrm1RkRERERERESkA40BvgNMJLuizj3AIUB3fs0QEREREREREelsCwGfBm4E5tDamjpnApvnnbiIiIiIiIiIyEC6vBNwsAiwDbAxsDawFLA4MBwr5LwGvIwVdO4F7gYecclURERERERERGQQ/wd8DfxEkElbeAAAAABJRU5ErkJggg==';
-
-function exportOverlayPng() {
-  if (!activeFiring) return;
-  const m = activeFiring.meta;
-  const dp = _chartDatapoints(activeFiring.datapoints || []);
-
-  // Lienzo A4 apaisado (√2:1). 2480×1754 ≈ A4 a 210 DPI — nítido al imprimir.
-  const W = 2480, H = 1754;
-  const cv = document.createElement('canvas');
-  cv.width = W; cv.height = H;
-  const ctx = cv.getContext('2d');
-  // Fondo blanco sólido
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
-
-  const MX = 90, MY = 80;       // márgenes
-  const INK = '#111111', GRID = '#cccccc', MUTED = '#666666';
-
-  // ── CABECERA: logo + título ──────────────────────────────────────
-  const headerH = 200;
-  const title = (m.kilnName || 'Unnamed kiln');
-  let dateStr = _fmtDateLong(m.startedAt);
-  // Añadir franja horaria de la horneada (inicio–fin) si está disponible
-  try {
-    const tOpts = {hour:'2-digit', minute:'2-digit'};
-    const tStart = m.startedAt ? new Date(m.startedAt).toLocaleTimeString(_locale(), tOpts) : '';
-    const tEnd   = m.exportedAt ? new Date(m.exportedAt).toLocaleTimeString(_locale(), tOpts) : '';
-    if (tStart && tEnd) dateStr += '  ·  ' + tStart + ' – ' + tEnd;
-    else if (tStart)    dateStr += '  ·  ' + tStart;
-  } catch(_) {}
-  const drawBody = () => {
-    // título
-    ctx.fillStyle = INK;
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    ctx.font = '600 64px Fraunces, Georgia, serif';
-    ctx.fillText(title, MX, MY + 70);
-    ctx.fillStyle = MUTED;
-    ctx.font = '34px "DM Mono", monospace';
-    ctx.fillText(dateStr, MX, MY + 120);
-    // línea separadora bajo cabecera
-    ctx.strokeStyle = GRID; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(MX, MY + headerH); ctx.lineTo(W - MX, MY + headerH); ctx.stroke();
-
-    // ── Zona inferior: gráfica izq + leyenda der ──
-    const topY = MY + headerH + 50;
-    const bottomY = H - MY;
-    const colGap = 70;
-    const chartW = Math.round((W - MX*2 - colGap) * 0.60);
-    const legendX = MX + chartW + colGap;
-    const legendW = (W - MX) - legendX;
-
-    // —— GRÁFICA (escala de grises) ——
-    const _ws = (m.kilnType === 'electric' && m.energy && m.energy.samples) ? m.energy.samples : null;
-    _drawChartGray(ctx, dp, MX, topY, chartW, bottomY - topY, INK, GRID, MUTED, _ws);
-
-    // —— LEYENDA (columnas de datos) ——
-    const items = [];
-    const push = (label, val) => { if (val !== null && val !== undefined && val !== '' && val !== '—') items.push([label, val]); };
-    if (m.maxTemp_c != null) push(_tSafe('statMaxTemp','Max temp'), Math.round(m.maxTemp_c) + ' °C');
-    if (m.duration_min) {
-      const d = m.duration_min < 60 ? Math.round(m.duration_min)+' min' : (m.duration_min/60).toFixed(1)+' h';
-      push(_tSafe('statDuration','Duration'), d);
-    }
-    push(_tSafe('statMode','Firing type'), m.modeLabel || m.mode);
-    push(_tSafe('statKilnType','Kiln type'), _kilnTypeLabel(m.kilnType));
-    push(_tSafe('statCone','Target cone'), m.targetCone);
-    if (dp.length) push(_tSafe('statPoints','Datapoints'), dp.length);
-    // energía + coste
-    const e = m.energy;
-    if (e && typeof e.energyTotal_wh === 'number' && e.energyTotal_wh > 0) {
-      const kWh = e.energyTotal_wh / 1000;
-      push(_tSafe('statEnergy','Energy'), kWh < 1 ? (e.energyTotal_wh.toFixed(0)+' Wh') : (kWh.toFixed(2)+' kWh'));
-      if (typeof e.pricePerKwh === 'number' && e.pricePerKwh > 0) {
-        const cost = kWh * e.pricePerKwh, cur = e.currency || 'EUR';
-        let cs; try { cs = new Intl.NumberFormat(undefined,{style:'currency',currency:cur}).format(cost); }
-        catch(_) { cs = cost.toFixed(2)+' '+cur; }
-        push(_tSafe('statCost','Cost'), cs);
-      }
-    }
-
-    // dibujar celdas de datos (label arriba pequeño, valor abajo grande)
-    let ly = topY + 10;
-    const rowH = 96;
-    items.forEach(([label, val]) => {
-      ctx.fillStyle = MUTED;
-      ctx.font = '600 22px "DM Mono", monospace';
-      ctx.fillText(String(label).toUpperCase(), legendX, ly + 26);
-      ctx.fillStyle = INK;
-      ctx.font = '46px Fraunces, Georgia, serif';
-      ctx.fillText(String(val), legendX, ly + 74);
-      // línea fina bajo cada celda
-      ctx.strokeStyle = GRID; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(legendX, ly + rowH); ctx.lineTo(W - MX, ly + rowH); ctx.stroke();
-      ly += rowH;
-    });
-
-    // —— NOTA: recuadro que ocupa el espacio sobrante abajo a la derecha ——
-    if (m.note && m.note.trim()) {
-      const noteTop = ly + 24;
-      const noteBottom = bottomY;
-      if (noteBottom - noteTop > 80) {  // solo si hay espacio razonable
-        ctx.strokeStyle = GRID; ctx.lineWidth = 2;
-        ctx.strokeRect(legendX, noteTop, legendW, noteBottom - noteTop);
-        ctx.fillStyle = MUTED;
-        ctx.font = '600 22px "DM Mono", monospace';
-        ctx.fillText(_tSafe('notesLabel','Notes').toUpperCase(), legendX + 22, noteTop + 38);
-        ctx.fillStyle = INK;
-        ctx.font = '30px Fraunces, Georgia, serif';
-        _wrapText(ctx, m.note.trim(), legendX + 22, noteTop + 80, legendW - 44, 40, noteBottom - noteTop - 100);
-      }
-    }
-
-    // pie: nota ecológica (izq) + marca (der)
-    ctx.fillStyle = MUTED;
-    ctx.font = 'italic 20px "DM Mono", monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(_tSafe('shareEcoNote', '* Rendered in greyscale to minimise ink, resources and ecological footprint. Care for the planet.'), MX, H - 30);
-    ctx.font = '22px "DM Mono", monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText('Páramo Kiln Monitor', W - MX, H - 30);
-    ctx.textAlign = 'left';
-
-    // descargar
-    const dateF = m.startedAt ? new Date(m.startedAt).toISOString().slice(0,10) : 'unknown';
-    const a = document.createElement('a');
-    a.href = cv.toDataURL('image/png');
-    a.download = 'Paramo_' + dateF + '_firing.png';
-    a.click();
-  };
-
-  // Logo "páramo" (tipografía real, PNG negro transparente) en la cabecera,
-  // arriba a la derecha. Carga asíncrona → dibuja el cuerpo en onload.
-  const logoImg = new Image();
-  logoImg.onload = () => {
-    const lw = 360, lh = lw * (logoImg.height / logoImg.width);
-    ctx.drawImage(logoImg, W - MX - lw, MY + 18, lw, lh);
-    drawBody();
-  };
-  logoImg.onerror = () => { drawBody(); };
-  logoImg.src = PARAMO_TEXT_PNG;
-}
-
-// Gráfica en escala de grises sobre fondo blanco (para impresión)
-function _drawChartGray(ctx, dp, x, y, w, h, INK, GRID, MUTED, wattSamples) {
-  if (!dp || dp.length < 2) {
-    ctx.fillStyle = MUTED; ctx.font = '28px "DM Mono", monospace'; ctx.textAlign='center';
-    ctx.fillText(_tSafe('noDatapoints','No datapoints'), x + w/2, y + h/2); ctx.textAlign='left';
-    return;
-  }
-  const ws = (wattSamples && wattSamples.length >= 2) ? wattSamples.filter(s => typeof s.watts === 'number') : [];
-  const hasWatts = ws.length >= 2;
-  const pL = 70, pB = 50, pT = 10, pR = hasWatts ? 64 : 10;
-  const cw = w - pL - pR, ch = h - pT - pB;
-  const ox = x, oy = y;
-  const temps = dp.map(d=>d.tc).filter(v=>!isNaN(v)), tMax = Math.max(...temps, 100);
-  const t0 = dp[0].ts, t1 = dp[dp.length-1].ts, tSpan = (t1-t0)/60000 || 1;
-  const xC = ts => ox + pL + ((ts-t0)/60000/tSpan)*cw;
-  const yC = tc => oy + pT + (1 - tc/tMax)*ch;
-  // rejilla
-  ctx.strokeStyle = GRID; ctx.lineWidth = 1;
-  for (let i=0;i<=4;i++){ const yy = oy+pT+(ch*i)/4; ctx.beginPath(); ctx.moveTo(ox+pL,yy); ctx.lineTo(ox+pL+cw,yy); ctx.stroke(); }
-  // relleno gris muy claro
-  ctx.beginPath(); dp.forEach((d,i)=> i===0?ctx.moveTo(xC(d.ts),yC(d.tc)):ctx.lineTo(xC(d.ts),yC(d.tc)));
-  ctx.lineTo(xC(t1), oy+pT+ch); ctx.lineTo(xC(t0), oy+pT+ch); ctx.closePath();
-  ctx.fillStyle = 'rgba(0,0,0,0.06)'; ctx.fill();
-  // línea de temperatura negra
-  ctx.beginPath(); dp.forEach((d,i)=> i===0?ctx.moveTo(xC(d.ts),yC(d.tc)):ctx.lineTo(xC(d.ts),yC(d.tc)));
-  ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineJoin='round'; ctx.stroke();
-  // ejes
-  ctx.fillStyle = MUTED; ctx.font = '22px "DM Mono", monospace';
-  ctx.textAlign = 'right';
-  for (let i=0;i<=4;i++){ ctx.fillText(Math.round(tMax*(1-i/4))+'°', ox+pL-10, oy+pT+(ch*i)/4+8); }
-  ctx.textAlign = 'center';
-  for (let i=0;i<=4;i++){ const tt=(tSpan*i)/4; const lbl=tt<60?Math.round(tt)+'m':(tt/60).toFixed(tt%60?1:0)+'h'; ctx.fillText(lbl, ox+pL+(cw*i)/4, oy+pT+ch+34); }
-  ctx.textAlign = 'left';
-
-  // ── WATTS (línea punteada fina, ligera, para no competir con la temp) ──
-  if (hasWatts) {
-    const wMax = Math.max(...ws.map(s=>s.watts), 1);
-    const xW = ts => ox + pL + (((ts*1000) - t0) / 60000 / tSpan) * cw;  // ts en segundos
-    const yW = wv => oy + pT + (1 - wv/wMax) * ch;
-    ctx.save();
-    ctx.strokeStyle = MUTED;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([3, 5]);   // punteado fino
-    ctx.beginPath();
-    let started = false;
-    ws.forEach(s => {
-      const px = xW(s.ts), py = yW(s.watts);
-      if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
-    });
-    ctx.stroke();
-    ctx.restore();
-    // eje derecho de watts (kW), gris claro
-    ctx.fillStyle = MUTED; ctx.font = '20px "DM Mono", monospace'; ctx.textAlign = 'left';
-    for (let i=0;i<=4;i++){
-      const wv = wMax*(1-i/4);
-      const lbl = wMax >= 1000 ? (wv/1000).toFixed(1)+'kW' : Math.round(wv)+'W';
-      ctx.fillText(lbl, ox+pL+cw+8, oy+pT+(ch*i)/4+7);
-    }
-    ctx.textAlign = 'left';
-  }
-}
-
-// Envuelve texto en líneas; trunca con … si excede maxHeight
-function _wrapText(ctx, text, x, y, maxW, lineH, maxHeight) {
-  const words = text.split(/\s+/);
-  let line = '', yy = y;
-  for (let n=0; n<words.length; n++) {
-    const test = line ? line+' '+words[n] : words[n];
-    if (ctx.measureText(test).width > maxW && line) {
-      if (yy - y + lineH > maxHeight) { ctx.fillText(line.replace(/\s+\S*$/,'')+'…', x, yy); return; }
-      ctx.fillText(line, x, yy); line = words[n]; yy += lineH;
-    } else { line = test; }
-  }
-  if (yy - y <= maxHeight) ctx.fillText(line, x, yy);
-}
-
-// BLOBS
+// ── BACKGROUND BLOBS ─────────────────────────────────────────────────
 (function(){
-  const cv=document.getElementById('blob-canvas'),ctx=cv.getContext('2d');
-  function resize(){cv.width=window.innerWidth;cv.height=window.innerHeight;}
-  resize();window.addEventListener('resize',resize);
-  const blobs=[{x:.05,y:.05,r:.50,c:'#ff4800',t:0,ax:.18,ay:.14},{x:.92,y:.85,r:.42,c:'#de00ff',t:2.1,ax:.14,ay:.18},{x:.55,y:.65,r:.36,c:'#007cf0',t:4.2,ax:.16,ay:.12},{x:.70,y:.15,r:.28,c:'#3d3dff',t:1.1,ax:.12,ay:.14}];
+  const cv = document.getElementById('blob-canvas');
+  const ctx = cv.getContext('2d');
+  function resize(){ cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const blobs = [
+    { x: 0.05, y: 0.05, r: 0.50, c: '#ff4800', t: 0,   ax: 0.18, ay: 0.14 },
+    { x: 0.92, y: 0.85, r: 0.42, c: '#de00ff', t: 2.1, ax: 0.14, ay: 0.18 },
+    { x: 0.55, y: 0.65, r: 0.36, c: '#007cf0', t: 4.2, ax: 0.16, ay: 0.12 },
+    { x: 0.70, y: 0.15, r: 0.28, c: '#3d3dff', t: 1.1, ax: 0.12, ay: 0.14 }
+  ];
   function draw(){
-    ctx.clearRect(0,0,cv.width,cv.height);const W=cv.width,H=cv.height;
-    blobs.forEach(b=>{b.t+=.006;const x=(b.x+Math.sin(b.t*1.1)*b.ax)*W,y=(b.y+Math.cos(b.t*.85)*b.ay)*H,r=b.r*Math.min(W,H);const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,b.c+'40');g.addColorStop(.5,b.c+'1c');g.addColorStop(1,b.c+'00');ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();});
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const W = cv.width, H = cv.height;
+    blobs.forEach(b => {
+      b.t += 0.006;
+      const x = (b.x + Math.sin(b.t * 1.1) * b.ax) * W;
+      const y = (b.y + Math.cos(b.t * 0.85) * b.ay) * H;
+      const r = b.r * Math.min(W, H);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0,   b.c + '40');
+      g.addColorStop(0.5, b.c + '1c');
+      g.addColorStop(1,   b.c + '00');
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+    });
     requestAnimationFrame(draw);
   }
   draw();
 })();
 
-// INIT
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _diaryInit);
-else _diaryInit();
+// ── CONTACT — mailto handler ─────────────────────────────────────────
+function sendContact() {
+  const subject = document.getElementById('input-subject').value.trim();
+  const message = document.getElementById('input-message').value.trim();
+  const email   = 'paramoyermo@disroot.org';
+  const mailto  = 'mailto:' + email
+    + '?subject=' + encodeURIComponent(subject || 'Páramo — message')
+    + (message ? '&body=' + encodeURIComponent(message) : '');
+  window.location.href = mailto;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLang);
+else initLang();
 </script>
 </body>
 </html>
